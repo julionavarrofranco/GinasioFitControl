@@ -7,10 +7,7 @@ using ProjetoFinal.Data;
 using ProjetoFinal.Services;
 using System.Text;
 
-
 var builder = WebApplication.CreateBuilder(args);
-
-// Add services to the container.
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -28,60 +25,53 @@ builder.Services.AddSwaggerGen(c =>
         Scheme = "bearer",
         BearerFormat = "JWT",
         In = ParameterLocation.Header,
-        Description = "Insira 'Bearer' seguido do token JWT"
+        Description = "Enter JWT token"
     };
-
     c.AddSecurityDefinition("Bearer", securityScheme);
 
-    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    var securityRequirement = new OpenApiSecurityRequirement
     {
-        [securityScheme] = new List<string>()
-    });
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            new string[] {}
+        }
+    };
+    c.AddSecurityRequirement(securityRequirement);
 });
-
-
-
 
 
 builder.Services.AddDbContext<GinasioDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 
-var key = Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!);
 
-//builder.Services.AddAuthentication("Bearer")
-//    .AddJwtBearer("Bearer", options =>
-//    {
-//        options.TokenValidationParameters = new TokenValidationParameters
-//        {
-//            ValidateIssuer = true,
-//            ValidateAudience = true,
-//            ValidateIssuerSigningKey = true,
-//            ValidateLifetime = true,
-//            ValidIssuer = builder.Configuration["Jwt:Issuer"],
-//            ValidAudience = builder.Configuration["Jwt:Audience"],
-//            IssuerSigningKey = new SymmetricSecurityKey(key)
-//        };
-//    });
-
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).
+    AddJwtBearer(options =>
     {
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
-            ValidateAudience = true,
-            ValidateIssuerSigningKey = true,
-            ValidateLifetime = true,
             ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidateAudience = true,
             ValidAudience = builder.Configuration["Jwt:Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey(key)
+            ValidateLifetime = true,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:key"]!)),
+            ValidateIssuerSigningKey = true
         };
-    });
+    }
+);
 
-
-
-
+builder.Services.AddAuthorization(options =>
+// Política: apenas funcionários com função Admin ou receção podem registrar novos utilizadores
+    options.AddPolicy("CanRegisterUsers", policy =>
+    policy.RequireClaim("Funcao", "Admin", "Rececao")));
 
 
 var app = builder.Build();
@@ -95,7 +85,7 @@ if (app.Environment.IsDevelopment())
     var services = scope.ServiceProvider;
     try
     {
-        // Aplica migrations e faz seed (opcional: já feito dentro do SeedAsync, podes remover uma das chamadas se duplicar)
+        // Aplica migrations e faz seed (opcional: já feito dentro do SeedAsync)
         var context = services.GetRequiredService<GinasioDbContext>();
         await context.Database.MigrateAsync();
 
@@ -115,5 +105,5 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-
 app.Run();
+

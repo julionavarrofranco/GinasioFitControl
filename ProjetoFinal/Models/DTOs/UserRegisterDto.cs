@@ -12,7 +12,7 @@
 
         // Membro
         public DateTime? DataNascimento { get; set; }
-        public int? IdSubscricao { get; set; } // AGORA É OPCIONAL
+        public int? IdSubscricao { get; set; }
 
         // Funcionário
         public string? Funcao { get; set; } // Admin / Rececao / PT

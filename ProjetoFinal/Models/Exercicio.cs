@@ -2,7 +2,7 @@
 {
     public class Exercicio
     {
-        public int IdExercicio { get; set; } // PK
+        public int IdExercicio { get; set; }
 
         public string Nome { get; set; } = null!;
 

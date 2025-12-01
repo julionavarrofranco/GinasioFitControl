@@ -2,9 +2,9 @@
 {
     public class Membro
     {
-        public int IdMembro { get; set; } // PK
+        public int IdMembro { get; set; }
 
-        public int IdUser { get; set; } // FK User
+        public int IdUser { get; set; }
 
         public string Nome { get; set; } = null!;
 
@@ -14,11 +14,11 @@
 
         public DateTime DataRegisto { get; set; }
 
-        public int IdSubscricao { get; set; } // FK Subscricao
+        public int IdSubscricao { get; set; }
 
         public int? IdPlanoTreino { get; set; }
 
-        public DateTime? DataDesativacao { get; set; } // soft delete
+        public DateTime? DataDesativacao { get; set; }
 
         public User User { get; set; } = null!;
 

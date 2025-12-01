@@ -5,13 +5,13 @@
         Presente,
         Faltou,
         Cancelado
-    }//vai servir como soft delete - se cancelar a reserva
+    }
 
     public class MembroAula
     {
-        public int IdMembro { get; set; } // PK FK
+        public int IdMembro { get; set; }
 
-        public int IdAula { get; set; } // PK FK
+        public int IdAula { get; set; }
 
         public DateTime DataReserva { get; set; }
 

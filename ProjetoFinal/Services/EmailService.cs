@@ -13,7 +13,7 @@ public class EmailService : IEmailService
 
     public async Task SendEmailAsync(string to, string subject, string body)
     {
-        // Pegar configurações do appsettings
+        //Configurações do email
         var smtpHost = _configuration["Email:SmtpHost"];
         var smtpUser = _configuration["Email:SmtpUser"];
         var smtpPass = _configuration["Email:SmtpPass"];
@@ -34,13 +34,15 @@ public class EmailService : IEmailService
             fromName = "Ginásio Fit Control"; // valor padrão
 
         if (!int.TryParse(smtpPortStr, out var smtpPort))
-            smtpPort = 587; // valor padrão se não configurado
+            smtpPort = 587; // valor padrão
 
         // Criar cliente SMTP
         using var client = new SmtpClient(smtpHost, smtpPort)
         {
+            UseDefaultCredentials = false,
             Credentials = new NetworkCredential(smtpUser, smtpPass),
-            EnableSsl = true
+            EnableSsl = true,
+            DeliveryMethod = SmtpDeliveryMethod.Network
         };
 
         // Criar email
@@ -54,14 +56,12 @@ public class EmailService : IEmailService
 
         mail.To.Add(to);
 
-        // Enviar email com tratamento de exceções
         try
         {
             await client.SendMailAsync(mail);
         }
         catch (SmtpException ex)
         {
-            //Falha ao enviar email
             throw new InvalidOperationException("Falha ao enviar email.", ex);
         }
     }

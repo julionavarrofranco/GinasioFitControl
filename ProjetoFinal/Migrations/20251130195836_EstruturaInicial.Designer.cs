@@ -12,7 +12,7 @@ using ProjetoFinal.Data;
 namespace ProjetoFinal.Migrations
 {
     [DbContext(typeof(GinasioDbContext))]
-    [Migration("20251119155116_EstruturaInicial")]
+    [Migration("20251130195836_EstruturaInicial")]
     partial class EstruturaInicial
     {
         /// <inheritdoc />
@@ -322,13 +322,7 @@ namespace ProjetoFinal.Migrations
                     b.Property<decimal>("Carga")
                         .HasColumnType("decimal(10,2)");
 
-                    b.Property<int>("ExercicioIdExercicio")
-                        .HasColumnType("int");
-
                     b.Property<int>("Ordem")
-                        .HasColumnType("int");
-
-                    b.Property<int>("PlanoTreinoIdPlano")
                         .HasColumnType("int");
 
                     b.Property<int>("Repeticoes")
@@ -339,9 +333,7 @@ namespace ProjetoFinal.Migrations
 
                     b.HasKey("IdPlano", "IdExercicio");
 
-                    b.HasIndex("ExercicioIdExercicio");
-
-                    b.HasIndex("PlanoTreinoIdPlano");
+                    b.HasIndex("IdExercicio");
 
                     b.ToTable("planos_exercicios", (string)null);
                 });
@@ -364,7 +356,7 @@ namespace ProjetoFinal.Migrations
                     b.Property<int>("IdFuncionario")
                         .HasColumnType("int");
 
-                    b.Property<int>("IdMembro")
+                    b.Property<int?>("MembroIdMembro")
                         .HasColumnType("int");
 
                     b.Property<string>("Observacoes")
@@ -375,7 +367,7 @@ namespace ProjetoFinal.Migrations
 
                     b.HasIndex("IdFuncionario");
 
-                    b.HasIndex("IdMembro");
+                    b.HasIndex("MembroIdMembro");
 
                     b.ToTable("planos_treino", (string)null);
                 });
@@ -535,7 +527,7 @@ namespace ProjetoFinal.Migrations
                     b.HasOne("ProjetoFinal.Models.PlanoTreino", "PlanoTreino")
                         .WithMany("Membros")
                         .HasForeignKey("IdPlanoTreino")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("ProjetoFinal.Models.Subscricao", "Subscricao")
                         .WithMany("Membros")
@@ -598,15 +590,17 @@ namespace ProjetoFinal.Migrations
                 {
                     b.HasOne("ProjetoFinal.Models.Exercicio", "Exercicio")
                         .WithMany("PlanosExercicios")
-                        .HasForeignKey("ExercicioIdExercicio")
+                        .HasForeignKey("IdExercicio")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("FK_PlanosExercicios_Exercicio");
 
                     b.HasOne("ProjetoFinal.Models.PlanoTreino", "PlanoTreino")
                         .WithMany("PlanosExercicios")
-                        .HasForeignKey("PlanoTreinoIdPlano")
+                        .HasForeignKey("IdPlano")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("FK_PlanosExercicios_PlanoTreino");
 
                     b.Navigation("Exercicio");
 
@@ -621,15 +615,11 @@ namespace ProjetoFinal.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("ProjetoFinal.Models.Membro", "Membro")
+                    b.HasOne("ProjetoFinal.Models.Membro", null)
                         .WithMany("Planos")
-                        .HasForeignKey("IdMembro")
-                        .OnDelete(DeleteBehavior.SetNull)
-                        .IsRequired();
+                        .HasForeignKey("MembroIdMembro");
 
                     b.Navigation("Funcionario");
-
-                    b.Navigation("Membro");
                 });
 
             modelBuilder.Entity("ProjetoFinal.Models.RefreshToken", b =>

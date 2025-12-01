@@ -2,9 +2,9 @@
 {
     public class PlanoExercicio
     {
-        public int IdPlano { get; set; } // FK PK
+        public int IdPlano { get; set; }
 
-        public int IdExercicio { get; set; } // FK PK
+        public int IdExercicio { get; set; }
 
         public int Series { get; set; }
 

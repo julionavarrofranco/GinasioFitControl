@@ -2,11 +2,11 @@
 {
     public class RefreshToken
     {
-        public int IdRefresh { get; set; } // PK
+        public int IdRefresh { get; set; }
 
-        public int IdUser { get; set; } // FK User
+        public int IdUser { get; set; }
 
-        public string Token { get; set; } = null!; // refresh token
+        public string Token { get; set; } = null!; // hash do token
 
         public string? SubstituidoPor { get; set; }
 
