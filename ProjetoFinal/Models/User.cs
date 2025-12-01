@@ -24,8 +24,8 @@ namespace ProjetoFinal.Models
 
         public ICollection<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();
 
-        public Membro? Membro { get; set; }  // Navigation: um user pode ter um registo de membro (se Tipo = "Membro")
+        public Membro? Membro { get; set; }
 
-        public Funcionario? Funcionario { get; set; } // Navigation: um user pode ter um registo de funcionário (se Tipo = "Funcionario")
+        public Funcionario? Funcionario { get; set; }
     }
 }

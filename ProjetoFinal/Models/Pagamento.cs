@@ -16,11 +16,11 @@
 
     public class Pagamento
     {
-        public int IdPagamento { get; set; } // PK
+        public int IdPagamento { get; set; }
 
-        public int IdMembro { get; set; } // FK
+        public int IdMembro { get; set; }
 
-        public int IdSubscricao { get; set; } // FK
+        public int IdSubscricao { get; set; }
 
         public DateTime DataPagamento { get; set; }
 

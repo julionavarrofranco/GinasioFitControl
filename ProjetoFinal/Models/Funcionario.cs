@@ -9,9 +9,9 @@
 
     public class Funcionario
     {
-        public int IdFuncionario { get; set; } // PK
+        public int IdFuncionario { get; set; } 
 
-        public int IdUser { get; set; } // FK User
+        public int IdUser { get; set; }
 
         public string Nome { get; set; } = null!;
 

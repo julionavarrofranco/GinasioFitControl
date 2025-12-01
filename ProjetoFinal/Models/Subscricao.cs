@@ -9,7 +9,7 @@
 
     public class Subscricao
     {
-        public int IdSubscricao { get; set; } // PK
+        public int IdSubscricao { get; set; }
 
         public TipoSubscricao Tipo { get; set; }
 

@@ -2,11 +2,11 @@
 {
     public class AvaliacaoFisica
     {
-        public int IdAvaliacao { get; set; } // PK
+        public int IdAvaliacao { get; set; }
 
-        public int IdMembro { get; set; } // FK
+        public int IdMembro { get; set; } 
 
-        public int IdFuncionario { get; set; } // FK
+        public int IdFuncionario { get; set; } 
 
         public DateTime DataAvaliacao { get; set; }
 

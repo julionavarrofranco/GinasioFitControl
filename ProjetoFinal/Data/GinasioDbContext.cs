@@ -87,7 +87,7 @@ namespace ProjetoFinal.Data
                 entity.HasOne(m => m.PlanoTreino)
                       .WithMany(p => p.Membros)
                       .HasForeignKey(m => m.IdPlanoTreino)
-                      .OnDelete(DeleteBehavior.SetNull);
+                      .OnDelete(DeleteBehavior.Restrict);
             });
 
             //Funcionarios
@@ -147,16 +147,10 @@ namespace ProjetoFinal.Data
                 entity.ToTable("planos_treino");
                 entity.HasKey(p => p.IdPlano);
                 entity.Property(p => p.IdPlano).HasColumnName("id_plano");
-                entity.Property(p => p.IdMembro).IsRequired();
                 entity.Property(p => p.IdFuncionario).IsRequired();
                 entity.Property(p => p.DataCriacao).HasColumnType("date");
                 entity.Property(p => p.Observacoes).HasColumnType("text");
                 entity.Property(p => p.DataDesativacao);
-
-                entity.HasOne(p => p.Membro)
-                      .WithMany(m => m.Planos)
-                      .HasForeignKey(p => p.IdMembro)
-                      .OnDelete(DeleteBehavior.SetNull);
 
                 entity.HasOne(p => p.Funcionario)
                       .WithMany(f => f.PlanosTreino)
@@ -169,7 +163,21 @@ namespace ProjetoFinal.Data
             {
                 entity.ToTable("planos_exercicios");
                 entity.HasKey(pe => new { pe.IdPlano, pe.IdExercicio });
+
+                entity.Property(pe => pe.Series);
+                entity.Property(pe => pe.Repeticoes);
                 entity.Property(pe => pe.Carga).HasColumnType("decimal(10,2)");
+                entity.Property(pe => pe.Ordem);
+
+                entity.HasOne(pe => pe.PlanoTreino)
+                      .WithMany(p => p.PlanosExercicios)
+                      .HasForeignKey(pe => pe.IdPlano)
+                      .HasConstraintName("FK_PlanosExercicios_PlanoTreino");
+
+                entity.HasOne(pe => pe.Exercicio)
+                      .WithMany(e => e.PlanosExercicios)
+                      .HasForeignKey(pe => pe.IdExercicio)
+                      .HasConstraintName("FK_PlanosExercicios_Exercicio");
             });
 
             //Aulas

@@ -7,9 +7,9 @@
 
     public class Aula
     {
-        public int IdAula { get; set; } // PK
+        public int IdAula { get; set; }
 
-        public int IdFuncionario { get; set; } // FK PT
+        public int IdFuncionario { get; set; }
 
         public string Nome { get; set; } = null!;
 

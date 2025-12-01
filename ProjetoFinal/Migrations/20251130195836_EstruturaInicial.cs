@@ -257,11 +257,11 @@ namespace ProjetoFinal.Migrations
                 {
                     id_plano = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    IdMembro = table.Column<int>(type: "int", nullable: true),
                     IdFuncionario = table.Column<int>(type: "int", nullable: false),
                     DataCriacao = table.Column<DateTime>(type: "date", nullable: false),
                     Observacoes = table.Column<string>(type: "text", nullable: false),
-                    DataDesativacao = table.Column<DateTime>(type: "datetime2", nullable: true)
+                    DataDesativacao = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    MembroIdMembro = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -273,11 +273,10 @@ namespace ProjetoFinal.Migrations
                         principalColumn: "id_funcionario",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_planos_treino_membros_IdMembro",
-                        column: x => x.IdMembro,
+                        name: "FK_planos_treino_membros_MembroIdMembro",
+                        column: x => x.MembroIdMembro,
                         principalTable: "membros",
-                        principalColumn: "id_membro",
-                        onDelete: ReferentialAction.SetNull);
+                        principalColumn: "id_membro");
                 });
 
             migrationBuilder.CreateTable(
@@ -289,22 +288,20 @@ namespace ProjetoFinal.Migrations
                     Series = table.Column<int>(type: "int", nullable: false),
                     Repeticoes = table.Column<int>(type: "int", nullable: false),
                     Carga = table.Column<decimal>(type: "decimal(10,2)", nullable: false),
-                    Ordem = table.Column<int>(type: "int", nullable: false),
-                    PlanoTreinoIdPlano = table.Column<int>(type: "int", nullable: false),
-                    ExercicioIdExercicio = table.Column<int>(type: "int", nullable: false)
+                    Ordem = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_planos_exercicios", x => new { x.IdPlano, x.IdExercicio });
                     table.ForeignKey(
-                        name: "FK_planos_exercicios_exercicios_ExercicioIdExercicio",
-                        column: x => x.ExercicioIdExercicio,
+                        name: "FK_PlanosExercicios_Exercicio",
+                        column: x => x.IdExercicio,
                         principalTable: "exercicios",
                         principalColumn: "id_exercicio",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_planos_exercicios_planos_treino_PlanoTreinoIdPlano",
-                        column: x => x.PlanoTreinoIdPlano,
+                        name: "FK_PlanosExercicios_PlanoTreino",
+                        column: x => x.IdPlano,
                         principalTable: "planos_treino",
                         principalColumn: "id_plano",
                         onDelete: ReferentialAction.Cascade);
@@ -363,14 +360,9 @@ namespace ProjetoFinal.Migrations
                 column: "IdSubscricao");
 
             migrationBuilder.CreateIndex(
-                name: "IX_planos_exercicios_ExercicioIdExercicio",
+                name: "IX_planos_exercicios_IdExercicio",
                 table: "planos_exercicios",
-                column: "ExercicioIdExercicio");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_planos_exercicios_PlanoTreinoIdPlano",
-                table: "planos_exercicios",
-                column: "PlanoTreinoIdPlano");
+                column: "IdExercicio");
 
             migrationBuilder.CreateIndex(
                 name: "IX_planos_treino_IdFuncionario",
@@ -378,9 +370,9 @@ namespace ProjetoFinal.Migrations
                 column: "IdFuncionario");
 
             migrationBuilder.CreateIndex(
-                name: "IX_planos_treino_IdMembro",
+                name: "IX_planos_treino_MembroIdMembro",
                 table: "planos_treino",
-                column: "IdMembro");
+                column: "MembroIdMembro");
 
             migrationBuilder.CreateIndex(
                 name: "IX_refresh_tokens_IdUser_Token",
@@ -407,7 +399,7 @@ namespace ProjetoFinal.Migrations
                 column: "IdPlanoTreino",
                 principalTable: "planos_treino",
                 principalColumn: "id_plano",
-                onDelete: ReferentialAction.SetNull);
+                onDelete: ReferentialAction.Restrict);
         }
 
         /// <inheritdoc />
@@ -418,7 +410,7 @@ namespace ProjetoFinal.Migrations
                 table: "planos_treino");
 
             migrationBuilder.DropForeignKey(
-                name: "FK_planos_treino_membros_IdMembro",
+                name: "FK_planos_treino_membros_MembroIdMembro",
                 table: "planos_treino");
 
             migrationBuilder.DropTable(
