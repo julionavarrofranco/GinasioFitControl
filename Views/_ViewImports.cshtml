@@ -1,0 +1,16 @@
+@* ============================================================================
+   IMPORTAÇÕES DE VISTAS - CONFIGURAÇÃO GLOBAL PARA TODAS AS VISTAS RAZOR
+   Este ficheiro define os namespaces e Tag Helpers disponíveis em todas
+   as vistas da aplicação
+   ============================================================================ *@
+
+@* Importar o namespace principal da aplicação *@
+@using TTFWebsite
+
+@* Importar o namespace dos modelos para uso nas vistas *@
+@using TTFWebsite.Models
+
+@* Ativar os Tag Helpers do ASP.NET Core MVC
+   Tag Helpers permitem usar sintaxe HTML-like para funcionalidades servidor
+   Exemplos: asp-action, asp-controller, asp-for, asp-validation-for *@
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers

@@ -1,0 +1,252 @@
+@* ============================================================================
+   PÁGINA DE AVALIAÇÕES FÍSICAS
+   Esta vista apresenta o histórico de avaliações físicas do membro
+   com métricas corporais e observações do personal trainer
+   ============================================================================ *@
+
+@* Modelo de dados - lista de avaliações físicas *@
+@model List<TTFWebsite.Models.PhysicalAssessment>
+
+@* Configurações da página *@
+@{
+    ViewData["Title"] = "Avaliação Física - Área de Membros";
+    Layout = "~/Views/Shared/_MemberLayout.cshtml";
+}
+
+<div class="assessment-container">
+    @* Cabeçalho da página *@
+    <div class="assessment-header">
+        <h1>Avaliação Física</h1>
+        <p>Histórico das tuas avaliações físicas</p>
+    </div>
+
+    @* Verificar se existem avaliações *@
+    @if (Model != null && Model.Any())
+    {
+        <div class="assessments-list">
+            @* Iterar sobre cada avaliação *@
+            @foreach (var assessment in Model)
+            {
+                <div class="assessment-card">
+                    @* Cabeçalho da avaliação com data e nome do PT *@
+                    <div class="assessment-card-header">
+                        <div>
+                            <h2>@assessment.AssessmentDate.ToString("dd MMMM yyyy")</h2>
+                            <p class="trainer-name">Personal Trainer: @assessment.TrainerName</p>
+                        </div>
+                    </div>
+                    
+                    @* Grelha de métricas corporais *@
+                    <div class="assessment-metrics-grid">
+                        @* Peso *@
+                        <div class="metric-card">
+                            <span class="metric-icon">⚖️</span>
+                            <div class="metric-content">
+                                <span class="metric-label">Peso</span>
+                                <span class="metric-value">@assessment.Weight kg</span>
+                            </div>
+                        </div>
+                        
+                        @* Altura *@
+                        <div class="metric-card">
+                            <span class="metric-icon">📏</span>
+                            <div class="metric-content">
+                                <span class="metric-label">Altura</span>
+                                <span class="metric-value">@assessment.Height m</span>
+                            </div>
+                        </div>
+                        
+                        @* Percentagem de gordura corporal *@
+                        <div class="metric-card">
+                            <span class="metric-icon">📊</span>
+                            <div class="metric-content">
+                                <span class="metric-label">Gordura Corporal</span>
+                                <span class="metric-value">@assessment.BodyFat%</span>
+                            </div>
+                        </div>
+                        
+                        @* Massa muscular *@
+                        <div class="metric-card">
+                            <span class="metric-icon">💪</span>
+                            <div class="metric-content">
+                                <span class="metric-label">Massa Muscular</span>
+                                <span class="metric-value">@assessment.MuscleMass kg</span>
+                            </div>
+                        </div>
+                        
+                        @* Índice de Massa Corporal (IMC) *@
+                        <div class="metric-card">
+                            <span class="metric-icon">📈</span>
+                            <div class="metric-content">
+                                <span class="metric-label">IMC</span>
+                                <span class="metric-value">@assessment.BMI</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    @* Observações do personal trainer (se existirem) *@
+                    @if (!string.IsNullOrEmpty(assessment.Notes))
+                    {
+                        <div class="assessment-notes">
+                            <h3>Observações</h3>
+                            <p>@assessment.Notes</p>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        @* Estado vazio - sem avaliações registadas *@
+        <div class="empty-state">
+            <p>Não tens avaliações físicas registadas.</p>
+            <p class="empty-subtitle">Contacta o teu Personal Trainer para agendares uma avaliação.</p>
+        </div>
+    }
+</div>
+
+@* ============================================================================
+   ESTILOS CSS ESPECÍFICOS DA PÁGINA DE AVALIAÇÕES
+   ============================================================================ *@
+<style>
+/* Contentor principal */
+.assessment-container {
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Cabeçalho */
+.assessment-header {
+    margin-bottom: 2rem;
+}
+
+.assessment-header h1 {
+    font-size: 2.5rem;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.assessment-header p {
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+}
+
+/* Lista de avaliações empilhadas */
+.assessments-list {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+/* Cartão de avaliação */
+.assessment-card {
+    background: var(--bg-card);
+    border-radius: 12px;
+    padding: 2rem;
+    border: 1px solid var(--border);
+}
+
+/* Cabeçalho do cartão */
+.assessment-card-header {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.assessment-card-header h2 {
+    font-size: 1.5rem;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+/* Nome do personal trainer */
+.trainer-name {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+/* Grelha de métricas responsiva */
+.assessment-metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+/* Cartão de métrica individual */
+.metric-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.5rem;
+    background: var(--bg-primary);
+    border-radius: 8px;
+    border: 1px solid var(--border);
+}
+
+/* Ícone da métrica */
+.metric-icon {
+    font-size: 2rem;
+}
+
+/* Conteúdo da métrica */
+.metric-content {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Etiqueta da métrica */
+.metric-label {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+}
+
+/* Valor da métrica */
+.metric-value {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--accent);
+}
+
+/* Secção de observações */
+.assessment-notes {
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+}
+
+.assessment-notes h3 {
+    font-size: 1.1rem;
+    color: var(--text-primary);
+    margin-bottom: 0.75rem;
+}
+
+.assessment-notes p {
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+
+/* Estado vazio */
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: var(--bg-card);
+    border-radius: 12px;
+    border: 1px solid var(--border);
+}
+
+.empty-state p {
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+}
+
+/* Subtítulo do estado vazio */
+.empty-subtitle {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    opacity: 0.8;
+}
+</style>

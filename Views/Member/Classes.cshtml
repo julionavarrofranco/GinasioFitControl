@@ -1,0 +1,507 @@
+@* ============================================================================
+   PÁGINA DE AULAS - RESERVA E GESTÃO DE AULAS DE GRUPO
+   Esta vista permite ao membro ver aulas disponíveis, fazer reservas
+   e gerir as suas reservas existentes
+   ============================================================================ *@
+
+@* Modelo de dados com aulas e reservas *@
+@model TTFWebsite.Controllers.ClassesViewModel
+
+@* Configurações da página *@
+@{
+    ViewData["Title"] = "Aulas - Área de Membros";
+    Layout = "~/Views/Shared/_MemberLayout.cshtml";
+}
+
+<div class="classes-container">
+    @* Cabeçalho da página *@
+    <div class="classes-header">
+        <h1>Aulas e Reservas</h1>
+        <p>Reserva as tuas aulas favoritas</p>
+    </div>
+
+    <div class="classes-content">
+        @* ================================================================
+           SECÇÃO DE RESERVAS DO UTILIZADOR
+           Mostra as aulas já reservadas pelo membro
+           ================================================================ *@
+        @if (Model.UserReservations.Any())
+        {
+            <div class="section">
+                <h2>As Minhas Reservas</h2>
+                <div class="reservations-grid">
+                    @foreach (var reservation in Model.UserReservations)
+                    {
+                        <div class="reservation-card">
+                            @* Data da reserva *@
+                            <div class="reservation-date">
+                                <span class="day">@reservation.ReservationDate.ToString("dd")</span>
+                                <span class="month">@reservation.ReservationDate.ToString("MMM")</span>
+                            </div>
+                            @* Informações da reserva *@
+                            <div class="reservation-info">
+                                <h3>Aula Reservada</h3>
+                                <p>@reservation.ReservationDate.ToString("dddd, dd MMMM yyyy")</p>
+                                <p class="time">@reservation.ReservationDate.ToString("HH:mm")</p>
+                            </div>
+                            @* Botão para cancelar reserva *@
+                            <button class="btn-cancel" onclick="cancelReservation(@reservation.Id)">Cancelar</button>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+
+        @* ================================================================
+           SECÇÃO DE AULAS DISPONÍVEIS
+           Lista todas as aulas disponíveis para reserva
+           ================================================================ *@
+        <div class="section">
+            <h2>Aulas Disponíveis</h2>
+            
+            @* Filtros de aulas *@
+            <div class="classes-filters">
+                <button class="filter-btn active" onclick="filterClasses('all')">Todas</button>
+                <button class="filter-btn" onclick="filterClasses('today')">Hoje</button>
+                <button class="filter-btn" onclick="filterClasses('week')">Esta Semana</button>
+            </div>
+
+            @* Grelha de aulas *@
+            <div class="classes-grid">
+                @foreach (var classItem in Model.AvailableClasses.OrderBy(c => c.StartTime))
+                {
+                    @* Verificar estados da aula *@
+                    var isBooked = Model.UserReservations.Any(r => r.ClassId == classItem.Id && !r.IsCancelled);
+                    var isFull = classItem.CurrentBookings >= classItem.MaxCapacity;
+                    var isPast = classItem.StartTime < DateTime.Now;
+                    
+                    <div class="class-card @(isPast ? "past" : "")">
+                        @* Cabeçalho da aula com horário *@
+                        <div class="class-header">
+                            <div class="class-time-badge">
+                                <span class="time">@classItem.StartTime.ToString("HH:mm")</span>
+                                <span class="duration">@classItem.StartTime.ToString("HH:mm") - @classItem.EndTime.ToString("HH:mm")</span>
+                            </div>
+                            <span class="class-date">@classItem.StartTime.ToString("dd MMM")</span>
+                        </div>
+                        
+                        @* Corpo da aula com detalhes *@
+                        <div class="class-body">
+                            <h3>@classItem.Name</h3>
+                            <p class="class-description">@classItem.Description</p>
+                            <div class="class-details">
+                                @* Instrutor *@
+                                <div class="detail">
+                                    <span class="detail-icon">👤</span>
+                                    <span>@classItem.Instructor</span>
+                                </div>
+                                @* Sala *@
+                                <div class="detail">
+                                    <span class="detail-icon">📍</span>
+                                    <span>@classItem.Room</span>
+                                </div>
+                                @* Disponibilidade *@
+                                <div class="detail">
+                                    <span class="detail-icon">👥</span>
+                                    <span>@classItem.CurrentBookings/@classItem.MaxCapacity lugares</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        @* Rodapé com botão de ação *@
+                        <div class="class-footer">
+                            @if (isPast)
+                            {
+                                @* Aula já passou *@
+                                <button class="btn-disabled" disabled>Aula já decorreu</button>
+                            }
+                            else if (isBooked)
+                            {
+                                @* Já tem reserva *@
+                                <button class="btn-booked" disabled>Já reservada</button>
+                            }
+                            else if (isFull)
+                            {
+                                @* Aula lotada *@
+                                <button class="btn-full" disabled>Lotada</button>
+                            }
+                            else
+                            {
+                                @* Disponível para reserva *@
+                                <button class="btn-book" onclick="bookClass(@classItem.Id)">Reservar</button>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@* ============================================================================
+   JAVASCRIPT PARA INTERAÇÕES DA PÁGINA
+   Funções para reservar aulas, cancelar reservas e filtrar
+   ============================================================================ *@
+<script>
+/**
+ * Reserva uma aula de grupo
+ * Envia pedido AJAX para o servidor e recarrega a página em caso de sucesso
+ * @param {number} classId - ID da aula a reservar
+ */
+async function bookClass(classId) {
+    // Pedir confirmação ao utilizador
+    if (!confirm('Tens a certeza que queres reservar esta aula?')) {
+        return;
+    }
+
+    try {
+        // Enviar pedido de reserva
+        const response = await fetch('@Url.Action("BookClass", "Member")', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                // Token anti-forgery para proteção CSRF
+                'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+            },
+            body: JSON.stringify({ classId: classId })
+        });
+
+        // Processar resposta
+        const result = await response.json();
+        if (result.success) {
+            alert(result.message);
+            location.reload(); // Recarregar para atualizar lista
+        } else {
+            alert(result.message || 'Erro ao reservar aula.');
+        }
+    } catch (error) {
+        alert('Erro ao reservar aula. Tenta novamente.');
+    }
+}
+
+/**
+ * Cancela uma reserva existente
+ * Envia pedido AJAX para o servidor e recarrega a página em caso de sucesso
+ * @param {number} reservationId - ID da reserva a cancelar
+ */
+async function cancelReservation(reservationId) {
+    // Pedir confirmação ao utilizador
+    if (!confirm('Tens a certeza que queres cancelar esta reserva?')) {
+        return;
+    }
+
+    try {
+        // Enviar pedido de cancelamento
+        const response = await fetch('@Url.Action("CancelReservation", "Member")', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                // Token anti-forgery para proteção CSRF
+                'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+            },
+            body: JSON.stringify({ reservationId: reservationId })
+        });
+
+        // Processar resposta
+        const result = await response.json();
+        if (result.success) {
+            alert(result.message);
+            location.reload(); // Recarregar para atualizar lista
+        } else {
+            alert(result.message || 'Erro ao cancelar reserva.');
+        }
+    } catch (error) {
+        alert('Erro ao cancelar reserva. Tenta novamente.');
+    }
+}
+
+/**
+ * Filtra as aulas por período
+ * Implementação simples - pode ser expandida para filtrar no frontend ou servidor
+ * @param {string} filter - Tipo de filtro ('all', 'today', 'week')
+ */
+function filterClasses(filter) {
+    // Atualizar estado visual dos botões de filtro
+    const buttons = document.querySelectorAll('.filter-btn');
+    buttons.forEach(btn => btn.classList.remove('active'));
+    event.target.classList.add('active');
+    
+    // NOTA: Implementar filtragem real aqui
+    // Pode filtrar no frontend ou fazer chamada ao servidor
+}
+</script>
+
+@* ============================================================================
+   ESTILOS CSS ESPECÍFICOS DA PÁGINA DE AULAS
+   ============================================================================ *@
+<style>
+/* Contentor principal */
+.classes-container {
+    padding: 2rem;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+/* Cabeçalho */
+.classes-header {
+    margin-bottom: 2rem;
+}
+
+.classes-header h1 {
+    font-size: 2.5rem;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.classes-header p {
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+}
+
+/* Secção genérica */
+.section {
+    margin-bottom: 3rem;
+}
+
+.section h2 {
+    font-size: 1.8rem;
+    color: var(--text-primary);
+    margin-bottom: 1.5rem;
+}
+
+/* Botões de filtro */
+.classes-filters {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.filter-btn {
+    padding: 0.5rem 1.5rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.filter-btn:hover {
+    background: var(--bg-primary);
+    color: var(--text-primary);
+}
+
+.filter-btn.active {
+    background: var(--accent);
+    color: white;
+    border-color: var(--accent);
+}
+
+/* Grelhas responsivas */
+.reservations-grid, .classes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+/* Cartão de reserva */
+.reservation-card {
+    background: var(--bg-card);
+    border-radius: 12px;
+    padding: 1.5rem;
+    border: 1px solid var(--border);
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+/* Data da reserva */
+.reservation-date {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 60px;
+    padding: 0.5rem;
+    background: var(--bg-primary);
+    border-radius: 8px;
+}
+
+.day {
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: var(--accent);
+}
+
+.month {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+}
+
+/* Informações da reserva */
+.reservation-info {
+    flex: 1;
+}
+
+.reservation-info h3 {
+    font-size: 1.1rem;
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+}
+
+.reservation-info p {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.25rem;
+}
+
+.time {
+    color: var(--accent);
+    font-weight: 500;
+}
+
+/* Botão de cancelar */
+.btn-cancel {
+    padding: 0.5rem 1rem;
+    background: var(--error);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+.btn-cancel:hover {
+    background: #c0392b;
+}
+
+/* Cartão de aula */
+.class-card {
+    background: var(--bg-card);
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    overflow: hidden;
+    transition: transform 0.3s;
+}
+
+.class-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* Aula passada - estilo desbotado */
+.class-card.past {
+    opacity: 0.6;
+}
+
+/* Cabeçalho da aula */
+.class-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    background: var(--bg-primary);
+    border-bottom: 1px solid var(--border);
+}
+
+/* Badge de horário */
+.class-time-badge {
+    display: flex;
+    flex-direction: column;
+}
+
+.time {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--accent);
+}
+
+.duration {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.class-date {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+/* Corpo da aula */
+.class-body {
+    padding: 1.5rem;
+}
+
+.class-body h3 {
+    font-size: 1.3rem;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.class-description {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+}
+
+/* Detalhes da aula */
+.class-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.detail {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.detail-icon {
+    font-size: 1.1rem;
+}
+
+/* Rodapé da aula */
+.class-footer {
+    padding: 1rem 1.5rem;
+    border-top: 1px solid var(--border);
+    background: var(--bg-primary);
+}
+
+/* Botões de ação */
+.btn-book, .btn-booked, .btn-full, .btn-disabled {
+    width: 100%;
+    padding: 0.75rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+/* Botão de reservar */
+.btn-book {
+    background: var(--accent);
+    color: white;
+}
+
+.btn-book:hover {
+    background: var(--accent-hover);
+}
+
+/* Botão já reservado */
+.btn-booked {
+    background: var(--success);
+    color: white;
+    cursor: not-allowed;
+}
+
+/* Botão lotado/desativado */
+.btn-full, .btn-disabled {
+    background: var(--bg-card);
+    color: var(--text-secondary);
+    cursor: not-allowed;
+}
+</style>

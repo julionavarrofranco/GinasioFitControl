@@ -1,0 +1,165 @@
+@* ============================================================================
+   PÁGINA DE PERFIL DO MEMBRO
+   Esta vista apresenta todas as informações pessoais e de associação
+   do membro autenticado
+   ============================================================================ *@
+
+@* Modelo de dados do perfil *@
+@model TTFWebsite.Models.MemberProfileViewModel
+
+@* Configurações da página *@
+@{
+    ViewData["Title"] = "Perfil - Área de Membros";
+    Layout = "~/Views/Shared/_MemberLayout.cshtml";
+}
+
+<div class="profile-container">
+    @* Cabeçalho da página *@
+    <div class="profile-header">
+        <h1>O Meu Perfil</h1>
+        <p>Informações da tua conta e membro</p>
+    </div>
+
+    <div class="profile-content">
+        @* ================================================================
+           CARTÃO DE INFORMAÇÕES PESSOAIS
+           Nome, email, telefone e data de nascimento
+           ================================================================ *@
+        <div class="profile-card">
+            <h2>Informações Pessoais</h2>
+            <div class="profile-details">
+                @* Nome completo *@
+                <div class="detail-row">
+                    <span class="detail-label">Nome Completo</span>
+                    <span class="detail-value">@Model.Name</span>
+                </div>
+                @* Email *@
+                <div class="detail-row">
+                    <span class="detail-label">Email</span>
+                    <span class="detail-value">@Model.Email</span>
+                </div>
+                @* Telefone *@
+                <div class="detail-row">
+                    <span class="detail-label">Telefone</span>
+                    <span class="detail-value">@Model.Phone</span>
+                </div>
+                @* Data de nascimento *@
+                <div class="detail-row">
+                    <span class="detail-label">Data de Nascimento</span>
+                    <span class="detail-value">@Model.BirthDate.ToString("dd/MM/yyyy")</span>
+                </div>
+            </div>
+        </div>
+
+        @* ================================================================
+           CARTÃO DE INFORMAÇÕES DE MEMBRO
+           Número de membro, ginásio, plano e data de início
+           ================================================================ *@
+        <div class="profile-card">
+            <h2>Informações de Membro</h2>
+            <div class="profile-details">
+                @* Número de membro *@
+                <div class="detail-row">
+                    <span class="detail-label">Nº de Membro</span>
+                    <span class="detail-value">@Model.MembershipNumber</span>
+                </div>
+                @* Ginásio associado *@
+                <div class="detail-row">
+                    <span class="detail-label">Ginásio</span>
+                    <span class="detail-value">@Model.Gym</span>
+                </div>
+                @* Plano de subscrição *@
+                <div class="detail-row">
+                    <span class="detail-label">Plano</span>
+                    <span class="detail-value">@Model.Plan</span>
+                </div>
+                @* Data de início da associação *@
+                <div class="detail-row">
+                    <span class="detail-label">Membro desde</span>
+                    <span class="detail-value">@Model.MembershipStartDate.ToString("dd/MM/yyyy")</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@* ============================================================================
+   ESTILOS CSS ESPECÍFICOS DA PÁGINA DE PERFIL
+   ============================================================================ *@
+<style>
+/* Contentor principal */
+.profile-container {
+    padding: 2rem;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+/* Cabeçalho */
+.profile-header {
+    margin-bottom: 2rem;
+}
+
+.profile-header h1 {
+    font-size: 2.5rem;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.profile-header p {
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+}
+
+/* Conteúdo com cartões empilhados */
+.profile-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+/* Cartão de informações */
+.profile-card {
+    background: var(--bg-card);
+    border-radius: 12px;
+    padding: 2rem;
+    border: 1px solid var(--border);
+}
+
+/* Título do cartão */
+.profile-card h2 {
+    font-size: 1.5rem;
+    color: var(--text-primary);
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border);
+}
+
+/* Lista de detalhes */
+.profile-details {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+/* Linha de detalhe */
+.detail-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background: var(--bg-primary);
+    border-radius: 8px;
+}
+
+/* Etiqueta do detalhe */
+.detail-label {
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+/* Valor do detalhe */
+.detail-value {
+    color: var(--text-primary);
+    font-size: 1.1rem;
+}
+</style>
