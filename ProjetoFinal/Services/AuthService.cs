@@ -64,11 +64,7 @@ namespace ProjetoFinal.Services
                 {
                     if (tipoEnum == Tipo.Funcionario)
                     {
-                        if (!Enum.TryParse<Funcao>(request.Funcao, true, out var funcaoNovo))
-                            throw new InvalidOperationException("Função do funcionário inválida.");
-
-                        if (funcaoNovo == Funcao.Admin)
-                            throw new UnauthorizedAccessException();
+                        throw new UnauthorizedAccessException();
                     }              
                 }
             }
@@ -134,7 +130,7 @@ namespace ProjetoFinal.Services
                 await _emailService.SendEmailAsync(
                     user.Email,
                     "Credenciais do sistema",
-                    $"Olá {user.Email}, aqui tens as tuas credenciais \n Username: {user.Email} \n Palavra-passe temporária: {tempPassword}\n" +
+                    $"Olá {request.Nome}, aqui tens as tuas credenciais \n Username: {user.Email} \n Palavra-passe temporária: {tempPassword}\n" +
                     "Precisas de trocar a palavra-passe no primeiro login."
                 );
                 return user;

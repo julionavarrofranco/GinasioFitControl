@@ -22,7 +22,7 @@ namespace ProjetoFinal.Controllers
         }
 
         // 1. REGISTO
-        [Authorize(Policy = "CanRegisterUsers")]
+        [Authorize(Policy = "CanManageUsers")]
         [HttpPost("register")]
         public async Task<IActionResult> Register(UserRegisterDto request)
         {

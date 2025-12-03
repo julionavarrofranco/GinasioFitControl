@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -50,7 +51,7 @@ builder.Services.AddSwaggerGen(c =>
 builder.Services.AddDbContext<GinasioDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
-
+builder.Services.AddScoped<IMemberService, MemberService>();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).
     AddJwtBearer(options =>
@@ -70,9 +71,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).
 
 builder.Services.AddAuthorization(options =>
 // Política: apenas funcionários com função Admin ou receção podem registrar novos utilizadores
-    options.AddPolicy("CanRegisterUsers", policy =>
+    options.AddPolicy("CanManageUsers", policy =>
     policy.RequireClaim("Funcao", "Admin", "Rececao")));
-
 
 var app = builder.Build();
 

@@ -12,6 +12,7 @@
 
         // Membro
         public DateTime? DataNascimento { get; set; }
+
         public int? IdSubscricao { get; set; }
 
         // Funcionário
