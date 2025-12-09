@@ -16,7 +16,7 @@ namespace ProjetoFinal
             // Opcional: garante que as migrations foram aplicadas
             await context.Database.MigrateAsync();
 
-            // Guard: não seedar se já existir qualquer user (ajusta conforme desejado)
+            // Guard: não seedar se já existir qualquer user
             if (await context.Users.AnyAsync())
                 return;
 
@@ -31,73 +31,31 @@ namespace ProjetoFinal
                 {
                     var subs = new List<Subscricao>
                     {
-                        new Subscricao { Tipo = TipoSubscricao.Mensal, Preco = 29.99m, Descricao = "Mensal standard" },
-                        new Subscricao { Tipo = TipoSubscricao.Trimestral, Preco = 79.99m, Descricao = "3 meses" },
-                        new Subscricao { Tipo = TipoSubscricao.Anual, Preco = 199.99m, Descricao = "12 meses" }
+                        new Subscricao { Nome = "Mensal", Tipo = TipoSubscricao.Mensal, Preco = 29.99m, Descricao = "Mensal standard" },
+                        new Subscricao { Nome = "Trimestral", Tipo = TipoSubscricao.Trimestral, Preco = 79.99m, Descricao = "3 meses" },
+                        new Subscricao { Nome = "Anual", Tipo = TipoSubscricao.Anual, Preco = 199.99m, Descricao = "12 meses" }
                     };
                     context.Subscricoes.AddRange(subs);
                     await context.SaveChangesAsync();
                 }
 
                 // 2) Criar USERS (funcionários e membros)
-                // Senhas em texto para testes — ajusta para ambiente real
                 var users = new List<(User user, string plainPassword, Action createLinkedEntity)>
                 {
-                    // Admin funcionário
-                    ( new User {
-                        Email = "admin@fit.local",
-                        Tipo = Tipo.Funcionario,
-                        PrimeiraVez = false,
-                        Ativo = true
-                      },
-                      "Admin@123!",
-                      () => {
-                        // placeholder - cria depois após SaveChanges (ver abaixo)
-                      }
-                    ),
+                    ( new User { Email = "admin@fit.local", Tipo = Tipo.Funcionario, PrimeiraVez = false, Ativo = true },
+                      "Admin@123!", () => {} ),
 
-                    // Receção
-                    ( new User {
-                        Email = "rececao@fit.local",
-                        Tipo = Tipo.Funcionario,
-                        PrimeiraVez = false,
-                        Ativo = true
-                      },
-                      "Recepcao@123!",
-                      () => {}
-                    ),
+                    ( new User { Email = "rececao@fit.local", Tipo = Tipo.Funcionario, PrimeiraVez = false, Ativo = true },
+                      "Recepcao@123!", () => {} ),
 
-                    // PT
-                    ( new User {
-                        Email = "pt@fit.local",
-                        Tipo = Tipo.Funcionario,
-                        PrimeiraVez = false,
-                        Ativo = true
-                      },
-                      "PT@123!",
-                      () => {}
-                    ),
+                    ( new User { Email = "pt@fit.local", Tipo = Tipo.Funcionario, PrimeiraVez = false, Ativo = true },
+                      "PT@123!", () => {} ),
 
-                    // Membros de exemplo
-                    ( new User {
-                        Email = "m1@fit.local",
-                        Tipo = Tipo.Membro,
-                        PrimeiraVez = false,
-                        Ativo = true
-                      },
-                      "Membro1@123!",
-                      () => {}
-                    ),
+                    ( new User { Email = "m1@fit.local", Tipo = Tipo.Membro, PrimeiraVez = false, Ativo = true },
+                      "Membro1@123!", () => {} ),
 
-                    ( new User {
-                        Email = "m2@fit.local",
-                        Tipo = Tipo.Membro,
-                        PrimeiraVez = false,
-                        Ativo = true
-                      },
-                      "Membro2@123!",
-                      () => {}
-                    )
+                    ( new User { Email = "m2@fit.local", Tipo = Tipo.Membro, PrimeiraVez = false, Ativo = true },
+                      "Membro2@123!", () => {} )
                 };
 
                 // Adiciona users e gera password hashes
@@ -110,7 +68,6 @@ namespace ProjetoFinal
                 await context.SaveChangesAsync(); // para obter IdUser
 
                 // 3) Criar Funcionarios e Membros com base nos Users criados
-                // Obter users recém-criados do BD para ter IdUser
                 var adminUser = await context.Users.FirstOrDefaultAsync(u => u.Email == "admin@fit.local");
                 var rececaoUser = await context.Users.FirstOrDefaultAsync(u => u.Email == "rececao@fit.local");
                 var ptUser = await context.Users.FirstOrDefaultAsync(u => u.Email == "pt@fit.local");
@@ -153,7 +110,6 @@ namespace ProjetoFinal
                 }
 
                 // Criar Membros
-                // Usa a primeira subscrição existente (ajusta se quiseres mapear especificamente)
                 var primeiraSub = await context.Subscricoes.FirstOrDefaultAsync();
                 if (primeiraSub == null)
                     throw new InvalidOperationException("Subscrição de teste não encontrada.");

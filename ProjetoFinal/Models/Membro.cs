@@ -18,8 +18,6 @@
 
         public int? IdPlanoTreino { get; set; }
 
-        public DateTime? DataDesativacao { get; set; }
-
         public User User { get; set; } = null!;
 
         public Subscricao Subscricao { get; set; } = null!;

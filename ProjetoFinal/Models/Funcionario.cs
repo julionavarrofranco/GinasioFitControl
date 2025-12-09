@@ -19,8 +19,6 @@
 
         public Funcao Funcao { get; set; }
 
-        public DateTime? DataDesativacao { get; set; }
-
         public User User { get; set; } = null!;
 
         public ICollection<PlanoTreino> PlanosTreino { get; set; } = new List<PlanoTreino>();

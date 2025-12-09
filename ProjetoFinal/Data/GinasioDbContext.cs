@@ -29,7 +29,8 @@ namespace ProjetoFinal.Data
                 entity.HasKey(u => u.IdUser);
                 entity.Property(u => u.IdUser).HasColumnName("id_user");
                 entity.Property(u => u.Email).IsRequired().HasMaxLength(100);
-                entity.HasIndex(u => u.Email).IsUnique();
+                entity.HasIndex(u => u.Email).IsUnique()
+                                             .HasFilter("[Ativo] = 1");
                 entity.Property(u => u.PasswordHash).IsRequired().HasMaxLength(255);
                 entity.Property(f => f.Tipo)
                      .HasConversion<string>()
@@ -37,6 +38,7 @@ namespace ProjetoFinal.Data
                      .IsRequired();
                 entity.Property(u => u.PrimeiraVez).HasDefaultValue(true);
                 entity.Property(u => u.Ativo).HasDefaultValue(true);
+                entity.Property(u => u.DataDesativacao);
             });
 
             //RefreshTokens
@@ -72,7 +74,6 @@ namespace ProjetoFinal.Data
                 entity.Property(m => m.DataRegisto).HasColumnType("date");
                 entity.Property(m => m.IdSubscricao).IsRequired();
                 entity.Property(m => m.IdPlanoTreino);
-                entity.Property(m => m.DataDesativacao);
 
                 entity.HasOne(m => m.User)
                       .WithOne(u => u.Membro)
@@ -104,8 +105,6 @@ namespace ProjetoFinal.Data
                       .HasMaxLength(10)
                       .IsRequired();
 
-                entity.Property(f => f.DataDesativacao);
-
                 entity.HasOne(f => f.User)
                       .WithOne(u => u.Funcionario)
                       .HasForeignKey<Funcionario>(f => f.IdUser)
@@ -118,6 +117,9 @@ namespace ProjetoFinal.Data
                 entity.ToTable("subscricoes");
                 entity.HasKey(s => s.IdSubscricao);
                 entity.Property(s => s.IdSubscricao).HasColumnName("id_subscricao");
+                entity.Property(s => s.Nome).IsRequired().HasMaxLength(100);
+                entity.HasIndex(s => s.Nome).IsUnique();
+
                 entity.Property(s => s.Tipo)
                       .HasConversion<string>()
                       .HasMaxLength(10)
@@ -148,6 +150,8 @@ namespace ProjetoFinal.Data
                 entity.HasKey(p => p.IdPlano);
                 entity.Property(p => p.IdPlano).HasColumnName("id_plano");
                 entity.Property(p => p.IdFuncionario).IsRequired();
+                entity.Property(p => p.Nome).IsRequired().HasMaxLength(100);
+                entity.HasIndex(p => p.Nome).IsUnique();
                 entity.Property(p => p.DataCriacao).HasColumnType("date");
                 entity.Property(p => p.Observacoes).HasColumnType("text");
                 entity.Property(p => p.DataDesativacao);
@@ -288,3 +292,5 @@ namespace ProjetoFinal.Data
         }
     }
 }
+
+

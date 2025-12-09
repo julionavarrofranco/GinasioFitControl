@@ -22,6 +22,8 @@ namespace ProjetoFinal.Models
 
         public bool Ativo { get; set; } = true;
 
+        public DateTime? DataDesativacao { get; set; }
+
         public ICollection<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();
 
         public Membro? Membro { get; set; }

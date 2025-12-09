@@ -17,138 +17,29 @@ namespace ProjetoFinal.Services
     {
         private readonly GinasioDbContext _context;
         private readonly IConfiguration _configuration;
-        private readonly IEmailService _emailService;
+        private readonly IUserService _userService;
 
-        public AuthService(GinasioDbContext context, IConfiguration configuration, IEmailService emailService)
+        public AuthService(GinasioDbContext context, IConfiguration configuration, IUserService userService)
         {
             _context = context;
             _configuration = configuration;
-            _emailService = emailService;
+            _userService = userService;
         }
 
-        // 1. REGISTO
         // Regista um novo utilizador (Membro ou Funcionário) e envia email com credenciais
         // Adiciona validações de permissão conforme o utilizador atual (Admin - pode criar todos, Receção - só Membros e Funcionários com função "PT" e "Receção", PT - nenhum)
         // Melhoria: adicionar validações extras (ex: telemóvel único, idade mínima para membros, etc)
-        public async Task<User> RegisterAsync(UserRegisterDto request, User currentUser)
+        public Task<User> RegisterAsync(UserRegisterDto dto, CurrentUserInfo currentUser)
         {
-            // Email em minúsculas e sem espaços
-            var email = request.Email?.Trim().ToLower();
-
-            // Validações de input
-            if (string.IsNullOrWhiteSpace(email) || 
-                string.IsNullOrWhiteSpace(request.Nome) ||
-                string.IsNullOrWhiteSpace(request.Telemovel))
-                throw new InvalidOperationException("Por favor, preencha todos os campos obrigatórios.");
-
-            var emailValidator = new EmailAddressAttribute(); // Validador de email do DataAnnotations
-            if (!emailValidator.IsValid(email))
-                throw new InvalidOperationException("Por favor, insira um email válido.");
-
-            var phoneRegex = new Regex(@"^\+\d{7,15}$"); // Permite apenas números e + (no ínicio), mínimo 7, máximo 15 dígitos
-            if (!phoneRegex.IsMatch(request.Telemovel))
-                throw new InvalidOperationException("Por favor, insira um Nº de telemóvel válido.");
-
-            if (await _context.Users.AnyAsync(u => u.Email == email))
-                throw new InvalidOperationException("Este email já está registado.");
-
-            if (!Enum.TryParse<Tipo>(request.Tipo, true, out var tipoEnum))
-                throw new InvalidOperationException("Tipo de utilizador inválido.");
-
-            // Validações de permissão
-            if (currentUser.Tipo == Tipo.Funcionario)
-            {
-                var funcao = currentUser.Funcionario?.Funcao;
-
-                if (funcao == Funcao.Rececao)
-                {
-                    if (tipoEnum == Tipo.Funcionario)
-                    {
-                        throw new UnauthorizedAccessException();
-                    }              
-                }
-            }
-
-            // Operação assíncrona na bd, garante que todas as operações dentro do bloco sejam atômicas (tudo ou nada) e revertidas automaticamente em caso de erro.
-            await using var tx = await _context.Database.BeginTransactionAsync();
-
-            try
-            {
-                // Criação do User - id, email, tipo, password hash, (Ativo e PrimeiraVez por default = true)
-                var user = new User
-                {
-                    Email = email,
-                    Tipo = tipoEnum
-                };
-
-                var tempPassword = GenerateRandomPassword();
-                user.PasswordHash = new PasswordHasher<User>().HashPassword(user, tempPassword);
-
-                _context.Users.Add(user);
-                await _context.SaveChangesAsync();
-
-                // Cria Membro ou Funcionário, com as informações detalhadas de cada um
-                if (tipoEnum == Tipo.Membro)
-                {
-                    if (request.IdSubscricao == null)
-                        throw new InvalidOperationException("Membros precisam de uma subscrição.");
-
-                    if (request.DataNascimento == null)
-                        throw new InvalidOperationException("Membros precisam de uma data de nascimento.");
-
-                    if (!await _context.Subscricoes.AnyAsync(s => s.IdSubscricao == request.IdSubscricao))
-                        throw new InvalidOperationException("A subscrição indicada não existe.");
-
-                    _context.Membros.Add(new Membro
-                    {
-                        IdUser = user.IdUser,
-                        Nome = request.Nome,
-                        Telemovel = request.Telemovel,
-                        DataNascimento = request.DataNascimento.Value,
-                        IdSubscricao = request.IdSubscricao.Value,
-                        DataRegisto = DateTime.UtcNow
-                    });
-                }
-                else if (tipoEnum == Tipo.Funcionario)
-                {
-                    if (string.IsNullOrWhiteSpace(request.Funcao) || !Enum.TryParse<Funcao>(request.Funcao, true, out var funcaoEnum))
-                        throw new InvalidOperationException("Função de funcionário inválida.");
-                     
-                    _context.Funcionarios.Add(new Funcionario
-                    {
-                        IdUser = user.IdUser,
-                        Nome = request.Nome,
-                        Telemovel = request.Telemovel,
-                        Funcao = funcaoEnum
-                    });
-                }
-
-                await _context.SaveChangesAsync();
-                await tx.CommitAsync(); 
-
-                // Enviar email
-                await _emailService.SendEmailAsync(
-                    user.Email,
-                    "Credenciais do sistema",
-                    $"Olá {request.Nome}, aqui tens as tuas credenciais \n Username: {user.Email} \n Palavra-passe temporária: {tempPassword}\n" +
-                    "Precisas de trocar a palavra-passe no primeiro login."
-                );
-                return user;
-            }
-            catch
-            {
-                await tx.RollbackAsync(); // Reverte todas as operações em caso de erro
-                throw;
-            }
+            return _userService.CreateUserAsync(dto, currentUser);
         }
 
-        // 2. LOGIN
+
         // Verifica credenciais e retorna JWT + refresh token
         // Se for o primeiro login, indica que é necessário alterar a password       
         public async Task<TokenResponseDto> LoginAsync(UserLoginDto request)
         {
-            var user = await _context.Users.Include(u => u.RefreshTokens)
-                                           .Include(u => u.Funcionario)
+            var user = await _context.Users.Include(u => u.RefreshTokens)                                           
                                            .FirstOrDefaultAsync(u => u.Email == request.Email);
 
             if (user == null)
@@ -161,6 +52,11 @@ namespace ProjetoFinal.Services
             if (result == PasswordVerificationResult.Failed)
                 throw new UnauthorizedAccessException("Credenciais inválidas.");
 
+            if (user.Tipo == Tipo.Funcionario)
+                user = await _userService.GetUserByIdAsync(user.IdUser, includeFuncionario: true);
+            if (user == null)
+                throw new KeyNotFoundException("Erro ao carregar dados do funcionário.");
+
             var tokenResponse = await CreateTokenResponse(user);
 
             if (user.PrimeiraVez)
@@ -172,23 +68,15 @@ namespace ProjetoFinal.Services
             return tokenResponse;
         }
 
-        // 3. LOGOUT
         // Invalida todos os refresh tokens do utilizador
         /* Obs: Após cancelar os tokens, o access token ainda é válido até expirar (1 hora), no entanto não é mais renovado.
          * Cabe ao front-end eliminar o access token do armazenamento local e redirecionar para a página de login.
          * Assim, mesmo que o access token ainda esteja ativo, o utilizador não poderá renovar a sessão. */
         public async Task LogoutAsync(int userId)
         {
-            var tokens = _context.RefreshTokens.Where(t => t.IdUser == userId && !t.Cancelado).ToList();
-            foreach (var t in tokens)
-            {
-                t.Cancelado = true;
-            }
-
-            await _context.SaveChangesAsync();
+            await _userService.CancelarActiveTokensAsync(userId);
         }
 
-        // 4. REFRESH TOKEN
         // Valida e renova tokens (rotaciona refresh token)
         // Implementa deteção de replay (revoga toda a sessão do utilizador se um token for reutilizado)
         // Retorna novos tokens (access + refresh)
@@ -210,14 +98,7 @@ namespace ProjetoFinal.Services
 
                 if (reused != null)
                 {
-                    // Replay detectado — revoga todos os tokens do utilizador
-                    var tokens = _context.RefreshTokens.Where(t => t.IdUser == reused.IdUser && !t.Cancelado).ToList();
-                    foreach (var t in tokens)
-                    {
-                        t.Cancelado = true;
-                    }
-                    await _context.SaveChangesAsync();
-
+                    await _userService.CancelarActiveTokensAsync(reused.IdUser);
                     throw new UnauthorizedAccessException("Refresh token reutilizado (replay) detectado.");
                 }
 
@@ -225,10 +106,10 @@ namespace ProjetoFinal.Services
             }
 
             token.Cancelado = true;
-            var user = await _context.Users.Include(u => u.Funcionario)
-                                           .FirstOrDefaultAsync(u => u.IdUser == token.IdUser);
+            var user = await _userService.GetUserByIdAsync(token.IdUser, includeFuncionario: true);
+
             if (user == null)
-                throw new UnauthorizedAccessException("Utilizador não encontrado.");
+                throw new KeyNotFoundException("Utilizador não encontrado.");
 
             var newTokens = await CreateTokenResponse(user);
             token.SubstituidoPor = HashToken(newTokens.RefreshToken);
@@ -237,135 +118,8 @@ namespace ProjetoFinal.Services
 
             return newTokens;
         }
-
-        // 5. REDEFINIÇÃO DE PASSWORD
-        // Redefinir a palavra-passe de um utilizador, enviando uma nova password temporária por email
-        // Cancela todos os refresh tokens ativos e força re-login
-        public async Task ResetPasswordAsync(ResetPasswordDto email)
-        {
-            var emailUser = email.Email.Trim().ToLower();
-            var emailValidator = new EmailAddressAttribute();
-            if (!emailValidator.IsValid(emailUser))
-                throw new InvalidOperationException("Por favor, insira um email válido.");
-
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == emailUser);
-            if(user == null) 
-                throw new InvalidOperationException("Email não foi encontrado.");
-
-            var tempPassword = GenerateRandomPassword();
-            user.PasswordHash = new PasswordHasher<User>().HashPassword(user, tempPassword);
-            user.PrimeiraVez = true; // Força alteração da password no próximo login
-
-            foreach (var t in user.RefreshTokens.Where(t => !t.Cancelado).ToList())
-            {
-                t.Cancelado = true;
-            }
-
-            await _context.SaveChangesAsync();
-
-            await _emailService.SendEmailAsync(
-                  user.Email,
-                  "Credenciais do sistema",
-                  $"Olá {user.Email}, aqui tens a tua nova palavra-passe temporária: {tempPassword}\n" +
-                  "Precisas de trocar a palavra-passe novamente após login."
-              );
-        }
-
-        // 6. ALTERAÇÃO DE PASSWORD
-        // Permite ao utilizador alterar a sua password, valida a password atual e aplica as regras de complexidade na nova password
-        // Cancela todos os refresh tokens ativos e força re-login
-        public async Task ChangePasswordAsync(int idUser,ChangePasswordDto request)
-        {
-            //Validações de input
-            if (string.IsNullOrWhiteSpace(request.PasswordAtual))
-                throw new InvalidOperationException("A palavra-passe atual é obrigatória.");
-
-            if (string.IsNullOrWhiteSpace(request.NovaPassword))
-                throw new InvalidOperationException("A nova palavra-passe é obrigatória.");
-
-            if (request.PasswordAtual == request.NovaPassword)
-                throw new InvalidOperationException("A nova palavra-passe não pode ser igual à atual.");
-
-            if (!PasswordComplexity(request.NovaPassword))
-                throw new InvalidOperationException("A nova palavra-passe não cumpre os requisitos de complexidade.");
-
-            var user = await _context.Users.FindAsync(idUser);
-            if (user == null)
-                throw new InvalidOperationException("Utilizador não encontrado.");
-
-            var result = new PasswordHasher<User>().VerifyHashedPassword(
-                user,
-                user.PasswordHash,
-                request.PasswordAtual
-            );
-
-            if (result == PasswordVerificationResult.Failed)
-                throw new UnauthorizedAccessException("Palavra-passe incorreta.");
-
-            user.PasswordHash = new PasswordHasher<User>().HashPassword(user, request.NovaPassword);
-            user.PrimeiraVez = false;
-
-            var tokens = _context.RefreshTokens.Where(t => t.IdUser == idUser && !t.Cancelado).ToList();
-            foreach (var t in tokens)
-            {
-                t.Cancelado = true;
-            }
-            await _context.SaveChangesAsync();
-        }
-
+    
         //Métodos complementares
-
-        // Método para gerar password temporária aleatória
-        // Garante complexidade mínima (maiúsculas, minúsculas, números, símbolos) e comprimento padrão de 12 caracteres
-        // Usa algoritmo Fisher–Yates para baralhar os caracteres (evita padrões previsíveis)
-        private string GenerateRandomPassword(int length = 12)
-        {
-            const string maiusculas = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-            const string minusculas = "abcdefghijklmnopqrstuvwxyz";
-            const string numeros = "0123456789";
-            const string simbolos = "!@#$%^&*?_~-";
-            string caracteres = maiusculas + minusculas + numeros + simbolos;
-
-            var randomPassword = new List<char>(length);
-
-            // Garante a complexidade mínima
-            randomPassword.Add(maiusculas[RandomNumberGenerator.GetInt32(maiusculas.Length)]);
-            randomPassword.Add(minusculas[RandomNumberGenerator.GetInt32(minusculas.Length)]);
-            randomPassword.Add(numeros[RandomNumberGenerator.GetInt32(numeros.Length)]);
-            randomPassword.Add(simbolos[RandomNumberGenerator.GetInt32(simbolos.Length)]);
-
-            // Preenche o resto da password
-            for (int i = randomPassword.Count; i < length; i++)
-            {
-                int indiceCaracteres = RandomNumberGenerator.GetInt32(caracteres.Length);
-                randomPassword.Add(caracteres[indiceCaracteres]);
-            }
-
-            // Baralha os caracteres (Fisher–Yates)
-            for (int i = randomPassword.Count - 1; i > 0; i--)
-            {
-                int j = RandomNumberGenerator.GetInt32(i + 1);
-                char temp = randomPassword[i];
-                randomPassword[i] = randomPassword[j];
-                randomPassword[j] = temp;
-            }
-
-            return new string(randomPassword.ToArray());
-        }
-
-        // Método para validação de complexidade da password (12 caracteres, maiúsculas, minúsculas, números, símbolos) 
-        private bool PasswordComplexity(string password)
-        {
-            if (string.IsNullOrEmpty(password) || password.Length < 12)
-                return false;
-
-            bool hasUpper = password.Any(char.IsUpper);
-            bool hasLower = password.Any(char.IsLower);
-            bool hasDigit = password.Any(char.IsDigit);
-            bool hasSymbol = password.Any(ch => "!@#$%^&*?_~-".Contains(ch));
-
-            return hasUpper && hasLower && hasDigit && hasSymbol;
-        }
 
         // Método de criação do JWT
         private string CreateToken(User user)

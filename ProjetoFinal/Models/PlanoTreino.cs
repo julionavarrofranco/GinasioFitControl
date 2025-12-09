@@ -6,9 +6,11 @@
 
         public int IdFuncionario { get; set; }
 
+        public string Nome { get; set; } = null!;
+
         public DateTime DataCriacao { get; set; }
 
-        public string Observacoes { get; set; } = null!;
+        public string? Observacoes { get; set; }
 
         public DateTime? DataDesativacao { get; set; }
 

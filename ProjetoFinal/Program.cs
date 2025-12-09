@@ -9,7 +9,6 @@ using ProjetoFinal.Services;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
-
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -51,7 +50,9 @@ builder.Services.AddSwaggerGen(c =>
 builder.Services.AddDbContext<GinasioDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IMemberService, MemberService>();
+builder.Services.AddScoped<IEmployeeService, EmployeeService>();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).
     AddJwtBearer(options =>
@@ -73,6 +74,11 @@ builder.Services.AddAuthorization(options =>
 // Política: apenas funcionários com função Admin ou receção podem registrar novos utilizadores
     options.AddPolicy("CanManageUsers", policy =>
     policy.RequireClaim("Funcao", "Admin", "Rececao")));
+
+builder.Services.AddAuthorization(options =>
+// Política: apenas funcionários com função Admin ou receção podem registrar novos utilizadores
+    options.AddPolicy("OnlyAdmin", policy =>
+    policy.RequireClaim("Funcao", "Admin")));
 
 var app = builder.Build();
 
