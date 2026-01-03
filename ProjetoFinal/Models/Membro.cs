@@ -30,6 +30,8 @@
 
         public ICollection<AvaliacaoFisica> AvaliacoesFisicas { get; set; } = new List<AvaliacaoFisica>();
 
+        public ICollection<MembroAvaliacao> MembroAvaliacoes { get; set; } = new List<MembroAvaliacao>();
+
         public ICollection<Pagamento> Pagamentos { get; set; } = new List<Pagamento>();
     }
 }

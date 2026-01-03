@@ -1,4 +1,4 @@
-﻿namespace ProjetoFinal.Services
+﻿namespace ProjetoFinal.Services.Interfaces
 {
     public interface IEmailService
     {

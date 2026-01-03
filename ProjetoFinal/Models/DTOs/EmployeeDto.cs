@@ -1,6 +1,6 @@
 ﻿namespace ProjetoFinal.Models.DTOs
 {
-    public class FuncionarioDto
+    public class EmployeeDto
     {
         public int IdUser { get; set; }
         public int IdFuncionario { get; set; }

@@ -1,9 +1,8 @@
-﻿using Azure.Core;
-using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using ProjetoFinal.Data;
 using ProjetoFinal.Models;
 using ProjetoFinal.Models.DTOs;
+using ProjetoFinal.Services.Interfaces;
 using System.Text.RegularExpressions;
 
 namespace ProjetoFinal.Services
@@ -41,7 +40,7 @@ namespace ProjetoFinal.Services
 
         public async Task<Membro> CreateMemberAsync(int idUser, UserRegisterDto request)
         {
-            await ValidateMember(request.DataNascimento, request.IdSubscricao);
+            await ValidateMemberAsync(request.DataNascimento, request.IdSubscricao, false);
             var dataNascimento = request.DataNascimento!.Value;
             var idSubscricao = request.IdSubscricao!.Value;
 
@@ -78,7 +77,7 @@ namespace ProjetoFinal.Services
             {
                 var dataNascimento = request.DataNascimento ?? membro.DataNascimento;
                 var idSubscricao = request.IdSubscricao ?? membro.IdSubscricao;
-                await ValidateMember(dataNascimento, idSubscricao);
+                await ValidateMemberAsync(dataNascimento, idSubscricao, true);
             }
 
             if (!string.IsNullOrWhiteSpace(request.Nome) && request.Nome != membro.Nome)
@@ -111,24 +110,32 @@ namespace ProjetoFinal.Services
             return alterado ? "Membro atualizado com sucesso." : "Nenhuma alteração realizada.";
         }
 
-        private async Task ValidateMember(DateTime? dataNascimento, int? idSubscricao)
+        private async Task ValidateMemberAsync(DateTime? dataNascimento, int? idSubscricao, bool isUpdate)
         {
-            if (!dataNascimento.HasValue)
-                throw new InvalidOperationException("Membros precisam de uma data de nascimento.");
+            if (!isUpdate)
+            {
+                if (!dataNascimento.HasValue)
+                    throw new InvalidOperationException("Membros precisam de uma data de nascimento.");
 
-            var data = dataNascimento.Value;
+                if (!idSubscricao.HasValue)
+                    throw new InvalidOperationException("Membros precisam de uma subscrição.");
+            }
 
-            if (data > DateTime.UtcNow)
-                throw new InvalidOperationException("A data de nascimento não pode ser futura.");
+            if (dataNascimento.HasValue)
+            {
+                if (dataNascimento > DateTime.UtcNow)
+                    throw new InvalidOperationException("A data de nascimento não pode ser futura.");
 
-            if (data > DateTime.UtcNow.AddYears(-14))
-                throw new InvalidOperationException("O membro deve ter pelo menos 14 anos.");
+                if (dataNascimento > DateTime.UtcNow.AddYears(-14))
+                    throw new InvalidOperationException("O membro deve ter pelo menos 14 anos.");
+            }
 
-            if (idSubscricao == null)
-                throw new InvalidOperationException("Membros precisam de uma subscrição.");
-
-            if (!await _context.Subscricoes.AnyAsync(s => s.IdSubscricao == idSubscricao))
-                throw new InvalidOperationException("A subscrição indicada não existe.");
+            if (idSubscricao.HasValue)
+            {
+                if (!await _context.Subscricoes
+                    .AnyAsync(s => s.IdSubscricao == idSubscricao))
+                    throw new InvalidOperationException("A subscrição indicada não existe.");
+            }
         }
     }
 }

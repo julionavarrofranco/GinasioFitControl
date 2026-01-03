@@ -1,11 +1,14 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using ProjetoFinal;
 using ProjetoFinal.Data;
 using ProjetoFinal.Services;
+using ProjetoFinal.Services.Interfaces;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -53,6 +56,11 @@ builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IMemberService, MemberService>();
 builder.Services.AddScoped<IEmployeeService, EmployeeService>();
+builder.Services.AddScoped<IExerciseService, ExerciseService>();
+builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();
+builder.Services.AddScoped<IPhysicalEvaluationService, PhysicalEvaluationService>();
+builder.Services.AddScoped<IPhysicalEvaluationReservationService, PhysicalEvaluationReservationService>();
+
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).
     AddJwtBearer(options =>
@@ -71,14 +79,25 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).
 );
 
 builder.Services.AddAuthorization(options =>
-// Política: apenas funcionários com função Admin ou receção podem registrar novos utilizadores
+{
     options.AddPolicy("CanManageUsers", policy =>
-    policy.RequireClaim("Funcao", "Admin", "Rececao")));
+        policy.RequireClaim("Funcao", "Admin", "Rececao"));
 
-builder.Services.AddAuthorization(options =>
-// Política: apenas funcionários com função Admin ou receção podem registrar novos utilizadores
     options.AddPolicy("OnlyAdmin", policy =>
-    policy.RequireClaim("Funcao", "Admin")));
+        policy.RequireClaim("Funcao", "Admin"));
+
+    options.AddPolicy("CanViewExercises", policy =>
+        policy.RequireClaim("Funcao", "Admin", "PT"));
+
+    options.AddPolicy("CanViewSubscriptions", policy =>
+        policy.RequireClaim("Funcao", "Admin", "Rececao"));
+
+    options.AddPolicy("OnlyPT", policy =>
+        policy.RequireClaim("Funcao", "PT"));
+
+    options.AddPolicy("OnlyMembers", policy =>
+        policy.RequireClaim("Tipo", "Membro"));
+});
 
 var app = builder.Build();
 

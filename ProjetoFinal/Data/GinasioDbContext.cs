@@ -16,8 +16,10 @@ namespace ProjetoFinal.Data
         public DbSet<PlanoTreino> Planos { get; set; }
         public DbSet<PlanoExercicio> PlanosExercicios { get; set; }
         public DbSet<Aula> Aulas { get; set; }
+        public DbSet<AulaMarcada> AulasMarcadas { get; set; }
         public DbSet<MembroAula> MembrosAulas { get; set; }
         public DbSet<AvaliacaoFisica> AvaliacoesFisicas { get; set; }
+        public DbSet<MembroAvaliacao> MembrosAvaliacoes { get; set; }
         public DbSet<Pagamento> Pagamentos { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -137,7 +139,10 @@ namespace ProjetoFinal.Data
                 entity.HasKey(e => e.IdExercicio);
                 entity.Property(e => e.IdExercicio).HasColumnName("id_exercicio");
                 entity.Property(e => e.Nome).IsRequired().HasMaxLength(100);
-                entity.Property(e => e.GrupoMuscular).HasMaxLength(100);
+                entity.Property(e => e.GrupoMuscular)
+                     .HasConversion<string>()
+                     .HasMaxLength(100)
+                     .IsRequired();
                 entity.Property(e => e.Descricao).HasColumnType("text");
                 entity.Property(e => e.FotoUrl).HasMaxLength(255);
                 entity.Property(e => e.Ativo).HasDefaultValue(true);
@@ -207,11 +212,30 @@ namespace ProjetoFinal.Data
                       .OnDelete(DeleteBehavior.Restrict);
             });
 
+            // AulaMarcada
+            modelBuilder.Entity<AulaMarcada>(entity =>
+            {
+                entity.ToTable("aulas_marcadas");
+                entity.HasKey(am => am.Id);
+                entity.Property(am => am.DataAula).HasColumnType("date").IsRequired();
+                entity.Property(am => am.DataDesativacao);
+
+                entity.HasOne(am => am.Aula)
+                      .WithMany(a => a.AulasMarcadas)
+                      .HasForeignKey(am => am.IdAula)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasMany(am => am.MembrosAulas)
+                      .WithOne(ma => ma.AulaMarcada)
+                      .HasForeignKey(ma => ma.IdAulaMarcada)
+                      .OnDelete(DeleteBehavior.Cascade);
+            });
+
             //MembrosAulas
             modelBuilder.Entity<MembroAula>(entity =>
             {
                 entity.ToTable("membros_aulas");
-                entity.HasKey(ma => new { ma.IdMembro, ma.IdAula });
+                entity.HasKey(ma => new { ma.IdMembro, ma.IdAulaMarcada });
                 entity.Property(ma => ma.DataReserva).HasColumnType("date");
                 entity.Property(ma => ma.Presenca)
                       .HasConversion<string>()
@@ -223,9 +247,9 @@ namespace ProjetoFinal.Data
                       .HasForeignKey(ma => ma.IdMembro)
                       .OnDelete(DeleteBehavior.Cascade);
 
-                entity.HasOne(ma => ma.Aula)
+                entity.HasOne(ma => ma.AulaMarcada)
                       .WithMany(a => a.MembrosAulas)
-                      .HasForeignKey(ma => ma.IdAula)
+                      .HasForeignKey(ma => ma.IdAulaMarcada)
                       .OnDelete(DeleteBehavior.Cascade);
             });
 
@@ -255,6 +279,41 @@ namespace ProjetoFinal.Data
                       .HasForeignKey(av => av.IdFuncionario)
                       .OnDelete(DeleteBehavior.Restrict);
             });
+
+            modelBuilder.Entity<MembroAvaliacao>(entity =>
+            {
+                entity.ToTable("membros_avaliacoes");
+
+                entity.HasKey(ma => ma.IdMembroAvaliacao);
+
+                entity.Property(ma => ma.DataReserva)
+                      .HasColumnType("datetime")
+                      .IsRequired();
+
+                entity.Property(ma => ma.Estado)
+                      .HasConversion<string>()
+                      .HasMaxLength(20)
+                      .IsRequired();
+
+                entity.Property(ma => ma.DataCancelamento)
+                      .HasColumnType("datetime");
+
+                entity.Property(ma => ma.DataDesativacao)
+                      .HasColumnType("datetime");
+
+                entity.HasOne(ma => ma.Membro)
+                      .WithMany(m => m.MembroAvaliacoes)
+                      .HasForeignKey(ma => ma.IdMembro)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                modelBuilder.Entity<MembroAvaliacao>()
+                      .HasOne(ma => ma.AvaliacaoFisica)
+                      .WithOne()
+                      .HasForeignKey<MembroAvaliacao>(ma => ma.IdAvaliacaoFisica)
+                      .OnDelete(DeleteBehavior.Restrict);
+
+            });
+
 
             //Pagamentos
             modelBuilder.Entity<Pagamento>(entity =>

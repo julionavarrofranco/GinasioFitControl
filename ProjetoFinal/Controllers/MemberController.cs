@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using ProjetoFinal.Models.DTOs;
-using ProjetoFinal.Services;
+using ProjetoFinal.Services.Interfaces;
 
 namespace ProjetoFinal.Controllers
 {
@@ -36,12 +36,12 @@ namespace ProjetoFinal.Controllers
         [Authorize(Policy = "CanManageUsers")]
         [HttpPatch("update-member/{idMembro}")]
         public async Task<IActionResult> UpdateMember(int idMembro, [FromBody] UpdateMemberDto request)
-        {
-            if (request == null)
-                return BadRequest(new { message = "Dados de atualização inválidos." });
-
+        {       
             try
             {
+                if (request == null)
+                    return BadRequest(new { message = "Dados de atualização inválidos." });
+
                 var result = await _memberService.UpdateMemberAsync(idMembro, request);
                 return Ok(new { message = result });
             }

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ProjetoFinal.Data;
 
@@ -11,9 +12,11 @@ using ProjetoFinal.Data;
 namespace ProjetoFinal.Migrations
 {
     [DbContext(typeof(GinasioDbContext))]
-    partial class GinasioDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260102190359_CreateTableMembrosAvaliacoes")]
+    partial class CreateTableMembrosAvaliacoes
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -289,6 +292,9 @@ namespace ProjetoFinal.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdMembroAvaliacao"));
 
+                    b.Property<DateTime>("DataAvaliacao")
+                        .HasColumnType("datetime");
+
                     b.Property<DateTime?>("DataCancelamento")
                         .HasColumnType("datetime");
 
@@ -303,17 +309,10 @@ namespace ProjetoFinal.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
-                    b.Property<int?>("IdAvaliacaoFisica")
-                        .HasColumnType("int");
-
                     b.Property<int>("IdMembro")
                         .HasColumnType("int");
 
                     b.HasKey("IdMembroAvaliacao");
-
-                    b.HasIndex("IdAvaliacaoFisica")
-                        .IsUnique()
-                        .HasFilter("[IdAvaliacaoFisica] IS NOT NULL");
 
                     b.HasIndex("IdMembro");
 
@@ -661,18 +660,11 @@ namespace ProjetoFinal.Migrations
 
             modelBuilder.Entity("ProjetoFinal.Models.MembroAvaliacao", b =>
                 {
-                    b.HasOne("ProjetoFinal.Models.AvaliacaoFisica", "AvaliacaoFisica")
-                        .WithOne()
-                        .HasForeignKey("ProjetoFinal.Models.MembroAvaliacao", "IdAvaliacaoFisica")
-                        .OnDelete(DeleteBehavior.Restrict);
-
                     b.HasOne("ProjetoFinal.Models.Membro", "Membro")
                         .WithMany("MembroAvaliacoes")
                         .HasForeignKey("IdMembro")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("AvaliacaoFisica");
 
                     b.Navigation("Membro");
                 });

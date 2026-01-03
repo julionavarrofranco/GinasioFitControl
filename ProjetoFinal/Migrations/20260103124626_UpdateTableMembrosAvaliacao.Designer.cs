@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ProjetoFinal.Data;
 
@@ -11,9 +12,11 @@ using ProjetoFinal.Data;
 namespace ProjetoFinal.Migrations
 {
     [DbContext(typeof(GinasioDbContext))]
-    partial class GinasioDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260103124626_UpdateTableMembrosAvaliacao")]
+    partial class UpdateTableMembrosAvaliacao
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -288,6 +291,9 @@ namespace ProjetoFinal.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdMembroAvaliacao"));
+
+                    b.Property<DateTime>("DataAvaliacao")
+                        .HasColumnType("datetime");
 
                     b.Property<DateTime?>("DataCancelamento")
                         .HasColumnType("datetime");

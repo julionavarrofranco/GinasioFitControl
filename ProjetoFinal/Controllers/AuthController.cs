@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using ProjetoFinal.Data;
 using ProjetoFinal.Models;
 using ProjetoFinal.Models.DTOs;
-using ProjetoFinal.Services;
+using ProjetoFinal.Services.Interfaces;
 using System.Security.Claims;
 
 namespace ProjetoFinal.Controllers

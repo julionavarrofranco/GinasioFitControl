@@ -1,7 +1,7 @@
 ﻿using ProjetoFinal.Models;
 using ProjetoFinal.Models.DTOs;
 
-namespace ProjetoFinal.Services
+namespace ProjetoFinal.Services.Interfaces
 {
     public interface IAuthService
     {

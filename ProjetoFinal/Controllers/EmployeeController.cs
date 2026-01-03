@@ -1,7 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using ProjetoFinal.Services;
+using ProjetoFinal.Models.DTOs;
+using ProjetoFinal.Services.Interfaces;
 
 namespace ProjetoFinal.Controllers
 {
@@ -29,6 +30,32 @@ namespace ProjetoFinal.Controllers
             {
                 return StatusCode(500, new { message = "Erro interno do servidor." });
             }      
+        }
+
+        [Authorize(Policy = "OnlyAdmin")]
+        [HttpPatch("{idFuncionario}")]
+        public async Task<IActionResult> UpdateEmployee(int idFuncionario, [FromBody] UpdateEmployeeDto request)
+        {
+            try
+            {
+                if (request == null)
+                    return BadRequest(new { message = "Dados de atualização inválidos." });
+
+                var result = await _employeeService.UpdateEmployeeAsync(idFuncionario, request);
+                return Ok(new { message = result });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, new { message = "Erro interno do servidor." });
+            }
         }
     }
 }

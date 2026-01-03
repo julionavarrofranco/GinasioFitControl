@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ProjetoFinal.Models;
 using ProjetoFinal.Models.DTOs;
-using ProjetoFinal.Services;
+using ProjetoFinal.Services.Interfaces;
 using System.Security.Claims;
 
 namespace ProjetoFinal.Controllers
@@ -116,7 +116,7 @@ namespace ProjetoFinal.Controllers
         // 4. CHANGE ACTIVE STATUS
         [Authorize(Policy = "CanManageUsers")]
         [HttpPatch("change-active-status")]
-        public async Task<IActionResult> ChangeActiveStatus([FromBody] UserStatusDto request)
+        public async Task<IActionResult> ChangeUserStatus([FromBody] UserStatusDto request)
         {
             try
             {

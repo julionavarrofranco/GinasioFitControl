@@ -25,6 +25,8 @@
 
         public Funcionario Funcionario { get; set; } = null!;
 
+        public ICollection<AulaMarcada> AulasMarcadas { get; set; } = new List<AulaMarcada>();
+
         public ICollection<MembroAula> MembrosAulas { get; set; } = new List<MembroAula>();
     }
 }
