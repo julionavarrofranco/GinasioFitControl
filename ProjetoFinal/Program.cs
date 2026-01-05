@@ -60,6 +60,7 @@ builder.Services.AddScoped<IExerciseService, ExerciseService>();
 builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();
 builder.Services.AddScoped<IPhysicalEvaluationService, PhysicalEvaluationService>();
 builder.Services.AddScoped<IPhysicalEvaluationReservationService, PhysicalEvaluationReservationService>();
+builder.Services.AddScoped<IPaymentService, PaymentService>();
 
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).
@@ -81,6 +82,9 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("CanManageUsers", policy =>
+        policy.RequireClaim("Funcao", "Admin", "Rececao"));
+
+    options.AddPolicy("CanManagePayments", policy =>
         policy.RequireClaim("Funcao", "Admin", "Rececao"));
 
     options.AddPolicy("OnlyAdmin", policy =>

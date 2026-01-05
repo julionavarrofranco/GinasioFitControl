@@ -8,6 +8,10 @@ namespace ProjetoFinal.Services.Interfaces
        Task<List<MemberDto>> GetAllMembersAsync();
 
        Task<Membro> CreateMemberAsync(int idUser, UserRegisterDto request);
+        
+       Task CancelMemberAsync(int idMembro);
+
+       Task ReactivateMemberAsync(int idMembro, MetodoPagamento metodo);
 
        Task<string> UpdateMemberAsync(int idMembro, UpdateMemberDto request);
     }

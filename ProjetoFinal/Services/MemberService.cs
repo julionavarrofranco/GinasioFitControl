@@ -10,10 +10,12 @@ namespace ProjetoFinal.Services
     public class MemberService: IMemberService
     {
         private readonly GinasioDbContext _context;
+        private readonly IPaymentService _paymentService;
 
-        public MemberService(GinasioDbContext context)
+        public MemberService(GinasioDbContext context, IPaymentService paymentService)
         {
             _context = context;
+            _paymentService = paymentService;
         }
 
         public async Task<List<MemberDto>> GetAllMembersAsync()
@@ -54,7 +56,35 @@ namespace ProjetoFinal.Services
                 DataRegisto = DateTime.UtcNow
             };
 
-            _context.Membros.Add(membro);    
+            _context.Membros.Add(membro);
+
+            // === CRIAR PAGAMENTO AUTOMÁTICO ===
+            var subscricao = await _context.Subscricoes.FirstAsync(s => s.IdSubscricao == idSubscricao);
+
+            // ⚠ Pontos a considerar:
+            // 1. Mês referente do pagamento
+            //    Atualmente fixamos como mês atual. Se quiser avançar o plano inicial (ex.: trimestral = 3 meses pagos à frente),
+            //    podemos ajustar aqui, criando pagamentos retroativos ou definindo o mês referente inicial do plano.
+            var mesAtual = new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, 1);
+            var mesReferente = mesAtual; // padrão = mês atual
+
+            // 2. Método de pagamento
+            //    Atualmente fixo como Cartão. Pode ser definido pela UI recebendo no UserRegisterDto.
+            var metodoPagamento = MetodoPagamento.Cartao;
+
+            // 3. Dia de pagamento
+            //    Será definido no PaymentService como dia 8 ou imediato se já passou.
+
+            var paymentDto = new PaymentDto
+            {
+                IdMembro = membro.IdMembro,
+                IdSubscricao = subscricao.IdSubscricao,
+                MetodoPagamento = metodoPagamento,
+                MesReferente = mesReferente
+            };
+
+            await _paymentService.CreatePaymentAsync(paymentDto);
+
             return membro;
         }
 
@@ -108,6 +138,67 @@ namespace ProjetoFinal.Services
                 await _context.SaveChangesAsync();
 
             return alterado ? "Membro atualizado com sucesso." : "Nenhuma alteração realizada.";
+        }
+
+        public async Task CancelMemberAsync(int idMembro)
+        {
+            var membro = await _context.Membros
+                .Include(m => m.User)
+                .FirstOrDefaultAsync(m => m.IdMembro == idMembro);
+
+            if (membro == null)
+                throw new KeyNotFoundException("Membro não encontrado.");
+
+            if (!membro.User.Ativo)
+                throw new InvalidOperationException("O membro já se encontra inativo.");
+
+            // Desativar utilizador
+            membro.User.Ativo = false;
+            membro.User.DataDesativacao = DateTime.UtcNow;
+
+            // Desativar todos os pagamentos futuros de uma vez
+            var mesAtual = new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, 1);
+            var pagamentosFuturos = await _context.Pagamentos
+                .Where(p => p.IdMembro == idMembro && p.DataDesativacao == null && p.MesReferente >= mesAtual)
+                .ToListAsync();
+
+            foreach (var pagamento in pagamentosFuturos)
+                pagamento.DataDesativacao = DateTime.UtcNow;
+
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task ReactivateMemberAsync(int idMembro, MetodoPagamento metodo)
+        {
+            var membro = await _context.Membros
+                .Include(m => m.User)
+                .Include(m => m.Subscricao)
+                .FirstOrDefaultAsync(m => m.IdMembro == idMembro);
+
+            if (membro == null)
+                throw new KeyNotFoundException("Membro não encontrado.");
+
+            if (membro.User.Ativo)
+                throw new InvalidOperationException("O membro já está ativo.");
+
+            // Reativar utilizador
+            membro.User.Ativo = true;
+            membro.User.DataDesativacao = null;
+
+            // Criar pagamento automático a partir do mês atual
+            var mesAtual = new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, 1);
+
+            var paymentDto = new PaymentDto
+            {
+                IdMembro = membro.IdMembro,
+                IdSubscricao = membro.Subscricao!.IdSubscricao,
+                MetodoPagamento = metodo,
+                MesReferente = mesAtual
+            };
+
+            await _paymentService.CreatePaymentAsync(paymentDto);
+
+            await _context.SaveChangesAsync();
         }
 
         private async Task ValidateMemberAsync(DateTime? dataNascimento, int? idSubscricao, bool isUpdate)
