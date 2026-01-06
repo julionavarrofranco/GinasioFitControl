@@ -57,7 +57,7 @@ namespace ProjetoFinal.Services
             };
 
             _context.Membros.Add(membro);
-
+            await _context.SaveChangesAsync();
             // === CRIAR PAGAMENTO AUTOMÁTICO ===
             var subscricao = await _context.Subscricoes.FirstAsync(s => s.IdSubscricao == idSubscricao);
 

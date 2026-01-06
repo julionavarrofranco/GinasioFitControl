@@ -34,7 +34,11 @@ namespace ProjetoFinal.Services
                 throw new KeyNotFoundException("Subscrição não encontrada ou inativa.");
 
             // Normalizar mês referente (dia 1)
-            var mesReferente = new DateTime(request.MesReferente.Year, request.MesReferente.Month, 1);
+            var hoje = DateTime.UtcNow;
+
+            var mesReferente = hoje.Day > 25
+                ? new DateTime(hoje.Year, hoje.Month, 1).AddMonths(1)
+                : new DateTime(hoje.Year, hoje.Month, 1);
 
             // ❌ Bloquear pagamentos retroativos
             var mesAtual = new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, 1);
