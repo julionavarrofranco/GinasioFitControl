@@ -1,42 +1,54 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "C:\\Users\\tiago\\OneDrive\\\u00C1rea de Trabalho\\PF\\App \u002B API Backup\\FitControlAdmin\\",
+  "WorkspaceRootPath": "C:\\Users\\tiago\\OneDrive\\\u00C1rea de Trabalho\\PF\\App \u002B API\\FitControlAdmin\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{5073CBDB-9D53-959F-5B9F-F991EBB17886}|FitControlAdmin.csproj|c:\\users\\tiago\\onedrive\\\u00E1rea de trabalho\\pf\\app \u002B api backup\\fitcontroladmin\\services\\apiservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{5073CBDB-9D53-959F-5B9F-F991EBB17886}|FitControlAdmin.csproj|solutionrelative:services\\apiservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{5073CBDB-9D53-959F-5B9F-F991EBB17886}|FitControlAdmin.csproj|c:\\users\\tiago\\onedrive\\\u00E1rea de trabalho\\pf\\app \u002B api\\fitcontroladmin\\createeditexercisewindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{5073CBDB-9D53-959F-5B9F-F991EBB17886}|FitControlAdmin.csproj|solutionrelative:createeditexercisewindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{5073CBDB-9D53-959F-5B9F-F991EBB17886}|FitControlAdmin.csproj|c:\\users\\tiago\\onedrive\\\u00E1rea de trabalho\\pf\\app \u002B api backup\\fitcontroladmin\\changepassworddialog.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
-      "RelativeMoniker": "D:0:0:{5073CBDB-9D53-959F-5B9F-F991EBB17886}|FitControlAdmin.csproj|solutionrelative:changepassworddialog.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{5073CBDB-9D53-959F-5B9F-F991EBB17886}|FitControlAdmin.csproj|c:\\users\\tiago\\onedrive\\\u00E1rea de trabalho\\pf\\app \u002B api backup\\fitcontroladmin\\mainwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "AbsoluteMoniker": "D:0:0:{5073CBDB-9D53-959F-5B9F-F991EBB17886}|FitControlAdmin.csproj|c:\\users\\tiago\\onedrive\\\u00E1rea de trabalho\\pf\\app \u002B api\\fitcontroladmin\\mainwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
       "RelativeMoniker": "D:0:0:{5073CBDB-9D53-959F-5B9F-F991EBB17886}|FitControlAdmin.csproj|solutionrelative:mainwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{5073CBDB-9D53-959F-5B9F-F991EBB17886}|FitControlAdmin.csproj|c:\\users\\tiago\\onedrive\\\u00E1rea de trabalho\\pf\\app \u002B api backup\\fitcontroladmin\\loginwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
-      "RelativeMoniker": "D:0:0:{5073CBDB-9D53-959F-5B9F-F991EBB17886}|FitControlAdmin.csproj|solutionrelative:loginwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+      "AbsoluteMoniker": "D:0:0:{5073CBDB-9D53-959F-5B9F-F991EBB17886}|FitControlAdmin.csproj|c:\\users\\tiago\\onedrive\\\u00E1rea de trabalho\\pf\\app \u002B api\\fitcontroladmin\\models\\exercisemodels.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5073CBDB-9D53-959F-5B9F-F991EBB17886}|FitControlAdmin.csproj|solutionrelative:models\\exercisemodels.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{5073CBDB-9D53-959F-5B9F-F991EBB17886}|FitControlAdmin.csproj|c:\\users\\tiago\\onedrive\\\u00E1rea de trabalho\\pf\\app \u002B api backup\\fitcontroladmin\\loginwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{5073CBDB-9D53-959F-5B9F-F991EBB17886}|FitControlAdmin.csproj|c:\\users\\tiago\\onedrive\\\u00E1rea de trabalho\\pf\\app \u002B api\\fitcontroladmin\\models\\physicalevaluationmodels.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5073CBDB-9D53-959F-5B9F-F991EBB17886}|FitControlAdmin.csproj|solutionrelative:models\\physicalevaluationmodels.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5073CBDB-9D53-959F-5B9F-F991EBB17886}|FitControlAdmin.csproj|c:\\users\\tiago\\onedrive\\\u00E1rea de trabalho\\pf\\app \u002B api\\fitcontroladmin\\loginwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{5073CBDB-9D53-959F-5B9F-F991EBB17886}|FitControlAdmin.csproj|solutionrelative:loginwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{5073CBDB-9D53-959F-5B9F-F991EBB17886}|FitControlAdmin.csproj|c:\\users\\tiago\\onedrive\\\u00E1rea de trabalho\\pf\\app \u002B api backup\\fitcontroladmin\\mainwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{5073CBDB-9D53-959F-5B9F-F991EBB17886}|FitControlAdmin.csproj|c:\\users\\tiago\\onedrive\\\u00E1rea de trabalho\\pf\\app \u002B api\\fitcontroladmin\\helper\\jwthelper.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5073CBDB-9D53-959F-5B9F-F991EBB17886}|FitControlAdmin.csproj|solutionrelative:helper\\jwthelper.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5073CBDB-9D53-959F-5B9F-F991EBB17886}|FitControlAdmin.csproj|c:\\users\\tiago\\onedrive\\\u00E1rea de trabalho\\pf\\app \u002B api\\fitcontroladmin\\loginwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{5073CBDB-9D53-959F-5B9F-F991EBB17886}|FitControlAdmin.csproj|solutionrelative:loginwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5073CBDB-9D53-959F-5B9F-F991EBB17886}|FitControlAdmin.csproj|c:\\users\\tiago\\onedrive\\\u00E1rea de trabalho\\pf\\app \u002B api\\fitcontroladmin\\mainwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{5073CBDB-9D53-959F-5B9F-F991EBB17886}|FitControlAdmin.csproj|solutionrelative:mainwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{5073CBDB-9D53-959F-5B9F-F991EBB17886}|FitControlAdmin.csproj|c:\\users\\tiago\\onedrive\\\u00E1rea de trabalho\\pf\\app \u002B api backup\\fitcontroladmin\\models\\userdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{5073CBDB-9D53-959F-5B9F-F991EBB17886}|FitControlAdmin.csproj|c:\\users\\tiago\\onedrive\\\u00E1rea de trabalho\\pf\\app \u002B api\\fitcontroladmin\\services\\apiservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5073CBDB-9D53-959F-5B9F-F991EBB17886}|FitControlAdmin.csproj|solutionrelative:services\\apiservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5073CBDB-9D53-959F-5B9F-F991EBB17886}|FitControlAdmin.csproj|c:\\users\\tiago\\onedrive\\\u00E1rea de trabalho\\pf\\app \u002B api\\fitcontroladmin\\changepassworddialog.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{5073CBDB-9D53-959F-5B9F-F991EBB17886}|FitControlAdmin.csproj|solutionrelative:changepassworddialog.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5073CBDB-9D53-959F-5B9F-F991EBB17886}|FitControlAdmin.csproj|c:\\users\\tiago\\onedrive\\\u00E1rea de trabalho\\pf\\app \u002B api\\fitcontroladmin\\models\\userdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{5073CBDB-9D53-959F-5B9F-F991EBB17886}|FitControlAdmin.csproj|solutionrelative:models\\userdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{5073CBDB-9D53-959F-5B9F-F991EBB17886}|FitControlAdmin.csproj|c:\\users\\tiago\\onedrive\\\u00E1rea de trabalho\\pf\\app \u002B api backup\\fitcontroladmin\\fitcontroladmin.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "AbsoluteMoniker": "D:0:0:{5073CBDB-9D53-959F-5B9F-F991EBB17886}|FitControlAdmin.csproj|c:\\users\\tiago\\onedrive\\\u00E1rea de trabalho\\pf\\app \u002B api\\fitcontroladmin\\fitcontroladmin.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
       "RelativeMoniker": "D:0:0:{5073CBDB-9D53-959F-5B9F-F991EBB17886}|FitControlAdmin.csproj|solutionrelative:fitcontroladmin.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{5073CBDB-9D53-959F-5B9F-F991EBB17886}|FitControlAdmin.csproj|c:\\users\\tiago\\onedrive\\\u00E1rea de trabalho\\pf\\app \u002B api backup\\fitcontroladmin\\helper\\jwthelper.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{5073CBDB-9D53-959F-5B9F-F991EBB17886}|FitControlAdmin.csproj|solutionrelative:helper\\jwthelper.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -46,27 +58,113 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 4,
+          "SelectedChildIndex": 0,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "ChangePasswordDialog.xaml",
-              "DocumentMoniker": "C:\\Users\\tiago\\OneDrive\\\u00C1rea de Trabalho\\PF\\App \u002B API Backup\\FitControlAdmin\\ChangePasswordDialog.xaml",
-              "RelativeDocumentMoniker": "ChangePasswordDialog.xaml",
-              "ToolTip": "C:\\Users\\tiago\\OneDrive\\\u00C1rea de Trabalho\\PF\\App \u002B API Backup\\FitControlAdmin\\ChangePasswordDialog.xaml",
-              "RelativeToolTip": "ChangePasswordDialog.xaml",
+              "DocumentIndex": 0,
+              "Title": "CreateEditExerciseWindow.xaml",
+              "DocumentMoniker": "C:\\Users\\tiago\\OneDrive\\\u00C1rea de Trabalho\\PF\\App \u002B API\\FitControlAdmin\\CreateEditExerciseWindow.xaml",
+              "RelativeDocumentMoniker": "CreateEditExerciseWindow.xaml",
+              "ToolTip": "C:\\Users\\tiago\\OneDrive\\\u00C1rea de Trabalho\\PF\\App \u002B API\\FitControlAdmin\\CreateEditExerciseWindow.xaml",
+              "RelativeToolTip": "CreateEditExerciseWindow.xaml",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
-              "WhenOpened": "2025-12-09T10:30:16.694Z",
+              "WhenOpened": "2026-01-07T13:46:12.325Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "PhysicalEvaluationModels.cs",
+              "DocumentMoniker": "C:\\Users\\tiago\\OneDrive\\\u00C1rea de Trabalho\\PF\\App \u002B API\\FitControlAdmin\\Models\\PhysicalEvaluationModels.cs",
+              "RelativeDocumentMoniker": "Models\\PhysicalEvaluationModels.cs",
+              "ToolTip": "C:\\Users\\tiago\\OneDrive\\\u00C1rea de Trabalho\\PF\\App \u002B API\\FitControlAdmin\\Models\\PhysicalEvaluationModels.cs",
+              "RelativeToolTip": "Models\\PhysicalEvaluationModels.cs",
+              "ViewState": "AgIAADcAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-07T13:45:19.592Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "ExerciseModels.cs",
+              "DocumentMoniker": "C:\\Users\\tiago\\OneDrive\\\u00C1rea de Trabalho\\PF\\App \u002B API\\FitControlAdmin\\Models\\ExerciseModels.cs",
+              "RelativeDocumentMoniker": "Models\\ExerciseModels.cs",
+              "ToolTip": "C:\\Users\\tiago\\OneDrive\\\u00C1rea de Trabalho\\PF\\App \u002B API\\FitControlAdmin\\Models\\ExerciseModels.cs",
+              "RelativeToolTip": "Models\\ExerciseModels.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-06T15:58:05.195Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "LoginWindow.xaml.cs",
+              "DocumentMoniker": "C:\\Users\\tiago\\OneDrive\\\u00C1rea de Trabalho\\PF\\App \u002B API\\FitControlAdmin\\LoginWindow.xaml.cs",
+              "RelativeDocumentMoniker": "LoginWindow.xaml.cs",
+              "ToolTip": "C:\\Users\\tiago\\OneDrive\\\u00C1rea de Trabalho\\PF\\App \u002B API\\FitControlAdmin\\LoginWindow.xaml.cs",
+              "RelativeToolTip": "LoginWindow.xaml.cs",
+              "ViewState": "AgIAABMAAAAAAAAAAAAAACUAAAAUAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-03T16:56:19.159Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "LoginWindow.xaml",
+              "DocumentMoniker": "C:\\Users\\tiago\\OneDrive\\\u00C1rea de Trabalho\\PF\\App \u002B API\\FitControlAdmin\\LoginWindow.xaml",
+              "RelativeDocumentMoniker": "LoginWindow.xaml",
+              "ToolTip": "C:\\Users\\tiago\\OneDrive\\\u00C1rea de Trabalho\\PF\\App \u002B API\\FitControlAdmin\\LoginWindow.xaml",
+              "RelativeToolTip": "LoginWindow.xaml",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2025-12-03T16:55:05.612Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "MainWindow.xaml",
+              "DocumentMoniker": "C:\\Users\\tiago\\OneDrive\\\u00C1rea de Trabalho\\PF\\App \u002B API\\FitControlAdmin\\MainWindow.xaml",
+              "RelativeDocumentMoniker": "MainWindow.xaml",
+              "ToolTip": "C:\\Users\\tiago\\OneDrive\\\u00C1rea de Trabalho\\PF\\App \u002B API\\FitControlAdmin\\MainWindow.xaml",
+              "RelativeToolTip": "MainWindow.xaml",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2025-12-02T16:48:33.658Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "MainWindow.xaml.cs",
+              "DocumentMoniker": "C:\\Users\\tiago\\OneDrive\\\u00C1rea de Trabalho\\PF\\App \u002B API\\FitControlAdmin\\MainWindow.xaml.cs",
+              "RelativeDocumentMoniker": "MainWindow.xaml.cs",
+              "ToolTip": "C:\\Users\\tiago\\OneDrive\\\u00C1rea de Trabalho\\PF\\App \u002B API\\FitControlAdmin\\MainWindow.xaml.cs",
+              "RelativeToolTip": "MainWindow.xaml.cs",
+              "ViewState": "AgIAAAwAAAAAAAAAAAAIwBcAAAAMAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-03T16:08:24.649Z"
+            },
+            {
+              "$type": "Document",
               "DocumentIndex": 8,
+              "Title": "ApiService.cs",
+              "DocumentMoniker": "C:\\Users\\tiago\\OneDrive\\\u00C1rea de Trabalho\\PF\\App \u002B API\\FitControlAdmin\\Services\\ApiService.cs",
+              "RelativeDocumentMoniker": "Services\\ApiService.cs",
+              "ToolTip": "C:\\Users\\tiago\\OneDrive\\\u00C1rea de Trabalho\\PF\\App \u002B API\\FitControlAdmin\\Services\\ApiService.cs",
+              "RelativeToolTip": "Services\\ApiService.cs",
+              "ViewState": "AgIAAOkAAAAAAAAAAAAuwP0AAAAQAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-03T16:24:48.405Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
               "Title": "JwtHelper.cs",
-              "DocumentMoniker": "C:\\Users\\tiago\\OneDrive\\\u00C1rea de Trabalho\\PF\\App \u002B API Backup\\FitControlAdmin\\Helper\\JwtHelper.cs",
+              "DocumentMoniker": "C:\\Users\\tiago\\OneDrive\\\u00C1rea de Trabalho\\PF\\App \u002B API\\FitControlAdmin\\Helper\\JwtHelper.cs",
               "RelativeDocumentMoniker": "Helper\\JwtHelper.cs",
-              "ToolTip": "C:\\Users\\tiago\\OneDrive\\\u00C1rea de Trabalho\\PF\\App \u002B API Backup\\FitControlAdmin\\Helper\\JwtHelper.cs",
+              "ToolTip": "C:\\Users\\tiago\\OneDrive\\\u00C1rea de Trabalho\\PF\\App \u002B API\\FitControlAdmin\\Helper\\JwtHelper.cs",
               "RelativeToolTip": "Helper\\JwtHelper.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
@@ -74,70 +172,22 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
-              "Title": "MainWindow.xaml.cs",
-              "DocumentMoniker": "C:\\Users\\tiago\\OneDrive\\\u00C1rea de Trabalho\\PF\\App \u002B API Backup\\FitControlAdmin\\MainWindow.xaml.cs",
-              "RelativeDocumentMoniker": "MainWindow.xaml.cs",
-              "ToolTip": "C:\\Users\\tiago\\OneDrive\\\u00C1rea de Trabalho\\PF\\App \u002B API Backup\\FitControlAdmin\\MainWindow.xaml.cs",
-              "RelativeToolTip": "MainWindow.xaml.cs",
-              "ViewState": "AgIAALEAAAAAAAAAAAAjwMoAAABGAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-12-03T16:08:24.649Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "MainWindow.xaml",
-              "DocumentMoniker": "C:\\Users\\tiago\\OneDrive\\\u00C1rea de Trabalho\\PF\\App \u002B API Backup\\FitControlAdmin\\MainWindow.xaml",
-              "RelativeDocumentMoniker": "MainWindow.xaml",
-              "ToolTip": "C:\\Users\\tiago\\OneDrive\\\u00C1rea de Trabalho\\PF\\App \u002B API Backup\\FitControlAdmin\\MainWindow.xaml",
-              "RelativeToolTip": "MainWindow.xaml",
+              "DocumentIndex": 9,
+              "Title": "ChangePasswordDialog.xaml",
+              "DocumentMoniker": "C:\\Users\\tiago\\OneDrive\\\u00C1rea de Trabalho\\PF\\App \u002B API\\FitControlAdmin\\ChangePasswordDialog.xaml",
+              "RelativeDocumentMoniker": "ChangePasswordDialog.xaml",
+              "ToolTip": "C:\\Users\\tiago\\OneDrive\\\u00C1rea de Trabalho\\PF\\App \u002B API\\FitControlAdmin\\ChangePasswordDialog.xaml",
+              "RelativeToolTip": "ChangePasswordDialog.xaml",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
-              "WhenOpened": "2025-12-02T16:48:33.658Z"
+              "WhenOpened": "2025-12-09T10:30:16.694Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "ApiService.cs",
-              "DocumentMoniker": "C:\\Users\\tiago\\OneDrive\\\u00C1rea de Trabalho\\PF\\App \u002B API Backup\\FitControlAdmin\\Services\\ApiService.cs",
-              "RelativeDocumentMoniker": "Services\\ApiService.cs",
-              "ToolTip": "C:\\Users\\tiago\\OneDrive\\\u00C1rea de Trabalho\\PF\\App \u002B API Backup\\FitControlAdmin\\Services\\ApiService.cs",
-              "RelativeToolTip": "Services\\ApiService.cs",
-              "ViewState": "AgIAAOkAAAAAAAAAAAAuwP0AAAAQAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-12-03T16:24:48.405Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 4,
-              "Title": "LoginWindow.xaml.cs",
-              "DocumentMoniker": "C:\\Users\\tiago\\OneDrive\\\u00C1rea de Trabalho\\PF\\App \u002B API Backup\\FitControlAdmin\\LoginWindow.xaml.cs",
-              "RelativeDocumentMoniker": "LoginWindow.xaml.cs",
-              "ToolTip": "C:\\Users\\tiago\\OneDrive\\\u00C1rea de Trabalho\\PF\\App \u002B API Backup\\FitControlAdmin\\LoginWindow.xaml.cs",
-              "RelativeToolTip": "LoginWindow.xaml.cs",
-              "ViewState": "AgIAABMAAAAAAAAAAAAAADEAAAAPAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-12-03T16:56:19.159Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "LoginWindow.xaml",
-              "DocumentMoniker": "C:\\Users\\tiago\\OneDrive\\\u00C1rea de Trabalho\\PF\\App \u002B API Backup\\FitControlAdmin\\LoginWindow.xaml",
-              "RelativeDocumentMoniker": "LoginWindow.xaml",
-              "ToolTip": "C:\\Users\\tiago\\OneDrive\\\u00C1rea de Trabalho\\PF\\App \u002B API Backup\\FitControlAdmin\\LoginWindow.xaml",
-              "RelativeToolTip": "LoginWindow.xaml",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
-              "WhenOpened": "2025-12-03T16:55:05.612Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 7,
+              "DocumentIndex": 11,
               "Title": "FitControlAdmin.csproj",
-              "DocumentMoniker": "C:\\Users\\tiago\\OneDrive\\\u00C1rea de Trabalho\\PF\\App \u002B API Backup\\FitControlAdmin\\FitControlAdmin.csproj",
+              "DocumentMoniker": "C:\\Users\\tiago\\OneDrive\\\u00C1rea de Trabalho\\PF\\App \u002B API\\FitControlAdmin\\FitControlAdmin.csproj",
               "RelativeDocumentMoniker": "FitControlAdmin.csproj",
-              "ToolTip": "C:\\Users\\tiago\\OneDrive\\\u00C1rea de Trabalho\\PF\\App \u002B API Backup\\FitControlAdmin\\FitControlAdmin.csproj",
+              "ToolTip": "C:\\Users\\tiago\\OneDrive\\\u00C1rea de Trabalho\\PF\\App \u002B API\\FitControlAdmin\\FitControlAdmin.csproj",
               "RelativeToolTip": "FitControlAdmin.csproj",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
@@ -145,11 +195,11 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 10,
               "Title": "UserDto.cs",
-              "DocumentMoniker": "C:\\Users\\tiago\\OneDrive\\\u00C1rea de Trabalho\\PF\\App \u002B API Backup\\FitControlAdmin\\Models\\UserDto.cs",
+              "DocumentMoniker": "C:\\Users\\tiago\\OneDrive\\\u00C1rea de Trabalho\\PF\\App \u002B API\\FitControlAdmin\\Models\\UserDto.cs",
               "RelativeDocumentMoniker": "Models\\UserDto.cs",
-              "ToolTip": "C:\\Users\\tiago\\OneDrive\\\u00C1rea de Trabalho\\PF\\App \u002B API Backup\\FitControlAdmin\\Models\\UserDto.cs",
+              "ToolTip": "C:\\Users\\tiago\\OneDrive\\\u00C1rea de Trabalho\\PF\\App \u002B API\\FitControlAdmin\\Models\\UserDto.cs",
               "RelativeToolTip": "Models\\UserDto.cs",
               "ViewState": "AgIAAEAAAAAAAAAAAAAkwCgAAAApAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",

@@ -344,6 +344,14 @@
                         </StackPanel>
                     </Button>
 
+                    <!-- Avaliações Físicas -->
+                    <Button x:Name="BtnAvaliacoesFisicas" Style="{StaticResource SidebarButtonStyle}">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="📊 " Foreground="#02acc3" FontSize="14"/>
+                            <TextBlock Text="Avaliações Físicas" Foreground="White" FontSize="14"/>
+                        </StackPanel>
+                    </Button>
+
                     <!-- Relatórios -->
                     <Button x:Name="BtnRelatorios" Style="{StaticResource SidebarButtonStyle}">
                         <StackPanel Orientation="Horizontal">
@@ -577,6 +585,413 @@
                            Margin="0,15,0,0" 
                            Foreground="#95a5a6"
                            FontSize="14"/>
+            </StackPanel>
+
+            <!-- Exercise Management Panel -->
+            <StackPanel x:Name="ExerciseManagementPanel" Margin="20,90,20,20" VerticalAlignment="Top" Visibility="Collapsed">
+                <!-- Header with Search and Add Button -->
+                <Grid Margin="0,0,0,25">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <!-- Search Bar -->
+                    <Border Grid.Column="0" 
+                            Background="#272936" 
+                            CornerRadius="8" 
+                            Padding="15,10" 
+                            Margin="0,0,15,0"
+                            VerticalAlignment="Center">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="🔍" 
+                                       Grid.Column="0" 
+                                       FontSize="16" 
+                                       Margin="0,0,10,0"
+                                       VerticalAlignment="Center"
+                                       Foreground="#95a5a6"/>
+                            <TextBox x:Name="ExerciseSearchTextBox"
+                                     Grid.Column="1"
+                                     Background="Transparent"
+                                     BorderThickness="0"
+                                     Foreground="#e6e6e8"
+                                     FontSize="14"
+                                     TextChanged="ExerciseSearchTextBox_TextChanged"
+                                     VerticalContentAlignment="Center">
+                                <TextBox.Style>
+                                    <Style TargetType="TextBox">
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="TextBox">
+                                                    <Border Background="{TemplateBinding Background}">
+                                                        <ScrollViewer x:Name="PART_ContentHost" Margin="0"/>
+                                                    </Border>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </TextBox.Style>
+                            </TextBox>
+                        </Grid>
+                    </Border>
+                    
+                    <!-- Add Exercise Button -->
+                    <Button x:Name="CreateExerciseButton" 
+                            Grid.Column="1"
+                            Content="+ Adicionar Exercício" 
+                            Click="CreateExerciseButton_Click" 
+                            Padding="20,10"
+                            Background="#27AE60"
+                            Foreground="White"
+                            BorderThickness="0"
+                            Cursor="Hand"
+                            FontSize="14"
+                            FontWeight="SemiBold">
+                        <Button.Style>
+                            <Style TargetType="Button">
+                                <Setter Property="Background" Value="#27AE60"/>
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Background" Value="#229954"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+                </Grid>
+
+                <!-- Exercises Grid -->
+                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                    <ItemsControl x:Name="ExercisesItemsControl">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel Orientation="Horizontal"/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border Background="#272936" 
+                                        CornerRadius="12" 
+                                        Margin="0,0,15,15"
+                                        Padding="0"
+                                        Width="350"
+                                        Height="400">
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="200"/>
+                                            <RowDefinition Height="*"/>
+                                            <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
+                                        
+                                        <!-- Exercise Image -->
+                                        <Border Grid.Row="0" 
+                                                Background="#1f2937" 
+                                                CornerRadius="12,12,0,0">
+                                            <Grid>
+                                                <Image Source="{Binding FotoUrl}"
+                                                       Stretch="UniformToFill"
+                                                       HorizontalAlignment="Stretch"
+                                                       VerticalAlignment="Stretch"/>
+                                                <TextBlock Text="Sem Imagem" 
+                                                           HorizontalAlignment="Center" 
+                                                           VerticalAlignment="Center"
+                                                           Foreground="#95a5a6"
+                                                           FontSize="14">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding FotoUrl}" Value="">
+                                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding FotoUrl}" Value="{x:Null}">
+                                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
+                                            </Grid>
+                                        </Border>
+                                        
+                                        <!-- Exercise Info -->
+                                        <StackPanel Grid.Row="1" Margin="15" VerticalAlignment="Top">
+                                            <TextBlock Text="{Binding Nome}" 
+                                                       FontSize="18" 
+                                                       FontWeight="Bold"
+                                                       Foreground="#e6e6e8"
+                                                       Margin="0,0,0,8"
+                                                       TextWrapping="Wrap"/>
+                                            
+                                            <TextBlock Text="{Binding GrupoMuscular}" 
+                                                       FontSize="14" 
+                                                       Foreground="#02acc3"
+                                                       Margin="0,0,0,12"/>
+                                            
+                                            <TextBlock Text="{Binding Descricao}" 
+                                                       FontSize="12" 
+                                                       Foreground="#95a5a6"
+                                                       TextWrapping="Wrap"
+                                                       MaxHeight="80"
+                                                       Margin="0,0,0,8"/>
+                                            
+                                            <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                                                <TextBlock Text="Estado: " 
+                                                           FontSize="12" 
+                                                           Foreground="#95a5a6"/>
+                                                <TextBlock FontSize="12" 
+                                                           FontWeight="SemiBold">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Setter Property="Text" Value="Ativo"/>
+                                                            <Setter Property="Foreground" Value="#27AE60"/>
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding Ativo}" Value="False">
+                                                                    <Setter Property="Text" Value="Inativo"/>
+                                                                    <Setter Property="Foreground" Value="#e74c3c"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
+                                            </StackPanel>
+                                        </StackPanel>
+                                        
+                                        <!-- Action Buttons -->
+                                        <Border Grid.Row="2" 
+                                                Background="#1f2937" 
+                                                CornerRadius="0,0,12,12"
+                                                Padding="15">
+                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                                <Button Content="✏️" 
+                                                        Click="EditExerciseButton_Click"
+                                                        Tag="{Binding IdExercicio}"
+                                                        Background="Transparent"
+                                                        BorderThickness="0"
+                                                        Padding="10"
+                                                        Cursor="Hand"
+                                                        ToolTip="Editar Exercício">
+                                                    <Button.Style>
+                                                        <Style TargetType="Button">
+                                                            <Setter Property="Foreground" Value="#02acc3"/>
+                                                            <Style.Triggers>
+                                                                <Trigger Property="IsMouseOver" Value="True">
+                                                                    <Setter Property="Foreground" Value="#0299b0"/>
+                                                                    <Setter Property="Background" Value="#272936"/>
+                                                                </Trigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </Button.Style>
+                                                </Button>
+                                                <Button Content="🗑️" 
+                                                        Click="DeleteExerciseButton_Click"
+                                                        Tag="{Binding IdExercicio}"
+                                                        Background="Transparent"
+                                                        BorderThickness="0"
+                                                        Padding="10"
+                                                        Cursor="Hand"
+                                                        ToolTip="Desativar Exercício">
+                                                    <Button.Style>
+                                                        <Style TargetType="Button">
+                                                            <Setter Property="Foreground" Value="#e74c3c"/>
+                                                            <Style.Triggers>
+                                                                <Trigger Property="IsMouseOver" Value="True">
+                                                                    <Setter Property="Foreground" Value="#c0392b"/>
+                                                                    <Setter Property="Background" Value="#272936"/>
+                                                                </Trigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </Button.Style>
+                                                </Button>
+                                            </StackPanel>
+                                        </Border>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+
+                <TextBlock x:Name="ExerciseStatusText" 
+                           Margin="0,15,0,0" 
+                           Foreground="#95a5a6"
+                           FontSize="14"
+                           HorizontalAlignment="Center"/>
+            </StackPanel>
+
+            <!-- Payment Management Panel -->
+            <StackPanel x:Name="PaymentManagementPanel" Margin="20,90,20,20" VerticalAlignment="Top" Visibility="Collapsed">
+                <TextBlock Text="Gestão de Pagamentos"
+                           FontSize="24"
+                           FontWeight="Bold"
+                           Foreground="#e6e6e8"
+                           Margin="0,0,0,20"/>
+
+                <Grid Margin="0,0,0,15">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <Button x:Name="RefreshPaymentsButton" 
+                            Grid.Column="0"
+                            Content="Atualizar" 
+                            Click="RefreshPaymentsButton_Click" 
+                            Padding="15,8" Margin="0,0,10,0"
+                            Background="#02acc3"
+                            Foreground="White"
+                            BorderThickness="0"
+                            Cursor="Hand"
+                            FontSize="14">
+                        <Button.Style>
+                            <Style TargetType="Button">
+                                <Setter Property="Background" Value="#02acc3"/>
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Background" Value="#0299b0"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+                    
+                    <Button x:Name="CreatePaymentButton" 
+                            Grid.Column="2"
+                            Content="Criar Pagamento" 
+                            Click="CreatePaymentButton_Click" 
+                            Padding="15,8" Margin="0,0,0,0"
+                            Background="#27AE60"
+                            Foreground="White"
+                            BorderThickness="0"
+                            Cursor="Hand"
+                            FontSize="14">
+                        <Button.Style>
+                            <Style TargetType="Button">
+                                <Setter Property="Background" Value="#27AE60"/>
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Background" Value="#229954"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+                </Grid>
+
+                <Border Background="#272936" CornerRadius="10" Padding="20">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+                        <DataGrid x:Name="PaymentsDataGrid"
+                                  AutoGenerateColumns="False"
+                                  IsReadOnly="True"
+                                  SelectionMode="Single"
+                                  GridLinesVisibility="All"
+                                  HeadersVisibility="Column">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="ID" Binding="{Binding IdPagamento}" Width="60"/>
+                                <DataGridTextColumn Header="ID Membro" Binding="{Binding IdMembro}" Width="80"/>
+                                <DataGridTextColumn Header="ID Subscrição" Binding="{Binding IdSubscricao}" Width="100"/>
+                                <DataGridTextColumn Header="Data Pagamento" Binding="{Binding DataPagamento, StringFormat=dd/MM/yyyy}" Width="120"/>
+                                <DataGridTextColumn Header="Valor" Binding="{Binding ValorPago, StringFormat=C}" Width="100"/>
+                                <DataGridTextColumn Header="Método" Binding="{Binding MetodoPagamento}" Width="100"/>
+                                <DataGridTextColumn Header="Estado" Binding="{Binding EstadoPagamento}" Width="100"/>
+                                <DataGridTextColumn Header="Mês Referente" Binding="{Binding MesReferente, StringFormat=MM/yyyy}" Width="100"/>
+                                <DataGridTemplateColumn Header="Ações" Width="150">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Orientation="Horizontal">
+                                                <Button Content="Editar" Click="EditPaymentButton_Click"
+                                                        Tag="{Binding IdPagamento}"
+                                                        Padding="5,2" Margin="2"/>
+                                                <Button Content="Desativar" Click="DeletePaymentButton_Click"
+                                                        Tag="{Binding IdPagamento}"
+                                                        Padding="5,2" Margin="2"
+                                                        Background="LightCoral"/>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </ScrollViewer>
+                </Border>
+
+                <TextBlock x:Name="PaymentStatusText" 
+                           Margin="0,15,0,0" 
+                           Foreground="#95a5a6"
+                           FontSize="14"/>
+            </StackPanel>
+
+            <!-- Physical Evaluation Management Panel -->
+            <StackPanel x:Name="PhysicalEvaluationManagementPanel" Margin="20,90,20,20" VerticalAlignment="Top" Visibility="Collapsed">
+                <TextBlock Text="Gestão de Avaliações Físicas"
+                           FontSize="24"
+                           FontWeight="Bold"
+                           Foreground="#e6e6e8"
+                           Margin="0,0,0,20"/>
+
+                <Grid Margin="0,0,0,15">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <Button x:Name="RefreshPhysicalEvaluationsButton" 
+                            Grid.Column="0"
+                            Content="Atualizar" 
+                            Click="RefreshPhysicalEvaluationsButton_Click" 
+                            Padding="15,8" Margin="0,0,10,0"
+                            Background="#02acc3"
+                            Foreground="White"
+                            BorderThickness="0"
+                            Cursor="Hand"
+                            FontSize="14">
+                        <Button.Style>
+                            <Style TargetType="Button">
+                                <Setter Property="Background" Value="#02acc3"/>
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Background" Value="#0299b0"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+                    
+                    <Button x:Name="CreatePhysicalEvaluationButton" 
+                            Grid.Column="2"
+                            Content="Criar Avaliação" 
+                            Click="CreatePhysicalEvaluationButton_Click" 
+                            Padding="15,8" Margin="0,0,0,0"
+                            Background="#27AE60"
+                            Foreground="White"
+                            BorderThickness="0"
+                            Cursor="Hand"
+                            FontSize="14">
+                        <Button.Style>
+                            <Style TargetType="Button">
+                                <Setter Property="Background" Value="#27AE60"/>
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Background" Value="#229954"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+                </Grid>
+
+                <Border Background="#272936" CornerRadius="10" Padding="20">
+                    <TextBlock x:Name="PhysicalEvaluationStatusText" 
+                               Text="Selecione um membro para ver avaliações físicas"
+                               Foreground="#95a5a6"
+                               FontSize="14"/>
+                </Border>
             </StackPanel>
 
             <!-- Settings Panel -->

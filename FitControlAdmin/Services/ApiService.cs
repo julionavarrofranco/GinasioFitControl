@@ -302,6 +302,462 @@ namespace FitControlAdmin.Services
 
             return null;
         }
+
+        #region Exercise Methods
+
+        public async Task<(bool Success, string? ErrorMessage, ExerciseResponseDto? Exercise)> CreateExerciseAsync(ExerciseDto exerciseDto)
+        {
+            try
+            {
+                var response = await _httpClient.PostAsJsonAsync("/api/Exercise", exerciseDto);
+                if (response.IsSuccessStatusCode)
+                {
+                    var exercise = await response.Content.ReadFromJsonAsync<ExerciseResponseDto>();
+                    return (true, null, exercise);
+                }
+
+                var errorContent = await response.Content.ReadAsStringAsync();
+                var message = ExtractMessage(errorContent);
+                return (false, message ?? $"Erro ao criar exercício ({response.StatusCode}).", null);
+            }
+            catch (Exception ex)
+            {
+                return (false, ex.Message, null);
+            }
+        }
+
+        public async Task<(bool Success, string? ErrorMessage)> UpdateExerciseAsync(int idExercicio, UpdateExerciseDto updateDto)
+        {
+            try
+            {
+                var response = await _httpClient.PatchAsJsonAsync($"/api/Exercise/update-exercise/{idExercicio}", updateDto);
+                if (response.IsSuccessStatusCode)
+                {
+                    return (true, null);
+                }
+
+                var errorContent = await response.Content.ReadAsStringAsync();
+                var message = ExtractMessage(errorContent);
+                return (false, message ?? $"Erro ao atualizar exercício ({response.StatusCode}).");
+            }
+            catch (Exception ex)
+            {
+                return (false, ex.Message);
+            }
+        }
+
+        public async Task<(bool Success, string? ErrorMessage)> ChangeExerciseStatusAsync(int idExercicio, bool ativo)
+        {
+            try
+            {
+                var response = await _httpClient.PatchAsync($"/api/Exercise/change-active-status/{idExercicio}?ativo={ativo}", null);
+                if (response.IsSuccessStatusCode)
+                {
+                    return (true, null);
+                }
+
+                var errorContent = await response.Content.ReadAsStringAsync();
+                var message = ExtractMessage(errorContent);
+                return (false, message ?? $"Erro ao alterar estado do exercício ({response.StatusCode}).");
+            }
+            catch (Exception ex)
+            {
+                return (false, ex.Message);
+            }
+        }
+
+        public async Task<List<ExerciseResponseDto>?> GetExercisesByStateAsync(bool ativo, bool ordenarAsc = true)
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync($"/api/Exercise/by-state?ativo={ativo}&ordenarAsc={ordenarAsc}");
+                if (response.IsSuccessStatusCode)
+                {
+                    return await response.Content.ReadFromJsonAsync<List<ExerciseResponseDto>>();
+                }
+                return null;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        public async Task<List<ExerciseResponseDto>?> GetExercisesByMuscleGroupAsync(GrupoMuscular grupo, bool ordenarAsc = true)
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync($"/api/Exercise/by-muscle-group/{grupo}?ordenarAsc={ordenarAsc}");
+                if (response.IsSuccessStatusCode)
+                {
+                    return await response.Content.ReadFromJsonAsync<List<ExerciseResponseDto>>();
+                }
+                return null;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        public async Task<List<ExerciseResponseDto>?> GetExercisesByNameAsync(string nome, bool ordenarAsc = true)
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync($"/api/Exercise/by-name?nome={Uri.EscapeDataString(nome)}&ordenarAsc={ordenarAsc}");
+                if (response.IsSuccessStatusCode)
+                {
+                    return await response.Content.ReadFromJsonAsync<List<ExerciseResponseDto>>();
+                }
+                return null;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        #endregion
+
+        #region Payment Methods
+
+        public async Task<(bool Success, string? ErrorMessage, PaymentResponseDto? Payment)> CreatePaymentAsync(PaymentDto paymentDto)
+        {
+            try
+            {
+                var response = await _httpClient.PostAsJsonAsync("/api/Payment", paymentDto);
+                if (response.IsSuccessStatusCode)
+                {
+                    var payment = await response.Content.ReadFromJsonAsync<PaymentResponseDto>();
+                    return (true, null, payment);
+                }
+
+                var errorContent = await response.Content.ReadAsStringAsync();
+                var message = ExtractMessage(errorContent);
+                return (false, message ?? $"Erro ao criar pagamento ({response.StatusCode}).", null);
+            }
+            catch (Exception ex)
+            {
+                return (false, ex.Message, null);
+            }
+        }
+
+        public async Task<(bool Success, string? ErrorMessage)> UpdatePaymentAsync(int idPagamento, UpdatePaymentDto updateDto)
+        {
+            try
+            {
+                var response = await _httpClient.PatchAsJsonAsync($"/api/Payment/update-payment/{idPagamento}", updateDto);
+                if (response.IsSuccessStatusCode)
+                {
+                    return (true, null);
+                }
+
+                var errorContent = await response.Content.ReadAsStringAsync();
+                var message = ExtractMessage(errorContent);
+                return (false, message ?? $"Erro ao atualizar pagamento ({response.StatusCode}).");
+            }
+            catch (Exception ex)
+            {
+                return (false, ex.Message);
+            }
+        }
+
+        public async Task<(bool Success, string? ErrorMessage)> ChangePaymentStatusAsync(int idPagamento, bool ativo)
+        {
+            try
+            {
+                var response = await _httpClient.PatchAsync($"/api/Payment/change-active-status/{idPagamento}?ativo={ativo}", null);
+                if (response.IsSuccessStatusCode)
+                {
+                    return (true, null);
+                }
+
+                var errorContent = await response.Content.ReadAsStringAsync();
+                var message = ExtractMessage(errorContent);
+                return (false, message ?? $"Erro ao alterar estado do pagamento ({response.StatusCode}).");
+            }
+            catch (Exception ex)
+            {
+                return (false, ex.Message);
+            }
+        }
+
+        public async Task<List<PaymentResponseDto>?> GetPaymentsByActiveStateAsync(bool ativo)
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync($"/api/Payment/by-state?ativo={ativo}");
+                if (response.IsSuccessStatusCode)
+                {
+                    return await response.Content.ReadFromJsonAsync<List<PaymentResponseDto>>();
+                }
+                return null;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        public async Task<List<PaymentResponseDto>?> GetPaymentsByDateAsync(DateTime inicio, DateTime fim)
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync($"/api/Payment/by-date?inicio={inicio:yyyy-MM-dd}&fim={fim:yyyy-MM-dd}");
+                if (response.IsSuccessStatusCode)
+                {
+                    return await response.Content.ReadFromJsonAsync<List<PaymentResponseDto>>();
+                }
+                return null;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        public async Task<List<PaymentResponseDto>?> GetPaymentsByPaymentStateAsync(EstadoPagamento estado)
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync($"/api/Payment/by-state-payment?estado={estado}");
+                if (response.IsSuccessStatusCode)
+                {
+                    return await response.Content.ReadFromJsonAsync<List<PaymentResponseDto>>();
+                }
+                return null;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        public async Task<(bool Success, string? ErrorMessage, decimal? Revenue)> GetMonthlyRevenueAsync(int ano, int mes)
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync($"/api/Payment/monthly-revenue?ano={ano}&mes={mes}");
+                if (response.IsSuccessStatusCode)
+                {
+                    var result = await response.Content.ReadFromJsonAsync<JsonElement>();
+                    if (result.TryGetProperty("receita", out var receitaElement))
+                    {
+                        var receita = receitaElement.GetDecimal();
+                        return (true, null, receita);
+                    }
+                    return (false, "Resposta inválida do servidor.", null);
+                }
+
+                var errorContent = await response.Content.ReadAsStringAsync();
+                var message = ExtractMessage(errorContent);
+                return (false, message ?? $"Erro ao obter receita mensal ({response.StatusCode}).", null);
+            }
+            catch (Exception ex)
+            {
+                return (false, ex.Message, null);
+            }
+        }
+
+        #endregion
+
+        #region Physical Evaluation Methods
+
+        public async Task<(bool Success, string? ErrorMessage, PhysicalEvaluationResponseDto? Evaluation)> CreatePhysicalEvaluationAsync(PhysicalEvaluationDto evaluationDto)
+        {
+            try
+            {
+                var response = await _httpClient.PostAsJsonAsync("/api/PhysicalEvaluation", evaluationDto);
+                if (response.IsSuccessStatusCode)
+                {
+                    var evaluation = await response.Content.ReadFromJsonAsync<PhysicalEvaluationResponseDto>();
+                    return (true, null, evaluation);
+                }
+
+                var errorContent = await response.Content.ReadAsStringAsync();
+                var message = ExtractMessage(errorContent);
+                return (false, message ?? $"Erro ao criar avaliação física ({response.StatusCode}).", null);
+            }
+            catch (Exception ex)
+            {
+                return (false, ex.Message, null);
+            }
+        }
+
+        public async Task<(bool Success, string? ErrorMessage)> UpdatePhysicalEvaluationAsync(int idAvaliacao, UpdatePhysicalEvaluationDto updateDto)
+        {
+            try
+            {
+                var response = await _httpClient.PatchAsJsonAsync($"/api/PhysicalEvaluation/update/{idAvaliacao}", updateDto);
+                if (response.IsSuccessStatusCode)
+                {
+                    return (true, null);
+                }
+
+                var errorContent = await response.Content.ReadAsStringAsync();
+                var message = ExtractMessage(errorContent);
+                return (false, message ?? $"Erro ao atualizar avaliação física ({response.StatusCode}).");
+            }
+            catch (Exception ex)
+            {
+                return (false, ex.Message);
+            }
+        }
+
+        public async Task<(bool Success, string? ErrorMessage)> ChangePhysicalEvaluationStatusAsync(int idAvaliacao, bool ativo)
+        {
+            try
+            {
+                var response = await _httpClient.PatchAsync($"/api/PhysicalEvaluation/change-active-status/{idAvaliacao}?ativo={ativo}", null);
+                if (response.IsSuccessStatusCode)
+                {
+                    return (true, null);
+                }
+
+                var errorContent = await response.Content.ReadAsStringAsync();
+                var message = ExtractMessage(errorContent);
+                return (false, message ?? $"Erro ao alterar estado da avaliação física ({response.StatusCode}).");
+            }
+            catch (Exception ex)
+            {
+                return (false, ex.Message);
+            }
+        }
+
+        public async Task<List<PhysicalEvaluationResponseDto>?> GetAllEvaluationsForMemberAsync(int idMembro)
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync($"/api/PhysicalEvaluation/member/evaluations/{idMembro}");
+                if (response.IsSuccessStatusCode)
+                {
+                    return await response.Content.ReadFromJsonAsync<List<PhysicalEvaluationResponseDto>>();
+                }
+                return null;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        public async Task<PhysicalEvaluationResponseDto?> GetLatestEvaluationForMemberAsync(int idMembro)
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync($"/api/PhysicalEvaluation/member/latest-evaluation/{idMembro}");
+                if (response.IsSuccessStatusCode)
+                {
+                    return await response.Content.ReadFromJsonAsync<PhysicalEvaluationResponseDto>();
+                }
+                return null;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        #endregion
+
+        #region Physical Evaluation Reservation Methods
+
+        public async Task<(bool Success, string? ErrorMessage, PhysicalEvaluationReservationResponseDto? Reservation)> CreateReservationAsync(int idMembro, DateTime dataReserva)
+        {
+            try
+            {
+                var response = await _httpClient.PostAsync($"/api/PhysicalEvaluationReservation/{idMembro}?dataReserva={dataReserva:yyyy-MM-ddTHH:mm:ss}", null);
+                if (response.IsSuccessStatusCode)
+                {
+                    var reservation = await response.Content.ReadFromJsonAsync<PhysicalEvaluationReservationResponseDto>();
+                    return (true, null, reservation);
+                }
+
+                var errorContent = await response.Content.ReadAsStringAsync();
+                var message = ExtractMessage(errorContent);
+                return (false, message ?? $"Erro ao criar reserva ({response.StatusCode}).", null);
+            }
+            catch (Exception ex)
+            {
+                return (false, ex.Message, null);
+            }
+        }
+
+        public async Task<(bool Success, string? ErrorMessage)> CancelReservationAsync(int idMembro, int idAvaliacao)
+        {
+            try
+            {
+                var response = await _httpClient.PatchAsync($"/api/PhysicalEvaluationReservation/cancel/{idMembro}/{idAvaliacao}", null);
+                if (response.IsSuccessStatusCode)
+                {
+                    return (true, null);
+                }
+
+                var errorContent = await response.Content.ReadAsStringAsync();
+                var message = ExtractMessage(errorContent);
+                return (false, message ?? $"Erro ao cancelar reserva ({response.StatusCode}).");
+            }
+            catch (Exception ex)
+            {
+                return (false, ex.Message);
+            }
+        }
+
+        public async Task<(bool Success, string? ErrorMessage)> MarkAttendanceAsync(int idMembro, int idAvaliacao, MarkAttendanceDto markAttendanceDto)
+        {
+            try
+            {
+                var response = await _httpClient.PatchAsJsonAsync($"/api/PhysicalEvaluationReservation/attendance/{idMembro}/{idAvaliacao}", markAttendanceDto);
+                if (response.IsSuccessStatusCode)
+                {
+                    return (true, null);
+                }
+
+                var errorContent = await response.Content.ReadAsStringAsync();
+                var message = ExtractMessage(errorContent);
+                return (false, message ?? $"Erro ao marcar presença ({response.StatusCode}).");
+            }
+            catch (Exception ex)
+            {
+                return (false, ex.Message);
+            }
+        }
+
+        public async Task<List<PhysicalEvaluationReservationResponseDto>?> GetActiveReservationsAsync()
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync("/api/PhysicalEvaluationReservation/active");
+                if (response.IsSuccessStatusCode)
+                {
+                    return await response.Content.ReadFromJsonAsync<List<PhysicalEvaluationReservationResponseDto>>();
+                }
+                return null;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        public async Task<List<PhysicalEvaluationReservationResponseDto>?> GetCompletedReservationsAsync()
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync("/api/PhysicalEvaluationReservation/completed");
+                if (response.IsSuccessStatusCode)
+                {
+                    return await response.Content.ReadFromJsonAsync<List<PhysicalEvaluationReservationResponseDto>>();
+                }
+                return null;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        #endregion
     }
 }
 

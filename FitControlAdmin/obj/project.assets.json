@@ -454,11 +454,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\tiago\\OneDrive\\Área de Trabalho\\PF\\App + API Backup\\FitControlAdmin\\FitControlAdmin.csproj",
+      "projectUniqueName": "C:\\Users\\tiago\\OneDrive\\Área de Trabalho\\PF\\App + API\\FitControlAdmin\\FitControlAdmin.csproj",
       "projectName": "FitControlAdmin",
-      "projectPath": "C:\\Users\\tiago\\OneDrive\\Área de Trabalho\\PF\\App + API Backup\\FitControlAdmin\\FitControlAdmin.csproj",
+      "projectPath": "C:\\Users\\tiago\\OneDrive\\Área de Trabalho\\PF\\App + API\\FitControlAdmin\\FitControlAdmin.csproj",
       "packagesPath": "C:\\Users\\tiago\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\tiago\\OneDrive\\Área de Trabalho\\PF\\App + API Backup\\FitControlAdmin\\obj\\",
+      "outputPath": "C:\\Users\\tiago\\OneDrive\\Área de Trabalho\\PF\\App + API\\FitControlAdmin\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -525,7 +525,7 @@
             "privateAssets": "none"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.100/PortableRuntimeIdentifierGraph.json",
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.101/PortableRuntimeIdentifierGraph.json",
         "packagesToPrune": {
           "Microsoft.CSharp": "(,4.7.32767]",
           "Microsoft.VisualBasic": "(,10.4.32767]",

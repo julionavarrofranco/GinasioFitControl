@@ -4,17 +4,17 @@
 winexe
 C#
 .cs
-C:\Users\tiago\OneDrive\Área de Trabalho\PF\App + API Backup\FitControlAdmin\obj\Debug\net10.0-windows\
+C:\Users\tiago\OneDrive\Área de Trabalho\PF\App + API\FitControlAdmin\obj\Debug\net10.0-windows\
 FitControlAdmin
 none
 false
 TRACE;DEBUG;NET;NET10_0;NETCOREAPP;WINDOWS;WINDOWS7_0;NET5_0_OR_GREATER;NET6_0_OR_GREATER;NET7_0_OR_GREATER;NET8_0_OR_GREATER;NET9_0_OR_GREATER;NET10_0_OR_GREATER;NETCOREAPP3_0_OR_GREATER;NETCOREAPP3_1_OR_GREATER;WINDOWS7_0_OR_GREATER
-C:\Users\tiago\OneDrive\Área de Trabalho\PF\App + API Backup\FitControlAdmin\App.xaml
-5-265765091
+C:\Users\tiago\OneDrive\Área de Trabalho\PF\App + API\FitControlAdmin\App.xaml
+6-580793021
 
-11-1421196901
-212-550533998
-ChangePasswordDialog.xaml;ConfirmDialog.xaml;CreateEditUserWindow.xaml;LoginWindow.xaml;MainWindow.xaml;
+151707403834
+2131459611862
+ChangePasswordDialog.xaml;ConfirmDialog.xaml;CreateEditExerciseWindow.xaml;CreateEditUserWindow.xaml;LoginWindow.xaml;MainWindow.xaml;
 
 False
 
