@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -527,24 +528,37 @@ namespace FitControlAdmin
 
         private List<ExerciseResponseDto>? _allExercises = null;
 
-        private async void LoadExercises()
+        private void LoadExercises()
+        {
+            LoadExercisesAsync();
+        }
+
+        private async Task LoadExercisesAsync()
         {
             ExerciseStatusText.Text = "A carregar exercícios...";
             try
             {
-                var exercises = await _apiService.GetExercisesByStateAsync(true);
-                if (exercises != null)
+                // Carregar todos os exercícios (ativos e inativos)
+                var activeExercises = await _apiService.GetExercisesByStateAsync(true);
+                var inactiveExercises = await _apiService.GetExercisesByStateAsync(false);
+                
+                _allExercises = new List<ExerciseResponseDto>();
+                if (activeExercises != null) _allExercises.AddRange(activeExercises);
+                if (inactiveExercises != null) _allExercises.AddRange(inactiveExercises);
+
+                // Popular ComboBox de grupos musculares
+                if (ExerciseGrupoMuscularFilterComboBox.Items.Count == 1) // Só tem "Todos"
                 {
-                    _allExercises = exercises;
-                    ExercisesItemsControl.ItemsSource = exercises;
-                    ExerciseStatusText.Text = $"Total: {exercises.Count} exercícios ativos";
+                    foreach (GrupoMuscular grupo in Enum.GetValues(typeof(GrupoMuscular)))
+                    {
+                        var displayName = FormatEnumName(grupo.ToString());
+                        var item = new ComboBoxItem { Content = displayName, Tag = grupo };
+                        ExerciseGrupoMuscularFilterComboBox.Items.Add(item);
+                    }
                 }
-                else
-                {
-                    ExerciseStatusText.Text = "Erro ao carregar exercícios";
-                    MessageBox.Show("Erro ao carregar exercícios. Verifique a conexão com o servidor.",
-                        "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
+
+                // Aplicar filtros após carregar
+                ApplyExerciseFilters();
             }
             catch (Exception ex)
             {
@@ -559,27 +573,70 @@ namespace FitControlAdmin
             LoadExercises();
         }
 
-        private void ExerciseSearchTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        private void ExerciseFilters_Changed(object sender, RoutedEventArgs e)
+        {
+            ApplyExerciseFilters();
+        }
+
+        private void ApplyExerciseFilters()
         {
             if (_allExercises == null) return;
 
-            var searchText = ExerciseSearchTextBox.Text?.ToLower() ?? string.Empty;
+            var filtered = _allExercises.AsEnumerable();
+
+            // Filtro por nome (LIKE)
+            var nomeFilter = ExerciseNameFilterTextBox?.Text?.Trim() ?? string.Empty;
+            if (!string.IsNullOrWhiteSpace(nomeFilter))
+            {
+                filtered = filtered.Where(ex => 
+                    ex.Nome.ToLower().Contains(nomeFilter.ToLower()));
+            }
+
+            // Filtro por estado
+            var estadoSelected = (ExerciseEstadoFilterComboBox?.SelectedItem as ComboBoxItem)?.Content?.ToString();
+            if (estadoSelected == "Ativo")
+            {
+                filtered = filtered.Where(ex => ex.Ativo);
+            }
+            else if (estadoSelected == "Inativo")
+            {
+                filtered = filtered.Where(ex => !ex.Ativo);
+            }
+            // "Todos" não filtra
+
+            // Filtro por grupo muscular
+            var grupoSelectedItem = ExerciseGrupoMuscularFilterComboBox?.SelectedItem as ComboBoxItem;
+            if (grupoSelectedItem != null && grupoSelectedItem.Tag is GrupoMuscular grupo)
+            {
+                filtered = filtered.Where(ex => ex.GrupoMuscular == grupo);
+            }
+
+            // Ordenação
+            var sortBy = (ExerciseSortByComboBox?.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? "Nome";
+            var sortDirection = (ExerciseSortDirectionComboBox?.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? "Ascendente";
+            var ascending = sortDirection == "Ascendente";
+
+            filtered = sortBy switch
+            {
+                "Nome" => ascending 
+                    ? filtered.OrderBy(ex => ex.Nome) 
+                    : filtered.OrderByDescending(ex => ex.Nome),
+                "Grupo Muscular" => ascending 
+                    ? filtered.OrderBy(ex => ex.GrupoMuscular.ToString()) 
+                    : filtered.OrderByDescending(ex => ex.GrupoMuscular.ToString()),
+                "Estado" => ascending 
+                    ? filtered.OrderBy(ex => ex.Ativo) 
+                    : filtered.OrderByDescending(ex => ex.Ativo),
+                _ => filtered.OrderBy(ex => ex.Nome)
+            };
+
+            var result = filtered.ToList();
             
-            if (string.IsNullOrWhiteSpace(searchText))
-            {
-                ExercisesItemsControl.ItemsSource = _allExercises;
-            }
-            else
-            {
-                var filtered = _allExercises.Where(ex =>
-                    ex.Nome.ToLower().Contains(searchText) ||
-                    ex.Descricao.ToLower().Contains(searchText) ||
-                    ex.GrupoMuscular.ToString().ToLower().Contains(searchText)
-                ).ToList();
-                
-                ExercisesItemsControl.ItemsSource = filtered;
-                ExerciseStatusText.Text = $"Mostrando {filtered.Count} de {_allExercises.Count} exercícios";
-            }
+            // Atualizar ItemsSource explicitamente
+            ExercisesItemsControl.ItemsSource = null;
+            ExercisesItemsControl.ItemsSource = result;
+            
+            ExerciseStatusText.Text = $"Mostrando {result.Count} de {_allExercises.Count} exercícios";
         }
 
         private void CreateExerciseButton_Click(object sender, RoutedEventArgs e)
@@ -626,7 +683,7 @@ namespace FitControlAdmin
             if (sender is Button button && button.Tag is int exerciseId)
             {
                 var result = MessageBox.Show(
-                    "Tem certeza que deseja desativar este exercício?",
+                    "Tem certeza que deseja eliminar este exercício?",
                     "Confirmar",
                     MessageBoxButton.YesNo,
                     MessageBoxImage.Question);
@@ -638,13 +695,15 @@ namespace FitControlAdmin
                         var (success, errorMessage) = await _apiService.ChangeExerciseStatusAsync(exerciseId, false);
                         if (success)
                         {
-                            MessageBox.Show("Exercício desativado com sucesso!",
+                            // Recarregar a lista completa da API
+                            await LoadExercisesAsync();
+                            
+                            MessageBox.Show("Exercício eliminado com sucesso!",
                                 "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
-                            LoadExercises();
                         }
                         else
                         {
-                            MessageBox.Show(errorMessage ?? "Erro ao desativar exercício.",
+                            MessageBox.Show(errorMessage ?? "Erro ao eliminar exercício.",
                                 "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
                         }
                     }
@@ -777,6 +836,12 @@ namespace FitControlAdmin
         }
 
         #endregion
+
+        private static string FormatEnumName(string enumName)
+        {
+            // Adiciona espaço antes de letras maiúsculas (exceto a primeira)
+            return System.Text.RegularExpressions.Regex.Replace(enumName, "(?<!^)([A-Z])", " $1");
+        }
     }
 
     public class Activity

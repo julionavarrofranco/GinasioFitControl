@@ -14,6 +14,7 @@ namespace FitControlAdmin.Services
     {
         private readonly HttpClient _httpClient;
         // Use HTTPS to match the API's launch profile and avoid losing the Authorization header on redirects
+        // Se a API estiver a correr em HTTP, mude para: "http://localhost:5295"
         private readonly string _baseUrl = "https://localhost:7267";
         private string? _accessToken;
         public string? CurrentAccessToken => _accessToken;

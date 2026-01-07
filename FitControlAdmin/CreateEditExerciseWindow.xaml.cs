@@ -24,7 +24,9 @@ namespace FitControlAdmin
             // Popular ComboBox com grupos musculares
             foreach (GrupoMuscular grupo in Enum.GetValues(typeof(GrupoMuscular)))
             {
-                GrupoMuscularComboBox.Items.Add(grupo);
+                var displayName = FormatEnumName(grupo.ToString());
+                var item = new ComboBoxItem { Content = displayName, Tag = grupo };
+                GrupoMuscularComboBox.Items.Add(item);
             }
 
             if (_isEditMode)
@@ -51,7 +53,14 @@ namespace FitControlAdmin
             AtivoCheckBox.IsChecked = _existingExercise.Ativo;
             
             // Selecionar grupo muscular
-            GrupoMuscularComboBox.SelectedItem = _existingExercise.GrupoMuscular;
+            foreach (ComboBoxItem item in GrupoMuscularComboBox.Items)
+            {
+                if (item.Tag is GrupoMuscular grupo && grupo == _existingExercise.GrupoMuscular)
+                {
+                    GrupoMuscularComboBox.SelectedItem = item;
+                    break;
+                }
+            }
             
             // Carregar preview da imagem
             UpdateImagePreview(_existingExercise.FotoUrl);
@@ -111,7 +120,7 @@ namespace FitControlAdmin
                         Nome = NomeTextBox.Text,
                         Descricao = DescricaoTextBox.Text,
                         FotoUrl = FotoUrlTextBox.Text,
-                        GrupoMuscular = (GrupoMuscular)GrupoMuscularComboBox.SelectedItem
+                        GrupoMuscular = GetSelectedGrupoMuscular()
                     };
 
                     var (success, errorMessage) = await _apiService.UpdateExerciseAsync(_existingExercise.IdExercicio, updateDto);
@@ -143,7 +152,7 @@ namespace FitControlAdmin
                         Nome = NomeTextBox.Text,
                         Descricao = DescricaoTextBox.Text,
                         FotoUrl = FotoUrlTextBox.Text,
-                        GrupoMuscular = (GrupoMuscular)GrupoMuscularComboBox.SelectedItem
+                        GrupoMuscular = GetSelectedGrupoMuscular()
                     };
 
                     var (success, errorMessage, exercise) = await _apiService.CreateExerciseAsync(exerciseDto);
@@ -173,6 +182,22 @@ namespace FitControlAdmin
                 MessageBox.Show($"Erro: {ex.Message}", 
                     "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
             }
+        }
+
+        private GrupoMuscular GetSelectedGrupoMuscular()
+        {
+            if (GrupoMuscularComboBox.SelectedItem is ComboBoxItem selectedItem && 
+                selectedItem.Tag is GrupoMuscular grupo)
+            {
+                return grupo;
+            }
+            return GrupoMuscular.Peito; // Default
+        }
+
+        private static string FormatEnumName(string enumName)
+        {
+            // Adiciona espaço antes de letras maiúsculas (exceto a primeira)
+            return System.Text.RegularExpressions.Regex.Replace(enumName, "(?<!^)([A-Z])", " $1");
         }
 
         private void CancelButton_Click(object sender, RoutedEventArgs e)
