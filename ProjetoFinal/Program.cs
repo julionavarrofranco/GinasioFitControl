@@ -101,6 +101,16 @@ builder.Services.AddAuthorization(options =>
 
     options.AddPolicy("OnlyMembers", policy =>
         policy.RequireClaim("Tipo", "Membro"));
+
+    //require assertion para combinar múltiplas claims
+    options.AddPolicy("CanViewClasses", policy =>
+    policy.RequireAssertion(context =>
+        context.User.HasClaim(c =>
+            (c.Type == "Funcao" && (c.Value == "Admin" || c.Value == "PT")) ||
+            (c.Type == "Tipo" && c.Value == "Membro")
+        )
+    ));
+
 });
 
 var app = builder.Build();

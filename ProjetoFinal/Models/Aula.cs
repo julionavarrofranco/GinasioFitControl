@@ -9,7 +9,7 @@
     {
         public int IdAula { get; set; }
 
-        public int IdFuncionario { get; set; }
+        public int? IdFuncionario { get; set; }
 
         public string Nome { get; set; } = null!;
 

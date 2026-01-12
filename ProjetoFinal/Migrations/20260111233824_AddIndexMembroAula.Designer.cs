@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ProjetoFinal.Data;
 
@@ -11,9 +12,11 @@ using ProjetoFinal.Data;
 namespace ProjetoFinal.Migrations
 {
     [DbContext(typeof(GinasioDbContext))]
-    partial class GinasioDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260111233824_AddIndexMembroAula")]
+    partial class AddIndexMembroAula
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -47,7 +50,7 @@ namespace ProjetoFinal.Migrations
                     b.Property<TimeSpan>("HoraInicio")
                         .HasColumnType("time");
 
-                    b.Property<int?>("IdFuncionario")
+                    b.Property<int>("IdFuncionario")
                         .HasColumnType("int");
 
                     b.Property<string>("Nome")
@@ -566,7 +569,8 @@ namespace ProjetoFinal.Migrations
                     b.HasOne("ProjetoFinal.Models.Funcionario", "Funcionario")
                         .WithMany("Aulas")
                         .HasForeignKey("IdFuncionario")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.Navigation("Funcionario");
                 });

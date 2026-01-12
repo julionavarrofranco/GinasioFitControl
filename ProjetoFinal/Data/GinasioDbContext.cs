@@ -194,8 +194,12 @@ namespace ProjetoFinal.Data
             {
                 entity.ToTable("aulas");
                 entity.HasKey(a => a.IdAula);
-                entity.Property(a => a.IdFuncionario).IsRequired();
+
+                // Permitir que IdFuncionario seja nulo
+                entity.Property(a => a.IdFuncionario);
+
                 entity.Property(a => a.Nome).IsRequired().HasMaxLength(255);
+
                 entity.Property(a => a.DiaSemana)
                       .HasConversion<string>()
                       .HasMaxLength(10)
@@ -211,6 +215,7 @@ namespace ProjetoFinal.Data
                       .HasForeignKey(a => a.IdFuncionario)
                       .OnDelete(DeleteBehavior.Restrict);
             });
+
 
             // AulaMarcada
             modelBuilder.Entity<AulaMarcada>(entity =>
@@ -251,6 +256,9 @@ namespace ProjetoFinal.Data
                       .WithMany(a => a.MembrosAulas)
                       .HasForeignKey(ma => ma.IdAulaMarcada)
                       .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasIndex(ma => new { ma.IdMembro, ma.IdAulaMarcada })
+                      .IsUnique();
             });
 
             //AvaliacoesFisicas

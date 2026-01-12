@@ -1,0 +1,12 @@
+﻿using ProjetoFinal.Models;
+using ProjetoFinal.Models.DTOs;
+
+namespace ProjetoFinal.Services.Interfaces
+{
+    public interface IScheduleClassService
+    {
+        Task<AulaMarcada> CreateAsync(ScheduleClassDto dto);
+        Task<int> GenerateScheduledClassesForPtAsync(int idPt);
+        Task<string> CancelByPtAsync(int idAulaMarcada);
+    }
+}
