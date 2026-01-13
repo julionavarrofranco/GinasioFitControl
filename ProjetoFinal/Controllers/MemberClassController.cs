@@ -99,7 +99,7 @@ namespace ProjetoFinal.Controllers
             }
         }
 
-        [Authorize(Policy = "OnlyPt")]
+        [Authorize(Policy = "OnlyPT")]
         [HttpGet("attendance/{idAulaMarcada}")]
         public async Task<IActionResult> GetClassForAttendance(int idAulaMarcada)
         {
@@ -118,7 +118,7 @@ namespace ProjetoFinal.Controllers
             }
         }
 
-        [Authorize(Policy = "OnlyPt")]
+        [Authorize(Policy = "OnlyPT")]
         [HttpGet("by-pt/{idFuncionario}")]
         public async Task<IActionResult> ListReservationsByPt(int idFuncionario)
         {

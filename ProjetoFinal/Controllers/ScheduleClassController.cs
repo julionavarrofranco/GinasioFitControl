@@ -17,7 +17,7 @@ namespace ProjetoFinal.Controllers
         }
 
         // PT cria aula marcada individualmente
-        [Authorize(Policy = "OnlyPt")]
+        [Authorize(Policy = "OnlyPT")]
         [HttpPost("create")]
         public async Task<IActionResult> CreateScheduledClass([FromBody] ScheduleClassDto request)
         {
@@ -40,7 +40,7 @@ namespace ProjetoFinal.Controllers
         }
 
         // PT gera todas as aulas agendadas para si nos próximos X dias
-        [Authorize(Policy = "OnlyPt")]
+        [Authorize(Policy = "OnlyPT")]
         [HttpPost("generate-for-pt/{idPt}")]
         public async Task<IActionResult> GenerateScheduledClassesForPt(int idPt)
         {
@@ -60,7 +60,7 @@ namespace ProjetoFinal.Controllers
         }
 
         // PT cancela aula manualmente
-        [Authorize(Policy = "OnlyPt")]
+        [Authorize(Policy = "OnlyPT")]
         [HttpPatch("cancel/{idAulaMarcada}")]
         public async Task<IActionResult> CancelScheduledClass(int idAulaMarcada)
         {

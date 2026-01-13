@@ -61,6 +61,12 @@ builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();
 builder.Services.AddScoped<IPhysicalEvaluationService, PhysicalEvaluationService>();
 builder.Services.AddScoped<IPhysicalEvaluationReservationService, PhysicalEvaluationReservationService>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
+builder.Services.AddScoped<IClassService, ClassService>();
+builder.Services.AddScoped<IScheduleClassService, ScheduleClassService>();
+builder.Services.AddScoped<IMemberClassService, MemberClassService>();
+builder.Services.AddScoped<ITrainingPlanService, TrainingPlanService>();
+builder.Services.AddScoped<IExercisePlanService, ExercisePlanService>();
+
 
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).
