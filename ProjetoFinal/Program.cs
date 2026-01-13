@@ -66,7 +66,7 @@ builder.Services.AddScoped<IScheduleClassService, ScheduleClassService>();
 builder.Services.AddScoped<IMemberClassService, MemberClassService>();
 builder.Services.AddScoped<ITrainingPlanService, TrainingPlanService>();
 builder.Services.AddScoped<IExercisePlanService, ExercisePlanService>();
-
+builder.Services.AddScoped<IDashboardService, DashboardService>();
 
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).
