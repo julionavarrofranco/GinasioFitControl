@@ -143,8 +143,8 @@ namespace ProjetoFinal.Data
                      .HasConversion<string>()
                      .HasMaxLength(100)
                      .IsRequired();
-                entity.Property(e => e.Descricao).HasColumnType("text");
-                entity.Property(e => e.FotoUrl).HasMaxLength(255);
+                entity.Property(e => e.Descricao).HasColumnType("text").HasDefaultValue("");
+                entity.Property(e => e.FotoUrl).HasMaxLength(255).HasDefaultValue("");
                 entity.Property(e => e.Ativo).HasDefaultValue(true);
             });
 

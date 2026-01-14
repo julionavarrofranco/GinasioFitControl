@@ -129,6 +129,7 @@ namespace ProjetoFinal.Services
             return "Nenhuma alteração realizada.";
         }
 
+
         // =========================
         // ATIVAR / DESATIVAR
         // =========================
@@ -216,28 +217,15 @@ namespace ProjetoFinal.Services
                 .FirstOrDefaultAsync(p => p.IdPagamento == idPagamento);
         }
 
-        private async Task<bool> PaymentExistsForPeriodAsync(int idMembro, DateTime mesReferente, TipoSubscricao tipo)
+        private async Task<bool> PaymentExistsForPeriodAsync(int idMembro, DateTime mesReferente, TipoSubscricao tipo, int? excludePagamentoId = null)
         {
-            int meses;
-
-            switch (tipo)
+            int meses = tipo switch
             {
-                case TipoSubscricao.Mensal:
-                    meses = 1;
-                    break;
-
-                case TipoSubscricao.Trimestral:
-                    meses = 3;
-                    break;
-
-                case TipoSubscricao.Anual:
-                    meses = 12;
-                    break;
-
-                default:
-                    throw new InvalidOperationException("Tipo de subscrição inválido.");
-            }
-
+                TipoSubscricao.Mensal => 1,
+                TipoSubscricao.Trimestral => 3,
+                TipoSubscricao.Anual => 12,
+                _ => throw new InvalidOperationException("Tipo de subscrição inválido.")
+            };
 
             var fim = mesReferente.AddMonths(meses);
 
@@ -245,8 +233,10 @@ namespace ProjetoFinal.Services
                 p.IdMembro == idMembro &&
                 p.DataDesativacao == null &&
                 p.MesReferente >= mesReferente &&
-                p.MesReferente < fim
+                p.MesReferente < fim &&
+                (!excludePagamentoId.HasValue || p.IdPagamento != excludePagamentoId.Value)
             );
         }
+
     }
 }

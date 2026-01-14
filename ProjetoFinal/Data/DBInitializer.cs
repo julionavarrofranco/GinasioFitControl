@@ -3,151 +3,144 @@ using Microsoft.EntityFrameworkCore;
 using ProjetoFinal.Data;
 using ProjetoFinal.Models;
 
-namespace ProjetoFinal
+public static class DbInitializer
 {
-    public static class DbInitializer
+    public static async Task SeedAsync(IServiceProvider services)
     {
-        public static async Task SeedAsync(IServiceProvider services)
+        using var scope = services.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<GinasioDbContext>();
+
+        // Aplica migrations (UMA vez)
+        await context.Database.MigrateAsync();
+
+        // =============================
+        // LIMPEZA DE DADOS (EF SAFE)
+        // =============================
+
+        context.MembrosAvaliacoes.RemoveRange(context.MembrosAvaliacoes);
+        context.AvaliacoesFisicas.RemoveRange(context.AvaliacoesFisicas);
+        context.MembrosAulas.RemoveRange(context.MembrosAulas);
+        context.AulasMarcadas.RemoveRange(context.AulasMarcadas);
+        context.Aulas.RemoveRange(context.Aulas);
+        context.PlanosExercicios.RemoveRange(context.PlanosExercicios);
+        context.Planos.RemoveRange(context.Planos);
+        context.Exercicios.RemoveRange(context.Exercicios);
+        context.Pagamentos.RemoveRange(context.Pagamentos);
+        context.Membros.RemoveRange(context.Membros);
+        context.Funcionarios.RemoveRange(context.Funcionarios);
+        context.RefreshTokens.RemoveRange(context.RefreshTokens);
+        context.Users.RemoveRange(context.Users);
+        context.Subscricoes.RemoveRange(context.Subscricoes);
+
+        await context.SaveChangesAsync();
+
+        // =============================
+        // SEED DE DADOS
+        // =============================
+
+        var hasher = new PasswordHasher<User>();
+
+        // Subscrições
+        var subscricoes = new[]
         {
-            using var scope = services.CreateScope();
-            var provider = scope.ServiceProvider;
-            var context = provider.GetRequiredService<GinasioDbContext>();
+            new Subscricao { Nome = "Mensal", Tipo = TipoSubscricao.Mensal, Preco = 29.99m },
+            new Subscricao { Nome = "Trimestral", Tipo = TipoSubscricao.Trimestral, Preco = 79.99m },
+            new Subscricao { Nome = "Anual", Tipo = TipoSubscricao.Anual, Preco = 199.99m }
+        };
 
-            // Opcional: garante que as migrations foram aplicadas
-            await context.Database.MigrateAsync();
+        context.Subscricoes.AddRange(subscricoes);
+        await context.SaveChangesAsync();
 
-            // Guard: não seedar se já existir qualquer user
-            if (await context.Users.AnyAsync())
-                return;
+        // Users
+        var users = new List<User>
+        {
+            new() { Email = "admin@fit.local", Tipo = Tipo.Funcionario, Ativo = true },
+            new() { Email = "rececao@fit.local", Tipo = Tipo.Funcionario, Ativo = true },
+            new() { Email = "pt@fit.local", Tipo = Tipo.Funcionario, Ativo = true },
+            new() { Email = "m1@fit.local", Tipo = Tipo.Membro, Ativo = true },
+            new() { Email = "m2@fit.local", Tipo = Tipo.Membro, Ativo = true }
+        };
 
-            // Usar transaction para atomicidade
-            await using var tx = await context.Database.BeginTransactionAsync();
-            try
+        foreach (var user in users)
+            user.PasswordHash = hasher.HashPassword(user, "Teste@123!");
+
+        context.Users.AddRange(users);
+        await context.SaveChangesAsync();
+
+        // Funcionários
+        var admin = users.First(u => u.Email.Contains("admin"));
+        var rececao = users.First(u => u.Email.Contains("rececao"));
+        var ptUser = users.First(u => u.Email == "pt@fit.local");
+
+        var funcionarios = new[]
+{
+            new Funcionario
             {
-                var hasher = new PasswordHasher<User>();
-
-                // 1) Subscrições de exemplo (se a tabela estiver vazia)
-                if (!await context.Subscricoes.AnyAsync())
-                {
-                    var subs = new List<Subscricao>
-                    {
-                        new Subscricao { Nome = "Mensal", Tipo = TipoSubscricao.Mensal, Preco = 29.99m, Descricao = "Mensal standard" },
-                        new Subscricao { Nome = "Trimestral", Tipo = TipoSubscricao.Trimestral, Preco = 79.99m, Descricao = "3 meses" },
-                        new Subscricao { Nome = "Anual", Tipo = TipoSubscricao.Anual, Preco = 199.99m, Descricao = "12 meses" }
-                    };
-                    context.Subscricoes.AddRange(subs);
-                    await context.SaveChangesAsync();
-                }
-
-                // 2) Criar USERS (funcionários e membros)
-                var users = new List<(User user, string plainPassword, Action createLinkedEntity)>
-                {
-                    ( new User { Email = "admin@fit.local", Tipo = Tipo.Funcionario, PrimeiraVez = false, Ativo = true },
-                      "Admin@123!", () => {} ),
-
-                    ( new User { Email = "rececao@fit.local", Tipo = Tipo.Funcionario, PrimeiraVez = false, Ativo = true },
-                      "Recepcao@123!", () => {} ),
-
-                    ( new User { Email = "pt@fit.local", Tipo = Tipo.Funcionario, PrimeiraVez = false, Ativo = true },
-                      "PT@123!", () => {} ),
-
-                    ( new User { Email = "m1@fit.local", Tipo = Tipo.Membro, PrimeiraVez = false, Ativo = true },
-                      "Membro1@123!", () => {} ),
-
-                    ( new User { Email = "m2@fit.local", Tipo = Tipo.Membro, PrimeiraVez = false, Ativo = true },
-                      "Membro2@123!", () => {} )
-                };
-
-                // Adiciona users e gera password hashes
-                foreach (var (user, plainPassword, _) in users)
-                {
-                    user.PasswordHash = hasher.HashPassword(user, plainPassword);
-                    context.Users.Add(user);
-                }
-
-                await context.SaveChangesAsync(); // para obter IdUser
-
-                // 3) Criar Funcionarios e Membros com base nos Users criados
-                var adminUser = await context.Users.FirstOrDefaultAsync(u => u.Email == "admin@fit.local");
-                var rececaoUser = await context.Users.FirstOrDefaultAsync(u => u.Email == "rececao@fit.local");
-                var ptUser = await context.Users.FirstOrDefaultAsync(u => u.Email == "pt@fit.local");
-
-                var membro1User = await context.Users.FirstOrDefaultAsync(u => u.Email == "m1@fit.local");
-                var membro2User = await context.Users.FirstOrDefaultAsync(u => u.Email == "m2@fit.local");
-
-                // Criar Funcionários
-                if (adminUser != null)
-                {
-                    context.Funcionarios.Add(new Funcionario
-                    {
-                        IdUser = adminUser.IdUser,
-                        Nome = "Admin Teste",
-                        Telemovel = "911000000",
-                        Funcao = Funcao.Admin
-                    });
-                }
-
-                if (rececaoUser != null)
-                {
-                    context.Funcionarios.Add(new Funcionario
-                    {
-                        IdUser = rececaoUser.IdUser,
-                        Nome = "Rececao Teste",
-                        Telemovel = "912000000",
-                        Funcao = Funcao.Rececao
-                    });
-                }
-
-                if (ptUser != null)
-                {
-                    context.Funcionarios.Add(new Funcionario
-                    {
-                        IdUser = ptUser.IdUser,
-                        Nome = "PT Teste",
-                        Telemovel = "913000000",
-                        Funcao = Funcao.PT
-                    });
-                }
-
-                // Criar Membros
-                var primeiraSub = await context.Subscricoes.FirstOrDefaultAsync();
-                if (primeiraSub == null)
-                    throw new InvalidOperationException("Subscrição de teste não encontrada.");
-
-                if (membro1User != null)
-                {
-                    context.Membros.Add(new Membro
-                    {
-                        IdUser = membro1User.IdUser,
-                        Nome = "Membro Teste 1",
-                        Telemovel = "914000000",
-                        DataNascimento = new DateTime(1990, 1, 1),
-                        DataRegisto = DateTime.UtcNow.Date,
-                        IdSubscricao = primeiraSub.IdSubscricao
-                    });
-                }
-
-                if (membro2User != null)
-                {
-                    context.Membros.Add(new Membro
-                    {
-                        IdUser = membro2User.IdUser,
-                        Nome = "Membro Teste 2",
-                        Telemovel = "915000000",
-                        DataNascimento = new DateTime(1992, 5, 15),
-                        DataRegisto = DateTime.UtcNow.Date,
-                        IdSubscricao = primeiraSub.IdSubscricao
-                    });
-                }
-
-                await context.SaveChangesAsync();
-                await tx.CommitAsync();
-            }
-            catch
+                IdUser = admin.IdUser,
+                Nome = "Admin",
+                Funcao = Funcao.Admin,
+                Telemovel = "910000001"
+            },
+            new Funcionario
             {
-                await tx.RollbackAsync();
-                throw;
+                IdUser = rececao.IdUser,
+                Nome = "Receção",
+                Funcao = Funcao.Rececao,
+                Telemovel = "910000002"
+            },
+            new Funcionario
+            {
+                IdUser = ptUser.IdUser,
+                Nome = "PT",
+                Funcao = Funcao.PT,
+                Telemovel = "910000003"
             }
-        }
+        };
+
+
+        context.Funcionarios.AddRange(funcionarios);
+        await context.SaveChangesAsync();
+
+        // Membros
+        var sub = subscricoes.First();
+
+        var membros = new[]
+        {
+            new Membro { IdUser = users[3].IdUser, Nome = "Membro 1",  Telemovel = "920000001", IdSubscricao = sub.IdSubscricao, DataRegisto = DateTime.UtcNow },
+            new Membro { IdUser = users[4].IdUser, Nome = "Membro 2",  Telemovel = "920000001", IdSubscricao = sub.IdSubscricao, DataRegisto = DateTime.UtcNow }
+        };
+
+        context.Membros.AddRange(membros);
+        await context.SaveChangesAsync();
+
+        // Exercícios
+        var exercicios = new[]
+        {
+            new Exercicio { Nome = "Supino Reto", GrupoMuscular = GrupoMuscular.Peito, Descricao = "exercicio para peito", FotoUrl = "" },
+            new Exercicio { Nome = "Agachamento", GrupoMuscular = GrupoMuscular.Pernas, Descricao = "exercicio para pernas", FotoUrl = "" }
+        };
+
+        context.Exercicios.AddRange(exercicios);
+        await context.SaveChangesAsync();
+
+        // Plano de treino
+        var ptFuncionario = funcionarios.First(f => f.Funcao == Funcao.PT);
+
+        var plano = new PlanoTreino
+        {
+            Nome = "Plano Inicial",
+            IdFuncionario = ptFuncionario.IdFuncionario,
+            DataCriacao = DateTime.UtcNow
+        };
+
+        context.Planos.Add(plano);
+        await context.SaveChangesAsync();
+
+        context.PlanosExercicios.AddRange(
+            new PlanoExercicio { IdPlano = plano.IdPlano, IdExercicio = exercicios[0].IdExercicio, Series = 3, Repeticoes = 10 },
+            new PlanoExercicio { IdPlano = plano.IdPlano, IdExercicio = exercicios[1].IdExercicio, Series = 3, Repeticoes = 12 }
+        );
+
+        await context.SaveChangesAsync();
     }
 }
