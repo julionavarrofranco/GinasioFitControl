@@ -106,5 +106,42 @@ namespace ProjetoFinal.Controllers
                 return StatusCode(500, new { message = "Erro interno do servidor." });
             }
         }
+
+        [Authorize(Policy = "OnlyMembers")]
+        [HttpGet("{idMembro}/profile")]
+        public async Task<IActionResult> GetMemberProfile(int idMembro)
+        {
+            try
+            {
+                var result = await _memberService.GetMemberProfileAsync(idMembro);
+                return Ok(result);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+        }
+
+        [Authorize(Policy = "OnlyMembers")]
+        [HttpGet("{idMembro}/evaluations")]
+        public async Task<IActionResult> GetMemberEvaluations(int idMembro)
+        {
+            var result = await _memberService.GetMemberEvaluationsAsync(idMembro);
+            return Ok(result);
+        }
+
+        [Authorize(Policy = "OnlyMembers")]
+        [HttpGet("{idMembro}/training-plan")]
+        public async Task<IActionResult> GetMemberTrainingPlan(int idMembro)
+        {
+            var result = await _memberService.GetMemberTrainingPlanAsync(idMembro);
+
+            if (result == null)
+                return NotFound(new { message = "O membro não tem plano de treino associado." });
+
+            return Ok(result);
+        }
+
+
     }
 }

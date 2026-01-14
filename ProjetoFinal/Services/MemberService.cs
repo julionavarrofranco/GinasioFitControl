@@ -201,6 +201,75 @@ namespace ProjetoFinal.Services
             await _context.SaveChangesAsync();
         }
 
+        public async Task<MemberProfileDto> GetMemberProfileAsync(int idMembro)
+        {
+            return await _context.Membros
+                .AsNoTracking()
+                .Where(m => m.IdMembro == idMembro)
+                .Select(m => new MemberProfileDto
+                {
+                    IdMembro = m.IdMembro,
+                    Nome = m.Nome,
+                    Email = m.User.Email,
+                    Telemovel = m.Telemovel,
+                    DataNascimento = m.DataNascimento,
+                    DataRegisto = m.DataRegisto,
+                    Subscricao = m.Subscricao.Nome
+                })
+                .FirstOrDefaultAsync()
+                ?? throw new KeyNotFoundException("Membro não encontrado.");
+        }
+
+        public async Task<List<MemberPhysicalEvaluationDto>> GetMemberEvaluationsAsync(int idMembro)
+        {
+            return await _context.AvaliacoesFisicas
+                .AsNoTracking()
+                .Where(a => a.IdMembro == idMembro && a.DataDesativacao == null)
+                .OrderByDescending(a => a.DataAvaliacao)
+                .Select(a => new MemberPhysicalEvaluationDto
+                {
+                    DataAvaliacao = a.DataAvaliacao,
+                    Peso = a.Peso,
+                    Altura = a.Altura,
+                    Imc = a.Imc,
+                    MassaMuscular = a.MassaMuscular,
+                    MassaGorda = a.MassaGorda,
+                    Observacoes = a.Observacoes,
+                    Avaliador = a.Funcionario.Nome
+                })
+                .ToListAsync();
+        }
+
+        public async Task<MemberTrainingPlanDto?> GetMemberTrainingPlanAsync(int idMembro)
+        {
+            return await _context.Membros
+                .AsNoTracking()
+                .Where(m => m.IdMembro == idMembro && m.PlanoTreino != null)
+                .Select(m => new MemberTrainingPlanDto
+                {
+                    NomePlano = m.PlanoTreino!.Nome,
+                    Observacoes = m.PlanoTreino.Observacoes,
+                    DataCriacao = m.PlanoTreino.DataCriacao,
+                    CriadoPor = m.PlanoTreino.Funcionario.Nome,
+                    Exercicios = m.PlanoTreino.PlanosExercicios
+                        .OrderBy(pe => pe.Ordem)
+                        .Select(pe => new TrainingPlanExerciseDto
+                        {
+                            NomeExercicio = pe.Exercicio.Nome,
+                            GrupoMuscular = pe.Exercicio.GrupoMuscular,
+                            Descricao = pe.Exercicio.Descricao,
+                            FotoUrl = pe.Exercicio.FotoUrl,
+                            Series = pe.Series,
+                            Repeticoes = pe.Repeticoes,
+                            Carga = pe.Carga,
+                            Ordem = pe.Ordem
+                        })
+                        .ToList()
+                })
+                .FirstOrDefaultAsync();
+        }
+
+
         private async Task ValidateMemberAsync(DateTime? dataNascimento, int? idSubscricao, bool isUpdate)
         {
             if (!isUpdate)
