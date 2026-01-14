@@ -137,11 +137,92 @@ namespace FitControlAdmin.Services
             }
         }
 
+        public async Task<(bool Success, string? ErrorMessage)> UpdateMemberAsync(int idMembro, UpdateMemberDto updateDto)
+        {
+            try
+            {
+                var response = await _httpClient.PatchAsJsonAsync($"/api/Member/update-member/{idMembro}", updateDto);
+                if (response.IsSuccessStatusCode)
+                {
+                    var content = await response.Content.ReadAsStringAsync();
+                    return (true, null);
+                }
+                else
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    var message = ExtractMessage(errorContent);
+                    return (false, message ?? $"Erro ao atualizar membro ({response.StatusCode}).");
+                }
+            }
+            catch (Exception ex)
+            {
+                return (false, ex.Message);
+            }
+        }
+
+        public async Task<List<EmployeeDto>?> GetAllEmployeesAsync()
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync("/api/Employee");
+                if (response.IsSuccessStatusCode)
+                {
+                    return await response.Content.ReadFromJsonAsync<List<EmployeeDto>>();
+                }
+                return null;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        public async Task<(bool Success, string? ErrorMessage)> UpdateEmployeeAsync(int idFuncionario, UpdateEmployeeDto updateDto)
+        {
+            try
+            {
+                var response = await _httpClient.PatchAsJsonAsync($"/api/Employee/{idFuncionario}", updateDto);
+                if (response.IsSuccessStatusCode)
+                {
+                    var content = await response.Content.ReadAsStringAsync();
+                    return (true, null);
+                }
+                else
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    var message = ExtractMessage(errorContent);
+                    return (false, message ?? $"Erro ao atualizar funcionário ({response.StatusCode}).");
+                }
+            }
+            catch (Exception ex)
+            {
+                return (false, ex.Message);
+            }
+        }
+
         public async Task<bool> DeleteUserAsync(int id)
         {
             try
             {
                 var response = await _httpClient.DeleteAsync($"/api/User/{id}");
+                return response.IsSuccessStatusCode;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public async Task<bool> ChangeUserActiveStatusAsync(int idUser, bool isActive)
+        {
+            try
+            {
+                var statusDto = new UserStatusDto
+                {
+                    IdUser = idUser,
+                    IsActive = isActive
+                };
+                var response = await _httpClient.PatchAsJsonAsync("/api/User/change-active-status", statusDto);
                 return response.IsSuccessStatusCode;
             }
             catch
@@ -749,6 +830,48 @@ namespace FitControlAdmin.Services
                 if (response.IsSuccessStatusCode)
                 {
                     return await response.Content.ReadFromJsonAsync<List<PhysicalEvaluationReservationResponseDto>>();
+                }
+                return null;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        #endregion
+
+        #region Member Methods
+
+        public async Task<List<MemberDto>?> GetAllMembersAsync()
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync("/api/Member");
+                if (response.IsSuccessStatusCode)
+                {
+                    return await response.Content.ReadFromJsonAsync<List<MemberDto>>();
+                }
+                return null;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        #endregion
+
+        #region Subscription Methods
+
+        public async Task<List<SubscriptionResponseDto>?> GetSubscriptionsByStateAsync(bool ativo, bool ordenarNomeAsc = true)
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync($"/api/Subscription/by-state?ativo={ativo}&ordenarNomeAsc={ordenarNomeAsc}");
+                if (response.IsSuccessStatusCode)
+                {
+                    return await response.Content.ReadFromJsonAsync<List<SubscriptionResponseDto>>();
                 }
                 return null;
             }

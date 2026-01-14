@@ -1,0 +1,174 @@
+using FitControlAdmin.Models;
+using FitControlAdmin.Services;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Windows;
+
+namespace FitControlAdmin
+{
+    public partial class EditMemberPaymentsWindow : Window
+    {
+        private readonly ApiService _apiService;
+        private readonly MemberDto _member;
+        private List<PaymentResponseDto>? _allPayments;
+        private List<SubscriptionResponseDto>? _allSubscriptions;
+
+        public EditMemberPaymentsWindow(ApiService apiService, MemberDto member)
+        {
+            InitializeComponent();
+            _apiService = apiService;
+            _member = member;
+
+            Title = $"Gestão de Pagamentos - {member.Nome}";
+            MemberInfoText.Text = $"Membro: {member.Nome} | Email: {member.Email} | Subscrição Atual: {member.Subscricao}";
+
+            LoadPayments();
+        }
+
+        private async void LoadPayments()
+        {
+            try
+            {
+                // Load all active payments and subscriptions
+                var paymentsTask = _apiService.GetPaymentsByActiveStateAsync(true);
+                var subscriptionsTask = _apiService.GetSubscriptionsByStateAsync(true);
+
+                await Task.WhenAll(paymentsTask, subscriptionsTask);
+
+                _allPayments = await paymentsTask;
+                _allSubscriptions = await subscriptionsTask;
+
+                if (_allPayments != null && _allSubscriptions != null)
+                {
+                    // Filter payments for this member
+                    var memberPayments = _allPayments
+                        .Where(p => p.IdMembro == _member.IdMembro)
+                        .Select(p => new PaymentDisplayModel
+                        {
+                            IdPagamento = p.IdPagamento,
+                            IdMembro = p.IdMembro,
+                            NomeMembro = _member.Nome,
+                            IdSubscricao = p.IdSubscricao,
+                            NomeSubscricao = _allSubscriptions.FirstOrDefault(s => s.IdSubscricao == p.IdSubscricao)?.Nome ?? "N/A",
+                            DataPagamento = p.DataPagamento,
+                            ValorPago = p.ValorPago,
+                            MetodoPagamento = FormatEnumName(p.MetodoPagamento.ToString()),
+                            EstadoPagamento = FormatEnumName(p.EstadoPagamento.ToString()),
+                            MesReferente = p.MesReferente,
+                            DataRegisto = p.DataRegisto,
+                            Ativo = p.DataDesativacao == null,
+                            StatusAtivo = p.DataDesativacao == null ? "Ativo" : p.DataDesativacao.Value.ToString("dd/MM/yyyy")
+                        })
+                        .OrderByDescending(p => p.MesReferente)
+                        .ToList();
+
+                    PaymentsDataGrid.ItemsSource = memberPayments;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erro ao carregar pagamentos: {ex.Message}",
+                    "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void CreatePaymentButton_Click(object sender, RoutedEventArgs e)
+        {
+            var createWindow = new CreatePaymentWindow(_apiService, _member.IdMembro);
+            createWindow.Owner = this;
+            if (createWindow.ShowDialog() == true)
+            {
+                LoadPayments();
+            }
+        }
+
+        private async void EditPaymentButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is System.Windows.Controls.Button button && button.Tag is int paymentId)
+            {
+                try
+                {
+                    var payment = _allPayments?.FirstOrDefault(p => p.IdPagamento == paymentId);
+                    if (payment == null)
+                    {
+                        MessageBox.Show("Pagamento não encontrado.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                        return;
+                    }
+
+                    // Open CreatePaymentWindow in edit mode
+                    var editWindow = new CreatePaymentWindow(_apiService, payment.IdMembro, payment);
+                    editWindow.Owner = this;
+                    if (editWindow.ShowDialog() == true)
+                    {
+                        LoadPayments();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Erro ao editar pagamento: {ex.Message}",
+                        "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+        }
+
+        private async void MarkPaymentAsPaidButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is System.Windows.Controls.Button button && button.Tag is int paymentId)
+            {
+                var result = MessageBox.Show(
+                    "Tem certeza que deseja marcar este pagamento como pago?",
+                    "Confirmar",
+                    MessageBoxButton.YesNo,
+                    MessageBoxImage.Question);
+
+                if (result == MessageBoxResult.Yes)
+                {
+                    try
+                    {
+                        var updateDto = new UpdatePaymentDto
+                        {
+                            EstadoPagamento = EstadoPagamento.Pago
+                        };
+
+                        var (success, errorMessage) = await _apiService.UpdatePaymentAsync(paymentId, updateDto);
+                        if (success)
+                        {
+                            MessageBox.Show("Pagamento marcado como pago com sucesso!",
+                                "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
+                            LoadPayments();
+                        }
+                        else
+                        {
+                            MessageBox.Show(errorMessage ?? "Erro ao marcar pagamento como pago.",
+                                "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"Erro: {ex.Message}",
+                            "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                }
+            }
+        }
+
+        private void CloseButton_Click(object sender, RoutedEventArgs e)
+        {
+            DialogResult = true;
+            Close();
+        }
+
+        private static string FormatEnumName(string enumName)
+        {
+            // Casos especiais
+            if (enumName == "MBWay") return "MBWay";
+            if (enumName == "Cartao") return "Cartão";
+            if (enumName == "Bracos") return "Braços";
+            
+            // Adiciona espaço antes de letras maiúsculas (exceto a primeira)
+            return System.Text.RegularExpressions.Regex.Replace(enumName, "(?<!^)([A-Z])", " $1");
+        }
+    }
+}

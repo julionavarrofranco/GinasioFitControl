@@ -196,6 +196,10 @@ namespace FitControlAdmin
 
         private static string FormatEnumName(string enumName)
         {
+            // Casos especiais
+            if (enumName == "MBWay") return "MBWay";
+            if (enumName == "Bracos") return "Braços";
+            
             // Adiciona espaço antes de letras maiúsculas (exceto a primeira)
             return System.Text.RegularExpressions.Regex.Replace(enumName, "(?<!^)([A-Z])", " $1");
         }

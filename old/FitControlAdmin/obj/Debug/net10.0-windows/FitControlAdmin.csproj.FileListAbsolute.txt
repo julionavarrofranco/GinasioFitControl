@@ -116,3 +116,43 @@ C:\Users\tiago\OneDrive\Área de Trabalho\PF\App + API Backup\FitControlAdmin\ob
 C:\Users\tiago\OneDrive\Área de Trabalho\PF\App + API Backup\FitControlAdmin\obj\Debug\net10.0-windows\FitControlAdmin.pdb
 C:\Users\tiago\OneDrive\Área de Trabalho\PF\App + API Backup\FitControlAdmin\obj\Debug\net10.0-windows\FitControlAdmin.genruntimeconfig.cache
 C:\Users\tiago\OneDrive\Área de Trabalho\PF\App + API Backup\FitControlAdmin\obj\Debug\net10.0-windows\ref\FitControlAdmin.dll
+C:\Users\tiago\OneDrive\Área de Trabalho\PF\App + API\FitControlAdmin\bin\Debug\net10.0-windows\FitControlAdmin.exe
+C:\Users\tiago\OneDrive\Área de Trabalho\PF\App + API\FitControlAdmin\bin\Debug\net10.0-windows\FitControlAdmin.deps.json
+C:\Users\tiago\OneDrive\Área de Trabalho\PF\App + API\FitControlAdmin\bin\Debug\net10.0-windows\FitControlAdmin.runtimeconfig.json
+C:\Users\tiago\OneDrive\Área de Trabalho\PF\App + API\FitControlAdmin\bin\Debug\net10.0-windows\FitControlAdmin.dll
+C:\Users\tiago\OneDrive\Área de Trabalho\PF\App + API\FitControlAdmin\bin\Debug\net10.0-windows\FitControlAdmin.pdb
+C:\Users\tiago\OneDrive\Área de Trabalho\PF\App + API\FitControlAdmin\bin\Debug\net10.0-windows\Microsoft.Extensions.DependencyInjection.Abstractions.dll
+C:\Users\tiago\OneDrive\Área de Trabalho\PF\App + API\FitControlAdmin\bin\Debug\net10.0-windows\Microsoft.Extensions.Logging.Abstractions.dll
+C:\Users\tiago\OneDrive\Área de Trabalho\PF\App + API\FitControlAdmin\bin\Debug\net10.0-windows\Microsoft.IdentityModel.Abstractions.dll
+C:\Users\tiago\OneDrive\Área de Trabalho\PF\App + API\FitControlAdmin\bin\Debug\net10.0-windows\Microsoft.IdentityModel.JsonWebTokens.dll
+C:\Users\tiago\OneDrive\Área de Trabalho\PF\App + API\FitControlAdmin\bin\Debug\net10.0-windows\Microsoft.IdentityModel.Logging.dll
+C:\Users\tiago\OneDrive\Área de Trabalho\PF\App + API\FitControlAdmin\bin\Debug\net10.0-windows\Microsoft.IdentityModel.Tokens.dll
+C:\Users\tiago\OneDrive\Área de Trabalho\PF\App + API\FitControlAdmin\bin\Debug\net10.0-windows\System.IdentityModel.Tokens.Jwt.dll
+C:\Users\tiago\OneDrive\Área de Trabalho\PF\App + API\FitControlAdmin\obj\Debug\net10.0-windows\FitControlAdmin.csproj.AssemblyReference.cache
+C:\Users\tiago\OneDrive\Área de Trabalho\PF\App + API\FitControlAdmin\obj\Debug\net10.0-windows\ChangePasswordDialog.baml
+C:\Users\tiago\OneDrive\Área de Trabalho\PF\App + API\FitControlAdmin\obj\Debug\net10.0-windows\ConfirmDialog.baml
+C:\Users\tiago\OneDrive\Área de Trabalho\PF\App + API\FitControlAdmin\obj\Debug\net10.0-windows\CreateEditUserWindow.baml
+C:\Users\tiago\OneDrive\Área de Trabalho\PF\App + API\FitControlAdmin\obj\Debug\net10.0-windows\LoginWindow.baml
+C:\Users\tiago\OneDrive\Área de Trabalho\PF\App + API\FitControlAdmin\obj\Debug\net10.0-windows\MainWindow.baml
+C:\Users\tiago\OneDrive\Área de Trabalho\PF\App + API\FitControlAdmin\obj\Debug\net10.0-windows\ChangePasswordDialog.g.cs
+C:\Users\tiago\OneDrive\Área de Trabalho\PF\App + API\FitControlAdmin\obj\Debug\net10.0-windows\ConfirmDialog.g.cs
+C:\Users\tiago\OneDrive\Área de Trabalho\PF\App + API\FitControlAdmin\obj\Debug\net10.0-windows\CreateEditUserWindow.g.cs
+C:\Users\tiago\OneDrive\Área de Trabalho\PF\App + API\FitControlAdmin\obj\Debug\net10.0-windows\LoginWindow.g.cs
+C:\Users\tiago\OneDrive\Área de Trabalho\PF\App + API\FitControlAdmin\obj\Debug\net10.0-windows\MainWindow.g.cs
+C:\Users\tiago\OneDrive\Área de Trabalho\PF\App + API\FitControlAdmin\obj\Debug\net10.0-windows\App.g.cs
+C:\Users\tiago\OneDrive\Área de Trabalho\PF\App + API\FitControlAdmin\obj\Debug\net10.0-windows\FitControlAdmin_MarkupCompile.cache
+C:\Users\tiago\OneDrive\Área de Trabalho\PF\App + API\FitControlAdmin\obj\Debug\net10.0-windows\FitControlAdmin.g.resources
+C:\Users\tiago\OneDrive\Área de Trabalho\PF\App + API\FitControlAdmin\obj\Debug\net10.0-windows\FitControlAdmin.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\tiago\OneDrive\Área de Trabalho\PF\App + API\FitControlAdmin\obj\Debug\net10.0-windows\FitControlAdmin.AssemblyInfoInputs.cache
+C:\Users\tiago\OneDrive\Área de Trabalho\PF\App + API\FitControlAdmin\obj\Debug\net10.0-windows\FitControlAdmin.AssemblyInfo.cs
+C:\Users\tiago\OneDrive\Área de Trabalho\PF\App + API\FitControlAdmin\obj\Debug\net10.0-windows\FitControlAdmin.csproj.CoreCompileInputs.cache
+C:\Users\tiago\OneDrive\Área de Trabalho\PF\App + API\FitControlAdmin\obj\Debug\net10.0-windows\FitContr.4A5DCE01.Up2Date
+C:\Users\tiago\OneDrive\Área de Trabalho\PF\App + API\FitControlAdmin\obj\Debug\net10.0-windows\FitControlAdmin.dll
+C:\Users\tiago\OneDrive\Área de Trabalho\PF\App + API\FitControlAdmin\obj\Debug\net10.0-windows\refint\FitControlAdmin.dll
+C:\Users\tiago\OneDrive\Área de Trabalho\PF\App + API\FitControlAdmin\obj\Debug\net10.0-windows\FitControlAdmin.pdb
+C:\Users\tiago\OneDrive\Área de Trabalho\PF\App + API\FitControlAdmin\obj\Debug\net10.0-windows\FitControlAdmin.genruntimeconfig.cache
+C:\Users\tiago\OneDrive\Área de Trabalho\PF\App + API\FitControlAdmin\obj\Debug\net10.0-windows\ref\FitControlAdmin.dll
+C:\Users\tiago\OneDrive\Área de Trabalho\PF\App + API\FitControlAdmin\obj\Debug\net10.0-windows\CreateEditExerciseWindow.baml
+C:\Users\tiago\OneDrive\Área de Trabalho\PF\App + API\FitControlAdmin\obj\Debug\net10.0-windows\CreateEditExerciseWindow.g.cs
+C:\Users\tiago\OneDrive\Área de Trabalho\PF\App + API\FitControlAdmin\obj\Debug\net10.0-windows\GeneratedInternalTypeHelper.g.cs
+C:\Users\tiago\OneDrive\Área de Trabalho\PF\App + API\FitControlAdmin\obj\Debug\net10.0-windows\FitControlAdmin_MarkupCompile.lref

@@ -284,7 +284,15 @@ namespace FitControlAdmin
             StatusText.Text = "A carregar utilizadores...";
             try
             {
-                var users = await _apiService.GetUsersAsync();
+                // Load users and subscriptions in parallel
+                var usersTask = _apiService.GetUsersAsync();
+                var subscriptionsTask = _apiService.GetSubscriptionsByStateAsync(true);
+                
+                await Task.WhenAll(usersTask, subscriptionsTask);
+                
+                var users = await usersTask;
+                _subscriptionsForMembers = await subscriptionsTask;
+                
                 if (users != null)
                 {
                     MembersDataGrid.ItemsSource = users;
@@ -330,18 +338,77 @@ namespace FitControlAdmin
 
         private async void EditButton_Click(object sender, RoutedEventArgs e)
         {
-            if (sender is Button button && button.Tag is int userId)
+            if (sender is Button button)
             {
                 try
                 {
-                    var user = await _apiService.GetUserAsync(userId);
-                    if (user != null)
+                    // Get MemberDto from DataContext
+                    MemberDto? member = null;
+
+                    // Try to get from DataGridRow
+                    var parent = button.Parent;
+                    while (parent != null && !(parent is System.Windows.Controls.DataGridRow))
                     {
-                        var editWindow = new CreateEditUserWindow(_apiService, user);
-                        if (editWindow.ShowDialog() == true)
+                        parent = System.Windows.Media.VisualTreeHelper.GetParent(parent);
+                    }
+
+                    if (parent is System.Windows.Controls.DataGridRow row && row.Item is MemberDto rowMember)
+                    {
+                        member = rowMember;
+                    }
+                    else if (button.DataContext is MemberDto contextMember)
+                    {
+                        member = contextMember;
+                    }
+                    else if (MembersDataGrid.SelectedItem is MemberDto selectedMember)
+                    {
+                        member = selectedMember;
+                    }
+
+                    if (member == null)
+                    {
+                        MessageBox.Show("Não foi possível identificar o membro a editar.",
+                            "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                        return;
+                    }
+
+                    // Convert MemberDto to UserDto
+                    var user = new UserDto
+                    {
+                        IdUser = member.IdUser,
+                        Email = member.Email,
+                        Nome = member.Nome,
+                        Telemovel = member.Telemovel,
+                        Tipo = "Membro",
+                        Ativo = member.Ativo,
+                        DataNascimento = member.DataNascimento,
+                        IdSubscricao = null // Will be loaded from subscription name if needed
+                    };
+
+                    // Try to get subscription ID from subscription name
+                    if (!string.IsNullOrEmpty(member.Subscricao))
+                    {
+                        // Load subscriptions if not already loaded
+                        if (_subscriptionsForMembers == null)
                         {
-                            LoadUsers();
+                            _subscriptionsForMembers = await _apiService.GetSubscriptionsByStateAsync(true);
                         }
+                        
+                        if (_subscriptionsForMembers != null)
+                        {
+                            var subscription = _subscriptionsForMembers.FirstOrDefault(s => s.Nome == member.Subscricao);
+                            if (subscription != null)
+                            {
+                                user.IdSubscricao = subscription.IdSubscricao;
+                            }
+                        }
+                    }
+
+                    var editWindow = new CreateEditUserWindow(_apiService, user);
+                    editWindow.Owner = this;
+                    if (editWindow.ShowDialog() == true)
+                    {
+                        LoadUsers();
                     }
                 }
                 catch (Exception ex)
@@ -354,19 +421,50 @@ namespace FitControlAdmin
 
         private async void DeleteButton_Click(object sender, RoutedEventArgs e)
         {
-            if (sender is Button button && button.Tag is int userId)
+            if (sender is Button button)
             {
-                var result = MessageBox.Show(
-                    "Tem certeza que deseja desativar este utilizador?",
-                    "Confirmar",
-                    MessageBoxButton.YesNo,
-                    MessageBoxImage.Question);
-
-                if (result == MessageBoxResult.Yes)
+                try
                 {
-                    try
+                    // Get MemberDto from DataContext
+                    MemberDto? member = null;
+
+                    // Try to get from DataGridRow
+                    var parent = button.Parent;
+                    while (parent != null && !(parent is System.Windows.Controls.DataGridRow))
                     {
-                        var success = await _apiService.DeleteUserAsync(userId);
+                        parent = System.Windows.Media.VisualTreeHelper.GetParent(parent);
+                    }
+
+                    if (parent is System.Windows.Controls.DataGridRow row && row.Item is MemberDto rowMember)
+                    {
+                        member = rowMember;
+                    }
+                    else if (button.DataContext is MemberDto contextMember)
+                    {
+                        member = contextMember;
+                    }
+                    else if (MembersDataGrid.SelectedItem is MemberDto selectedMember)
+                    {
+                        member = selectedMember;
+                    }
+
+                    if (member == null)
+                    {
+                        MessageBox.Show("Não foi possível identificar o membro a remover.",
+                            "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                        return;
+                    }
+
+                    var result = MessageBox.Show(
+                        "Tem certeza que deseja desativar este utilizador?",
+                        "Confirmar",
+                        MessageBoxButton.YesNo,
+                        MessageBoxImage.Question);
+
+                    if (result == MessageBoxResult.Yes)
+                    {
+                        // Use the change-active-status endpoint instead
+                        var success = await _apiService.ChangeUserActiveStatusAsync(member.IdUser, false);
                         if (success)
                         {
                             MessageBox.Show("Utilizador desativado com sucesso!",
@@ -375,15 +473,15 @@ namespace FitControlAdmin
                         }
                         else
                         {
-                            MessageBox.Show("Erro ao desativar utilizador.",
+                            MessageBox.Show($"Erro ao desativar utilizador (ID: {member.IdUser}). Verifique se tem permissões.",
                                 "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
                         }
                     }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show($"Erro: {ex.Message}",
-                            "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
-                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Erro: {ex.Message}",
+                        "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
         }
@@ -720,30 +818,90 @@ namespace FitControlAdmin
 
         #region Payment Management
 
+        private List<MemberDto>? _allMembers = null;
+        private List<SubscriptionResponseDto>? _allSubscriptions = null;
+        private List<SubscriptionResponseDto>? _subscriptionsForMembers = null;
+
         private async void LoadPayments()
         {
             PaymentStatusText.Text = "A carregar pagamentos...";
             try
             {
-                var payments = await _apiService.GetPaymentsByActiveStateAsync(true);
-                if (payments != null)
+                // Carregar pagamentos, membros e subscrições em paralelo
+                var paymentsTask = _apiService.GetPaymentsByActiveStateAsync(true);
+                var inactivePaymentsTask = _apiService.GetPaymentsByActiveStateAsync(false);
+                var membersTask = _apiService.GetAllMembersAsync();
+                var subscriptionsTask = _apiService.GetSubscriptionsByStateAsync(true);
+                var inactiveSubscriptionsTask = _apiService.GetSubscriptionsByStateAsync(false);
+
+                await Task.WhenAll(paymentsTask, inactivePaymentsTask, membersTask, subscriptionsTask, inactiveSubscriptionsTask);
+
+                var activePayments = await paymentsTask;
+                var inactivePayments = await inactivePaymentsTask;
+                var members = await membersTask;
+                var activeSubscriptions = await subscriptionsTask;
+                var inactiveSubscriptions = await inactiveSubscriptionsTask;
+
+                // Combinar todos os pagamentos
+                var allPayments = new List<PaymentResponseDto>();
+                if (activePayments != null) allPayments.AddRange(activePayments);
+                if (inactivePayments != null) allPayments.AddRange(inactivePayments);
+
+                // Combinar todas as subscrições
+                var allSubscriptions = new List<SubscriptionResponseDto>();
+                if (activeSubscriptions != null) allSubscriptions.AddRange(activeSubscriptions);
+                if (inactiveSubscriptions != null) allSubscriptions.AddRange(inactiveSubscriptions);
+
+                // Criar lista de display com todos os dados dos pagamentos
+                var displayList = allPayments.Select(payment =>
                 {
-                    PaymentsDataGrid.ItemsSource = payments;
-                    PaymentStatusText.Text = $"Total: {payments.Count} pagamentos ativos";
-                }
-                else
-                {
-                    PaymentStatusText.Text = "Erro ao carregar pagamentos";
-                    MessageBox.Show("Erro ao carregar pagamentos. Verifique a conexão com o servidor.",
-                        "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
+                    var member = members?.FirstOrDefault(m => m.IdMembro == payment.IdMembro);
+                    var subscription = allSubscriptions?.FirstOrDefault(s => s.IdSubscricao == payment.IdSubscricao);
+
+                    var displayModel = new PaymentDisplayModel
+                    {
+                        IdPagamento = payment.IdPagamento,
+                        IdMembro = payment.IdMembro,
+                        NomeMembro = member?.Nome ?? "Membro não encontrado",
+                        IdSubscricao = payment.IdSubscricao,
+                        NomeSubscricao = subscription?.Nome ?? "Subscrição não encontrada",
+                        DataPagamento = payment.DataPagamento,
+                        ValorPago = payment.ValorPago,
+                        MetodoPagamento = FormatEnumName(payment.MetodoPagamento.ToString()),
+                        EstadoPagamento = FormatEnumName(payment.EstadoPagamento.ToString()),
+                        MesReferente = payment.MesReferente,
+                        DataRegisto = payment.DataRegisto,
+                        Ativo = payment.DataDesativacao == null,
+                        StatusAtivo = payment.DataDesativacao == null ? "Ativo" : payment.DataDesativacao.Value.ToString("dd/MM/yyyy")
+                    };
+
+                    return displayModel;
+                }).OrderByDescending(p => p.DataRegisto).ToList();
+
+                // Sempre definir ItemsSource, mesmo que seja uma lista vazia
+                PaymentsDataGrid.ItemsSource = null; // Limpar primeiro
+                PaymentsDataGrid.ItemsSource = displayList;
+                
+                PaymentStatusText.Text = displayList.Count > 0 ? $"Total: {displayList.Count} pagamentos" : "Nenhum pagamento encontrado";
             }
             catch (Exception ex)
             {
+                PaymentsDataGrid.ItemsSource = null;
                 PaymentStatusText.Text = "Erro: " + ex.Message;
-                MessageBox.Show($"Erro: {ex.Message}", "Erro",
+                MessageBox.Show($"Erro ao carregar pagamentos: {ex.Message}", "Erro",
                     MessageBoxButton.OK, MessageBoxImage.Error);
             }
+        }
+
+        private static string FormatEnumName(string enumName)
+        {
+            // Casos especiais
+            if (enumName == "MBWay") return "MBWay";
+            if (enumName == "Cartao") return "Cartão";
+            if (enumName == "Bracos") return "Braços";
+            
+            // Adiciona espaço antes de letras maiúsculas (exceto a primeira)
+            return System.Text.RegularExpressions.Regex.Replace(enumName, "(?<!^)([A-Z])", " $1");
         }
 
         private void RefreshPaymentsButton_Click(object sender, RoutedEventArgs e)
@@ -751,18 +909,120 @@ namespace FitControlAdmin
             LoadPayments();
         }
 
-        private void CreatePaymentButton_Click(object sender, RoutedEventArgs e)
+        private async void EditPaymentButton_Click(object sender, RoutedEventArgs e)
         {
-            // TODO: Criar janela de criar pagamento
-            MessageBox.Show("Funcionalidade de criar pagamento será implementada.", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
+            if (sender is Button button && button.Tag is int idPagamento)
+            {
+                try
+                {
+                    // Get payment details from display model
+                    PaymentDisplayModel? displayPayment = null;
+                    if (PaymentsDataGrid.SelectedItem is PaymentDisplayModel selectedPayment)
+                    {
+                        displayPayment = selectedPayment;
+                    }
+                    else
+                    {
+                        // Try to find in ItemsSource
+                        if (PaymentsDataGrid.ItemsSource is System.Collections.IEnumerable items)
+                        {
+                            foreach (PaymentDisplayModel item in items)
+                            {
+                                if (item.IdPagamento == idPagamento)
+                                {
+                                    displayPayment = item;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
+                    if (displayPayment == null)
+                    {
+                        MessageBox.Show("Pagamento não encontrado.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                        return;
+                    }
+
+                    // Get the payment details from API
+                    var allPayments = await _apiService.GetPaymentsByActiveStateAsync(true);
+                    var inactivePayments = await _apiService.GetPaymentsByActiveStateAsync(false);
+                    var allPaymentsList = new List<PaymentResponseDto>();
+                    if (allPayments != null) allPaymentsList.AddRange(allPayments);
+                    if (inactivePayments != null) allPaymentsList.AddRange(inactivePayments);
+
+                    var payment = allPaymentsList.FirstOrDefault(p => p.IdPagamento == idPagamento);
+
+                    if (payment == null)
+                    {
+                        MessageBox.Show("Pagamento não encontrado na API.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                        return;
+                    }
+
+                    // Get member details
+                    var members = await _apiService.GetAllMembersAsync();
+                    var member = members?.FirstOrDefault(m => m.IdMembro == payment.IdMembro);
+
+                    if (member == null)
+                    {
+                        MessageBox.Show("Membro não encontrado.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                        return;
+                    }
+
+                    // Open CreatePaymentWindow in edit mode
+                    var createPaymentWindow = new CreatePaymentWindow(_apiService, payment.IdMembro, payment, member);
+                    createPaymentWindow.Owner = this;
+                    if (createPaymentWindow.ShowDialog() == true)
+                    {
+                        LoadPayments();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Erro ao abrir pagamento: {ex.Message}",
+                        "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
         }
 
-        private async void EditPaymentButton_Click(object sender, RoutedEventArgs e)
+        private async void MarkPaymentAsPaidButton_Click(object sender, RoutedEventArgs e)
         {
             if (sender is Button button && button.Tag is int paymentId)
             {
-                // TODO: Criar janela de editar pagamento
-                MessageBox.Show($"Editar pagamento {paymentId} - Funcionalidade será implementada.", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
+                var result = MessageBox.Show(
+                    "Tem certeza que deseja marcar este pagamento como pago?",
+                    "Confirmar",
+                    MessageBoxButton.YesNo,
+                    MessageBoxImage.Question);
+
+                if (result == MessageBoxResult.Yes)
+                {
+                    try
+                    {
+                        // Atualizar pagamento para Pago
+                        var updateDto = new UpdatePaymentDto
+                        {
+                            EstadoPagamento = EstadoPagamento.Pago
+                        };
+
+                        var (success, errorMessage) = await _apiService.UpdatePaymentAsync(paymentId, updateDto);
+                        if (success)
+                        {
+                            MessageBox.Show("Pagamento marcado como pago com sucesso!",
+                                "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
+                            LoadPayments();
+                        }
+                        else
+                        {
+                            MessageBox.Show(errorMessage ?? "Erro ao marcar pagamento como pago.",
+                                "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"Erro: {ex.Message}",
+                            "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                }
             }
         }
 
@@ -811,10 +1071,48 @@ namespace FitControlAdmin
             PhysicalEvaluationStatusText.Text = "A carregar avaliações físicas...";
             try
             {
-                // Por enquanto, vamos precisar de um membro específico ou listar todas
-                // Vou criar um método genérico que pode ser expandido depois
-                PhysicalEvaluationStatusText.Text = "Selecione um membro para ver avaliações";
-                // TODO: Implementar listagem completa quando a API suportar
+                // Carregar as 3 tabelas em paralelo
+                var activeReservationsTask = _apiService.GetActiveReservationsAsync();
+                var completedReservationsTask = _apiService.GetCompletedReservationsAsync();
+                var membersTask = _apiService.GetAllMembersAsync();
+
+                await Task.WhenAll(activeReservationsTask, completedReservationsTask, membersTask);
+
+                var activeReservations = await activeReservationsTask;
+                var completedReservations = await completedReservationsTask;
+                var members = await membersTask;
+
+                // Preencher tabela de reservas ativas
+                if (activeReservations != null)
+                {
+                    ReservationsDataGrid.ItemsSource = activeReservations;
+                }
+                else
+                {
+                    ReservationsDataGrid.ItemsSource = new List<PhysicalEvaluationReservationResponseDto>();
+                }
+
+                // Preencher tabela de reservas completas
+                if (completedReservations != null)
+                {
+                    CompletedReservationsDataGrid.ItemsSource = completedReservations;
+                }
+                else
+                {
+                    CompletedReservationsDataGrid.ItemsSource = new List<PhysicalEvaluationReservationResponseDto>();
+                }
+
+                // Preencher tabela de membros (histórico)
+                if (members != null)
+                {
+                    MembersHistoryDataGrid.ItemsSource = members;
+                }
+                else
+                {
+                    MembersHistoryDataGrid.ItemsSource = new List<MemberDto>();
+                }
+
+                PhysicalEvaluationStatusText.Text = $"Reservas: {activeReservations?.Count ?? 0} | Completas: {completedReservations?.Count ?? 0} | Membros: {members?.Count ?? 0}";
             }
             catch (Exception ex)
             {
@@ -829,19 +1127,84 @@ namespace FitControlAdmin
             LoadPhysicalEvaluations();
         }
 
-        private void CreatePhysicalEvaluationButton_Click(object sender, RoutedEventArgs e)
+        private async void ReserveButton_Click(object sender, RoutedEventArgs e)
         {
-            // TODO: Criar janela de criar avaliação física
-            MessageBox.Show("Funcionalidade de criar avaliação física será implementada.", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
+            if (sender is Button button && button.Tag is int idAvaliacao)
+            {
+                try
+                {
+                    // Buscar a reserva para obter informações do membro
+                    var activeReservations = await _apiService.GetActiveReservationsAsync();
+                    var reservation = activeReservations?.FirstOrDefault(r => r.IdAvaliacao == idAvaliacao);
+                    
+                    if (reservation == null)
+                    {
+                        MessageBox.Show("Reserva não encontrada.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                        return;
+                    }
+
+                    // Obter IdFuncionario do utilizador atual
+                    var currentUser = await _apiService.GetCurrentUserAsync();
+                    if (currentUser == null)
+                    {
+                        MessageBox.Show("Não foi possível obter informações do utilizador atual.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                        return;
+                    }
+
+                    // Buscar funcionário pelo IdUser
+                    var employees = await _apiService.GetAllEmployeesAsync();
+                    var employee = employees?.FirstOrDefault(e => e.IdUser == currentUser.IdUser);
+                    
+                    if (employee == null)
+                    {
+                        MessageBox.Show("Utilizador atual não é um funcionário válido.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                        return;
+                    }
+
+                    // Abrir janela para inserir dados da avaliação física
+                    var createWindow = new CreatePhysicalEvaluationWindow(_apiService, reservation.IdMembro, employee.IdFuncionario, idAvaliacao);
+                    createWindow.Owner = this;
+                    if (createWindow.ShowDialog() == true)
+                    {
+                        LoadPhysicalEvaluations();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Erro ao abrir janela de reserva: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+        }
+
+        private async void ViewMemberHistoryButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button button && button.Tag is int idMembro)
+            {
+                try
+                {
+                    // Buscar informações do membro
+                    var members = await _apiService.GetAllMembersAsync();
+                    var member = members?.FirstOrDefault(m => m.IdMembro == idMembro);
+                    
+                    if (member == null)
+                    {
+                        MessageBox.Show("Membro não encontrado.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                        return;
+                    }
+
+                    // Abrir janela de histórico
+                    var historyWindow = new MemberEvaluationHistoryWindow(_apiService, member);
+                    historyWindow.Owner = this;
+                    historyWindow.ShowDialog();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Erro ao abrir histórico: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
         }
 
         #endregion
-
-        private static string FormatEnumName(string enumName)
-        {
-            // Adiciona espaço antes de letras maiúsculas (exceto a primeira)
-            return System.Text.RegularExpressions.Regex.Replace(enumName, "(?<!^)([A-Z])", " $1");
-        }
     }
 
     public class Activity

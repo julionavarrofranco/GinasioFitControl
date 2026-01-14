@@ -2,8 +2,10 @@
 using FitControlAdmin.Services;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Text.Json;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -82,7 +84,7 @@ namespace FitControlAdmin
             BtnPagamentos.Click += (s, e) =>
             {
                 HighlightActiveButton(BtnPagamentos);
-                ShowPlaceholder("Gestão de Pagamentos");
+                ShowPaymentManagement();
             };
 
             BtnAulas.Click += (s, e) =>
@@ -94,7 +96,13 @@ namespace FitControlAdmin
             BtnExercicios.Click += (s, e) =>
             {
                 HighlightActiveButton(BtnExercicios);
-                ShowPlaceholder("Gestão de Exercícios");
+                ShowExerciseManagement();
+            };
+
+            BtnAvaliacoesFisicas.Click += (s, e) =>
+            {
+                HighlightActiveButton(BtnAvaliacoesFisicas);
+                ShowPhysicalEvaluationManagement();
             };
 
             BtnAtribuirPTs.Click += (s, e) =>
@@ -134,6 +142,27 @@ namespace FitControlAdmin
             LoadUsers();
         }
 
+        private void ShowExerciseManagement()
+        {
+            HideAllPanels();
+            ExerciseManagementPanel.Visibility = Visibility.Visible;
+            LoadExercises();
+        }
+
+        private void ShowPaymentManagement()
+        {
+            HideAllPanels();
+            PaymentManagementPanel.Visibility = Visibility.Visible;
+            LoadPayments();
+        }
+
+        private void ShowPhysicalEvaluationManagement()
+        {
+            HideAllPanels();
+            PhysicalEvaluationManagementPanel.Visibility = Visibility.Visible;
+            LoadPhysicalEvaluations();
+        }
+
         private void ShowPlaceholder(string text)
         {
             HideAllPanels();
@@ -146,6 +175,9 @@ namespace FitControlAdmin
             DashboardPanel.Visibility = Visibility.Collapsed;
             UserManagementPanel.Visibility = Visibility.Collapsed;
             SettingsPanel.Visibility = Visibility.Collapsed;
+            ExerciseManagementPanel.Visibility = Visibility.Collapsed;
+            PaymentManagementPanel.Visibility = Visibility.Collapsed;
+            PhysicalEvaluationManagementPanel.Visibility = Visibility.Collapsed;
             PlaceholderText.Visibility = Visibility.Collapsed;
         }
 
@@ -213,7 +245,7 @@ namespace FitControlAdmin
             var buttons = new[]
             {
                 BtnDashboard, BtnFuncionarios, BtnMembros, BtnSubscricoes,
-                BtnPagamentos, BtnAulas, BtnExercicios, BtnAtribuirPTs, BtnRelatorios, BtnConfig
+                BtnPagamentos, BtnAulas, BtnExercicios, BtnAvaliacoesFisicas, BtnAtribuirPTs, BtnRelatorios, BtnConfig
             };
 
             foreach (var btn in buttons)
@@ -409,6 +441,7 @@ namespace FitControlAdmin
             BtnPagamentos.Visibility = Visibility.Visible;
             BtnAulas.Visibility = Visibility.Visible;
             BtnExercicios.Visibility = Visibility.Visible;
+            BtnAvaliacoesFisicas.Visibility = Visibility.Visible;
             BtnAtribuirPTs.Visibility = Visibility.Visible;
             BtnRelatorios.Visibility = Visibility.Visible;
             BtnConfig.Visibility = Visibility.Visible;
@@ -421,6 +454,7 @@ namespace FitControlAdmin
                 BtnSubscricoes.Visibility = Visibility.Collapsed;
                 BtnPagamentos.Visibility = Visibility.Collapsed;
                 BtnExercicios.Visibility = Visibility.Collapsed;
+                BtnAvaliacoesFisicas.Visibility = Visibility.Collapsed;
                 BtnAtribuirPTs.Visibility = Visibility.Collapsed;
                 BtnRelatorios.Visibility = Visibility.Collapsed;
                 BtnConfig.Visibility = Visibility.Collapsed;
@@ -439,6 +473,7 @@ namespace FitControlAdmin
                     BtnFuncionarios.Visibility = Visibility.Collapsed;
                     BtnSubscricoes.Visibility = Visibility.Collapsed;
                     BtnPagamentos.Visibility = Visibility.Collapsed;
+                    BtnAvaliacoesFisicas.Visibility = Visibility.Visible; // PTs podem ver avaliações físicas
                     BtnAtribuirPTs.Visibility = Visibility.Collapsed;
                     BtnRelatorios.Visibility = Visibility.Collapsed;
                     BtnConfig.Visibility = Visibility.Collapsed;
@@ -488,6 +523,325 @@ namespace FitControlAdmin
         }
 
         #endregion
+
+        #region Exercise Management
+
+        private List<ExerciseResponseDto>? _allExercises = null;
+
+        private void LoadExercises()
+        {
+            LoadExercisesAsync();
+        }
+
+        private async Task LoadExercisesAsync()
+        {
+            ExerciseStatusText.Text = "A carregar exercícios...";
+            try
+            {
+                // Carregar todos os exercícios (ativos e inativos)
+                var activeExercises = await _apiService.GetExercisesByStateAsync(true);
+                var inactiveExercises = await _apiService.GetExercisesByStateAsync(false);
+                
+                _allExercises = new List<ExerciseResponseDto>();
+                if (activeExercises != null) _allExercises.AddRange(activeExercises);
+                if (inactiveExercises != null) _allExercises.AddRange(inactiveExercises);
+
+                // Popular ComboBox de grupos musculares
+                if (ExerciseGrupoMuscularFilterComboBox.Items.Count == 1) // Só tem "Todos"
+                {
+                    foreach (GrupoMuscular grupo in Enum.GetValues(typeof(GrupoMuscular)))
+                    {
+                        var displayName = FormatEnumName(grupo.ToString());
+                        var item = new ComboBoxItem { Content = displayName, Tag = grupo };
+                        ExerciseGrupoMuscularFilterComboBox.Items.Add(item);
+                    }
+                }
+
+                // Aplicar filtros após carregar
+                ApplyExerciseFilters();
+            }
+            catch (Exception ex)
+            {
+                ExerciseStatusText.Text = "Erro: " + ex.Message;
+                MessageBox.Show($"Erro: {ex.Message}", "Erro",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void RefreshExercisesButton_Click(object sender, RoutedEventArgs e)
+        {
+            LoadExercises();
+        }
+
+        private void ExerciseFilters_Changed(object sender, RoutedEventArgs e)
+        {
+            ApplyExerciseFilters();
+        }
+
+        private void ApplyExerciseFilters()
+        {
+            if (_allExercises == null) return;
+
+            var filtered = _allExercises.AsEnumerable();
+
+            // Filtro por nome (LIKE)
+            var nomeFilter = ExerciseNameFilterTextBox?.Text?.Trim() ?? string.Empty;
+            if (!string.IsNullOrWhiteSpace(nomeFilter))
+            {
+                filtered = filtered.Where(ex => 
+                    ex.Nome.ToLower().Contains(nomeFilter.ToLower()));
+            }
+
+            // Filtro por estado
+            var estadoSelected = (ExerciseEstadoFilterComboBox?.SelectedItem as ComboBoxItem)?.Content?.ToString();
+            if (estadoSelected == "Ativo")
+            {
+                filtered = filtered.Where(ex => ex.Ativo);
+            }
+            else if (estadoSelected == "Inativo")
+            {
+                filtered = filtered.Where(ex => !ex.Ativo);
+            }
+            // "Todos" não filtra
+
+            // Filtro por grupo muscular
+            var grupoSelectedItem = ExerciseGrupoMuscularFilterComboBox?.SelectedItem as ComboBoxItem;
+            if (grupoSelectedItem != null && grupoSelectedItem.Tag is GrupoMuscular grupo)
+            {
+                filtered = filtered.Where(ex => ex.GrupoMuscular == grupo);
+            }
+
+            // Ordenação
+            var sortBy = (ExerciseSortByComboBox?.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? "Nome";
+            var sortDirection = (ExerciseSortDirectionComboBox?.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? "Ascendente";
+            var ascending = sortDirection == "Ascendente";
+
+            filtered = sortBy switch
+            {
+                "Nome" => ascending 
+                    ? filtered.OrderBy(ex => ex.Nome) 
+                    : filtered.OrderByDescending(ex => ex.Nome),
+                "Grupo Muscular" => ascending 
+                    ? filtered.OrderBy(ex => ex.GrupoMuscular.ToString()) 
+                    : filtered.OrderByDescending(ex => ex.GrupoMuscular.ToString()),
+                "Estado" => ascending 
+                    ? filtered.OrderBy(ex => ex.Ativo) 
+                    : filtered.OrderByDescending(ex => ex.Ativo),
+                _ => filtered.OrderBy(ex => ex.Nome)
+            };
+
+            var result = filtered.ToList();
+            
+            // Atualizar ItemsSource explicitamente
+            ExercisesItemsControl.ItemsSource = null;
+            ExercisesItemsControl.ItemsSource = result;
+            
+            ExerciseStatusText.Text = $"Mostrando {result.Count} de {_allExercises.Count} exercícios";
+        }
+
+        private void CreateExerciseButton_Click(object sender, RoutedEventArgs e)
+        {
+            var createWindow = new CreateEditExerciseWindow(_apiService, null);
+            createWindow.Owner = this;
+            if (createWindow.ShowDialog() == true)
+            {
+                LoadExercises();
+            }
+        }
+
+        private async void EditExerciseButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button button && button.Tag is int exerciseId)
+            {
+                try
+                {
+                    // Buscar o exercício completo da lista
+                    var exercise = _allExercises?.FirstOrDefault(ex => ex.IdExercicio == exerciseId);
+                    if (exercise == null)
+                    {
+                        MessageBox.Show("Exercício não encontrado.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                        return;
+                    }
+
+                    var editWindow = new CreateEditExerciseWindow(_apiService, exercise);
+                    editWindow.Owner = this;
+                    if (editWindow.ShowDialog() == true)
+                    {
+                        LoadExercises();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Erro ao carregar exercício: {ex.Message}",
+                        "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+        }
+
+        private async void DeleteExerciseButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button button && button.Tag is int exerciseId)
+            {
+                var result = MessageBox.Show(
+                    "Tem certeza que deseja eliminar este exercício?",
+                    "Confirmar",
+                    MessageBoxButton.YesNo,
+                    MessageBoxImage.Question);
+
+                if (result == MessageBoxResult.Yes)
+                {
+                    try
+                    {
+                        var (success, errorMessage) = await _apiService.ChangeExerciseStatusAsync(exerciseId, false);
+                        if (success)
+                        {
+                            // Recarregar a lista completa da API
+                            await LoadExercisesAsync();
+                            
+                            MessageBox.Show("Exercício eliminado com sucesso!",
+                                "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
+                        }
+                        else
+                        {
+                            MessageBox.Show(errorMessage ?? "Erro ao eliminar exercício.",
+                                "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"Erro: {ex.Message}",
+                            "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                }
+            }
+        }
+
+        #endregion
+
+        #region Payment Management
+
+        private async void LoadPayments()
+        {
+            PaymentStatusText.Text = "A carregar pagamentos...";
+            try
+            {
+                var payments = await _apiService.GetPaymentsByActiveStateAsync(true);
+                if (payments != null)
+                {
+                    PaymentsDataGrid.ItemsSource = payments;
+                    PaymentStatusText.Text = $"Total: {payments.Count} pagamentos ativos";
+                }
+                else
+                {
+                    PaymentStatusText.Text = "Erro ao carregar pagamentos";
+                    MessageBox.Show("Erro ao carregar pagamentos. Verifique a conexão com o servidor.",
+                        "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+            catch (Exception ex)
+            {
+                PaymentStatusText.Text = "Erro: " + ex.Message;
+                MessageBox.Show($"Erro: {ex.Message}", "Erro",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void RefreshPaymentsButton_Click(object sender, RoutedEventArgs e)
+        {
+            LoadPayments();
+        }
+
+        private void CreatePaymentButton_Click(object sender, RoutedEventArgs e)
+        {
+            // TODO: Criar janela de criar pagamento
+            MessageBox.Show("Funcionalidade de criar pagamento será implementada.", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
+        private async void EditPaymentButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button button && button.Tag is int paymentId)
+            {
+                // TODO: Criar janela de editar pagamento
+                MessageBox.Show($"Editar pagamento {paymentId} - Funcionalidade será implementada.", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+        }
+
+        private async void DeletePaymentButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button button && button.Tag is int paymentId)
+            {
+                var result = MessageBox.Show(
+                    "Tem certeza que deseja desativar este pagamento?",
+                    "Confirmar",
+                    MessageBoxButton.YesNo,
+                    MessageBoxImage.Question);
+
+                if (result == MessageBoxResult.Yes)
+                {
+                    try
+                    {
+                        var (success, errorMessage) = await _apiService.ChangePaymentStatusAsync(paymentId, false);
+                        if (success)
+                        {
+                            MessageBox.Show("Pagamento desativado com sucesso!",
+                                "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
+                            LoadPayments();
+                        }
+                        else
+                        {
+                            MessageBox.Show(errorMessage ?? "Erro ao desativar pagamento.",
+                                "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"Erro: {ex.Message}",
+                            "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                }
+            }
+        }
+
+        #endregion
+
+        #region Physical Evaluation Management
+
+        private async void LoadPhysicalEvaluations()
+        {
+            PhysicalEvaluationStatusText.Text = "A carregar avaliações físicas...";
+            try
+            {
+                // Por enquanto, vamos precisar de um membro específico ou listar todas
+                // Vou criar um método genérico que pode ser expandido depois
+                PhysicalEvaluationStatusText.Text = "Selecione um membro para ver avaliações";
+                // TODO: Implementar listagem completa quando a API suportar
+            }
+            catch (Exception ex)
+            {
+                PhysicalEvaluationStatusText.Text = "Erro: " + ex.Message;
+                MessageBox.Show($"Erro: {ex.Message}", "Erro",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void RefreshPhysicalEvaluationsButton_Click(object sender, RoutedEventArgs e)
+        {
+            LoadPhysicalEvaluations();
+        }
+
+        private void CreatePhysicalEvaluationButton_Click(object sender, RoutedEventArgs e)
+        {
+            // TODO: Criar janela de criar avaliação física
+            MessageBox.Show("Funcionalidade de criar avaliação física será implementada.", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
+        #endregion
+
+        private static string FormatEnumName(string enumName)
+        {
+            // Adiciona espaço antes de letras maiúsculas (exceto a primeira)
+            return System.Text.RegularExpressions.Regex.Replace(enumName, "(?<!^)([A-Z])", " $1");
+        }
     }
 
     public class Activity

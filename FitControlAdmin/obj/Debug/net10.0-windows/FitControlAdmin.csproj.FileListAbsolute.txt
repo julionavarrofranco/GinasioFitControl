@@ -156,3 +156,13 @@ C:\Users\tiago\OneDrive\Área de Trabalho\PF\App + API\FitControlAdmin\obj\Debug
 C:\Users\tiago\OneDrive\Área de Trabalho\PF\App + API\FitControlAdmin\obj\Debug\net10.0-windows\CreateEditExerciseWindow.g.cs
 C:\Users\tiago\OneDrive\Área de Trabalho\PF\App + API\FitControlAdmin\obj\Debug\net10.0-windows\GeneratedInternalTypeHelper.g.cs
 C:\Users\tiago\OneDrive\Área de Trabalho\PF\App + API\FitControlAdmin\obj\Debug\net10.0-windows\FitControlAdmin_MarkupCompile.lref
+C:\Users\tiago\OneDrive\Área de Trabalho\PF\App + API\FitControlAdmin\obj\Debug\net10.0-windows\CreatePaymentWindow.g.cs
+C:\Users\tiago\OneDrive\Área de Trabalho\PF\App + API\FitControlAdmin\obj\Debug\net10.0-windows\CreatePaymentWindow.baml
+C:\Users\tiago\OneDrive\Área de Trabalho\PF\App + API\FitControlAdmin\obj\Debug\net10.0-windows\EditMemberPaymentsWindow.g.cs
+C:\Users\tiago\OneDrive\Área de Trabalho\PF\App + API\FitControlAdmin\obj\Debug\net10.0-windows\EditMemberPaymentsWindow.baml
+C:\Users\tiago\OneDrive\Área de Trabalho\PF\App + API\FitControlAdmin\obj\Debug\net10.0-windows\EditPaymentWindow.g.cs
+C:\Users\tiago\OneDrive\Área de Trabalho\PF\App + API\FitControlAdmin\obj\Debug\net10.0-windows\EditPaymentWindow.baml
+C:\Users\tiago\OneDrive\Área de Trabalho\PF\App + API\FitControlAdmin\obj\Debug\net10.0-windows\CreatePhysicalEvaluationWindow.baml
+C:\Users\tiago\OneDrive\Área de Trabalho\PF\App + API\FitControlAdmin\obj\Debug\net10.0-windows\MemberEvaluationHistoryWindow.baml
+C:\Users\tiago\OneDrive\Área de Trabalho\PF\App + API\FitControlAdmin\obj\Debug\net10.0-windows\CreatePhysicalEvaluationWindow.g.cs
+C:\Users\tiago\OneDrive\Área de Trabalho\PF\App + API\FitControlAdmin\obj\Debug\net10.0-windows\MemberEvaluationHistoryWindow.g.cs

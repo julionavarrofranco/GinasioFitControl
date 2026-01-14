@@ -12,6 +12,11 @@ namespace FitControlAdmin.Converters
             if (value == null) return string.Empty;
             
             var enumName = value.ToString() ?? string.Empty;
+            
+            // Casos especiais
+            if (enumName == "MBWay") return "MBWay";
+            if (enumName == "Bracos") return "Braços";
+            
             // Adiciona espaço antes de letras maiúsculas (exceto a primeira)
             return Regex.Replace(enumName, "(?<!^)([A-Z])", " $1");
         }

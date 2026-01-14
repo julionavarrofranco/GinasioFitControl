@@ -75,5 +75,11 @@ namespace FitControlAdmin.Models
         public string NovaPassword { get; set; } = string.Empty;
         public string ConfirmarPassword { get; set; } = string.Empty;
     }
+
+    public class UserStatusDto
+    {
+        public int IdUser { get; set; }
+        public bool IsActive { get; set; }
+    }
 }
 
