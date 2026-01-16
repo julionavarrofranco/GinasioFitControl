@@ -18,7 +18,7 @@ namespace ProjetoFinal.Services
         // =========================
         // CREATE
         // =========================
-        public async Task<Pagamento> CreatePaymentAsync(PaymentDto request)
+        public async Task CreatePaymentAsync(PaymentDto request)
         {
             var membro = await _context.Membros
                 .Include(m => m.Subscricao)
@@ -74,8 +74,6 @@ namespace ProjetoFinal.Services
 
             _context.Pagamentos.Add(pagamento);
             await _context.SaveChangesAsync();
-
-            return pagamento;
         }
 
         // =========================
@@ -156,7 +154,7 @@ namespace ProjetoFinal.Services
         // =========================
         // LISTAGENS
         // =========================
-        public async Task<List<Pagamento>> GetPaymentsByActiveStateAsync(bool ativo)
+        public async Task<List<PaymentResponseDto>> GetPaymentsByActiveStateAsync(bool ativo)
         {
             return await _context.Pagamentos
                 .AsNoTracking()
@@ -164,10 +162,22 @@ namespace ProjetoFinal.Services
                 .Include(p => p.Subscricao)
                 .Where(p => ativo ? p.DataDesativacao == null : p.DataDesativacao != null)
                 .OrderByDescending(p => p.DataRegisto)
+                .Select(p => new PaymentResponseDto
+                {
+                    IdPagamento = p.IdPagamento,
+                    ValorPago = p.ValorPago,
+                    EstadoPagamento = p.EstadoPagamento,
+                    MesReferente = p.MesReferente,
+                    DataPagamento = p.DataPagamento,
+                    IdMembro = p.Membro.IdMembro,
+                    NomeMembro = p.Membro.Nome,
+                    Subscricao = p.Subscricao.Tipo.ToString()
+                })
                 .ToListAsync();
         }
 
-        public async Task<List<Pagamento>> GetPaymentsByDateAsync(DateTime inicio, DateTime fim)
+
+        public async Task<List<PaymentResponseDto>> GetPaymentsByDateAsync(DateTime inicio, DateTime fim)
         {
             return await _context.Pagamentos
                 .AsNoTracking()
@@ -175,10 +185,22 @@ namespace ProjetoFinal.Services
                 .Include(p => p.Subscricao)
                 .Where(p => p.DataPagamento >= inicio && p.DataPagamento <= fim)
                 .OrderByDescending(p => p.DataPagamento)
+                .Select(p => new PaymentResponseDto
+                {
+                    IdPagamento = p.IdPagamento,
+                    ValorPago = p.ValorPago,
+                    EstadoPagamento = p.EstadoPagamento,
+                    MesReferente = p.MesReferente,
+                    DataPagamento = p.DataPagamento,
+                    IdMembro = p.Membro.IdMembro,
+                    NomeMembro = p.Membro.Nome,
+                    Subscricao = p.Subscricao.Tipo.ToString()
+                })
                 .ToListAsync();
         }
 
-        public async Task<List<Pagamento>> GetPaymentsByPaymentStateAsync(EstadoPagamento estado)
+
+        public async Task<List<PaymentResponseDto>> GetPaymentsByPaymentStateAsync(EstadoPagamento estado)
         {
             return await _context.Pagamentos
                 .AsNoTracking()
@@ -186,8 +208,20 @@ namespace ProjetoFinal.Services
                 .Include(p => p.Subscricao)
                 .Where(p => p.EstadoPagamento == estado && p.DataDesativacao == null)
                 .OrderByDescending(p => p.DataPagamento)
+                .Select(p => new PaymentResponseDto
+                {
+                    IdPagamento = p.IdPagamento,
+                    ValorPago = p.ValorPago,
+                    EstadoPagamento = p.EstadoPagamento,
+                    MesReferente = p.MesReferente,
+                    DataPagamento = p.DataPagamento,
+                    IdMembro = p.Membro.IdMembro,
+                    NomeMembro = p.Membro.Nome,
+                    Subscricao = p.Subscricao.Tipo.ToString()
+                })
                 .ToListAsync();
         }
+
 
         // =========================
         // DASHBOARD

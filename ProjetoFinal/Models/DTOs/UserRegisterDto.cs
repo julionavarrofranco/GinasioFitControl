@@ -15,6 +15,7 @@
 
         public int? IdSubscricao { get; set; }
 
+        public MetodoPagamento? MetodoPagamento { get; set; }
         // Funcionário
         public string? Funcao { get; set; } // Admin / Rececao / PT
     }

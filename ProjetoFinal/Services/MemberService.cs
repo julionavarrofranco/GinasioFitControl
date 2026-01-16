@@ -68,9 +68,8 @@ namespace ProjetoFinal.Services
             var mesAtual = new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, 1);
             var mesReferente = mesAtual; // padrão = mês atual
 
-            // 2. Método de pagamento
-            //    Atualmente fixo como Cartão. Pode ser definido pela UI recebendo no UserRegisterDto.
-            var metodoPagamento = MetodoPagamento.Cartao;
+            if (!request.MetodoPagamento.HasValue)
+                throw new InvalidOperationException("O método de pagamento é obrigatório.");
 
             // 3. Dia de pagamento
             //    Será definido no PaymentService como dia 8 ou imediato se já passou.
@@ -79,7 +78,7 @@ namespace ProjetoFinal.Services
             {
                 IdMembro = membro.IdMembro,
                 IdSubscricao = subscricao.IdSubscricao,
-                MetodoPagamento = metodoPagamento,
+                MetodoPagamento = request.MetodoPagamento.Value,
                 MesReferente = mesReferente
             };
 

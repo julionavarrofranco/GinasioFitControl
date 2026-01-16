@@ -5,12 +5,12 @@ namespace ProjetoFinal.Services.Interfaces
 {
     public interface IPaymentService
     {
-        Task<Pagamento> CreatePaymentAsync(PaymentDto request);
+        Task CreatePaymentAsync(PaymentDto request);
         Task<string> UpdatePaymentAsync(int idPagamento, UpdatePaymentDto request);
         Task ChangePaymentActiveStateAsync(int idPagamento, bool ativo);
-        Task<List<Pagamento>> GetPaymentsByActiveStateAsync(bool ativo);
-        Task<List<Pagamento>> GetPaymentsByDateAsync(DateTime inicio, DateTime fim);
-        Task<List<Pagamento>> GetPaymentsByPaymentStateAsync(EstadoPagamento estado);
+        Task<List<PaymentResponseDto>> GetPaymentsByActiveStateAsync(bool ativo);
+        Task<List<PaymentResponseDto>> GetPaymentsByDateAsync(DateTime inicio, DateTime fim);
+        Task<List<PaymentResponseDto>> GetPaymentsByPaymentStateAsync(EstadoPagamento estado);
         Task<decimal> GetMonthlyRevenueAsync(int ano, int mes);
     }
 }

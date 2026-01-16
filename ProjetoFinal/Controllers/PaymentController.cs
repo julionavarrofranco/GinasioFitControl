@@ -26,8 +26,8 @@ namespace ProjetoFinal.Controllers
                 if (request == null)
                     return BadRequest(new { message = "Dados de pagamento inválidos." });
 
-                var pagamento = await _paymentService.CreatePaymentAsync(request);
-                return Ok(pagamento);
+                await _paymentService.CreatePaymentAsync(request);
+                return NoContent();
             }
             catch (KeyNotFoundException ex)
             {
