@@ -274,7 +274,7 @@ namespace ProjetoFinal.Data
                 entity.Property(av => av.Imc).HasColumnType("decimal(4,2)");
                 entity.Property(av => av.MassaMuscular).HasColumnType("decimal(5,2)");
                 entity.Property(av => av.MassaGorda).HasColumnType("decimal(5,2)");
-                entity.Property(av => av.Observacoes).HasColumnType("text");
+                entity.Property(av => av.Observacoes).HasColumnType("text").HasDefaultValue("");
                 entity.Property(av => av.DataDesativacao);
 
                 entity.HasOne(av => av.Membro)

@@ -10,137 +10,299 @@ public static class DbInitializer
         using var scope = services.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<GinasioDbContext>();
 
-        // Aplica migrations (UMA vez)
         await context.Database.MigrateAsync();
-
-        // =============================
-        // LIMPEZA DE DADOS (EF SAFE)
-        // =============================
-
-        context.MembrosAvaliacoes.RemoveRange(context.MembrosAvaliacoes);
-        context.AvaliacoesFisicas.RemoveRange(context.AvaliacoesFisicas);
-        context.MembrosAulas.RemoveRange(context.MembrosAulas);
-        context.AulasMarcadas.RemoveRange(context.AulasMarcadas);
-        context.Aulas.RemoveRange(context.Aulas);
-        context.PlanosExercicios.RemoveRange(context.PlanosExercicios);
-        context.Planos.RemoveRange(context.Planos);
-        context.Exercicios.RemoveRange(context.Exercicios);
-        context.Pagamentos.RemoveRange(context.Pagamentos);
-        context.Membros.RemoveRange(context.Membros);
-        context.Funcionarios.RemoveRange(context.Funcionarios);
-        context.RefreshTokens.RemoveRange(context.RefreshTokens);
-        context.Users.RemoveRange(context.Users);
-        context.Subscricoes.RemoveRange(context.Subscricoes);
-
-        await context.SaveChangesAsync();
-
-        // =============================
-        // SEED DE DADOS
-        // =============================
 
         var hasher = new PasswordHasher<User>();
 
-        // Subscrições
-        var subscricoes = new[]
+        // =============================
+        // SUBSCRIÇÕES
+        // =============================
+        if (!context.Subscricoes.Any())
         {
-            new Subscricao { Nome = "Mensal", Tipo = TipoSubscricao.Mensal, Preco = 29.99m },
-            new Subscricao { Nome = "Trimestral", Tipo = TipoSubscricao.Trimestral, Preco = 79.99m },
-            new Subscricao { Nome = "Anual", Tipo = TipoSubscricao.Anual, Preco = 199.99m }
-        };
+            context.Subscricoes.AddRange(
+                new Subscricao { Nome = "Mensal", Tipo = TipoSubscricao.Mensal, Preco = 30, Ativo = true },
+                new Subscricao { Nome = "Trimestral", Tipo = TipoSubscricao.Trimestral, Preco = 80, Ativo = true },
+                new Subscricao { Nome = "Anual", Tipo = TipoSubscricao.Anual, Preco = 200, Ativo = true },
+                new Subscricao { Nome = "Promo Antiga", Tipo = TipoSubscricao.Mensal, Preco = 25, Ativo = false }
+            );
+            await context.SaveChangesAsync();
+        }
 
-        context.Subscricoes.AddRange(subscricoes);
-        await context.SaveChangesAsync();
+        var subscricaoMensal = context.Subscricoes
+            .Where(s => s.Tipo == TipoSubscricao.Mensal && s.Ativo)
+            .OrderBy(s => s.IdSubscricao)
+            .First();
 
-        // Users
-        var users = new List<User>
+        // =============================
+        // USERS
+        // =============================
+        if (!context.Users.Any())
         {
-            new() { Email = "admin@fit.local", Tipo = Tipo.Funcionario, Ativo = true },
-            new() { Email = "rececao@fit.local", Tipo = Tipo.Funcionario, Ativo = true },
-            new() { Email = "pt@fit.local", Tipo = Tipo.Funcionario, Ativo = true },
-            new() { Email = "m1@fit.local", Tipo = Tipo.Membro, Ativo = true },
-            new() { Email = "m2@fit.local", Tipo = Tipo.Membro, Ativo = true }
-        };
-
-        foreach (var user in users)
-            user.PasswordHash = hasher.HashPassword(user, "Teste@123!");
-
-        context.Users.AddRange(users);
-        await context.SaveChangesAsync();
-
-        // Funcionários
-        var admin = users.First(u => u.Email.Contains("admin"));
-        var rececao = users.First(u => u.Email.Contains("rececao"));
-        var ptUser = users.First(u => u.Email == "pt@fit.local");
-
-        var funcionarios = new[]
-{
-            new Funcionario
+            var users = new[]
             {
-                IdUser = admin.IdUser,
-                Nome = "Admin",
-                Funcao = Funcao.Admin,
-                Telemovel = "910000001"
-            },
-            new Funcionario
+                new User { Email="admin@fit.local", Tipo=Tipo.Funcionario, Ativo=true },
+                new User { Email="rececao@fit.local", Tipo=Tipo.Funcionario, Ativo=true },
+                new User { Email="pt@fit.local", Tipo=Tipo.Funcionario, Ativo=true },
+                new User { Email="pt2@fit.local", Tipo=Tipo.Funcionario, Ativo=true },
+
+                new User { Email="m1@fit.local", Tipo=Tipo.Membro, Ativo=true },
+                new User { Email="m2@fit.local", Tipo=Tipo.Membro, Ativo=true },
+                new User { Email="m3@fit.local", Tipo=Tipo.Membro, Ativo=false },
+                new User { Email="m4@fit.local", Tipo=Tipo.Membro, Ativo=true, PrimeiraVez=true }
+            };
+
+            foreach (var u in users)
+                u.PasswordHash = hasher.HashPassword(u, "Teste@123!");
+
+            context.Users.AddRange(users);
+            await context.SaveChangesAsync();
+        }
+
+        // =============================
+        // FUNCIONÁRIOS
+        // =============================
+        if (!context.Funcionarios.Any())
+        {
+            var admin = context.Users.Where(u => u.Email == "admin@fit.local").OrderBy(u => u.IdUser).First();
+            var rececao = context.Users.Where(u => u.Email == "rececao@fit.local").OrderBy(u => u.IdUser).First();
+            var pt1 = context.Users.Where(u => u.Email == "pt@fit.local").OrderBy(u => u.IdUser).First();
+            var pt2 = context.Users.Where(u => u.Email == "pt2@fit.local").OrderBy(u => u.IdUser).First();
+
+            context.Funcionarios.AddRange(
+                new Funcionario { IdUser = admin.IdUser, Nome = "Admin", Funcao = Funcao.Admin, Telemovel = "910000001" },
+                new Funcionario { IdUser = rececao.IdUser, Nome = "Receção", Funcao = Funcao.Rececao },
+                new Funcionario { IdUser = pt1.IdUser, Nome = "PT João", Funcao = Funcao.PT },
+                new Funcionario { IdUser = pt2.IdUser, Nome = "PT Maria", Funcao = Funcao.PT }
+            );
+
+            await context.SaveChangesAsync();
+        }
+
+        var ptPrincipal = context.Funcionarios
+            .Where(f => f.Funcao == Funcao.PT)
+            .OrderBy(f => f.IdFuncionario)
+            .First();
+
+        // =============================
+        // MEMBROS
+        // =============================
+        if (!context.Membros.Any())
+        {
+            var membrosUsers = context.Users
+                .Where(u => u.Tipo == Tipo.Membro)
+                .OrderBy(u => u.IdUser)
+                .ToList();
+
+            context.Membros.AddRange(
+                new Membro
+                {
+                    IdUser = membrosUsers[0].IdUser,
+                    Nome = "Carlos Silva",
+                    Telemovel = "920000001",
+                    IdSubscricao = subscricaoMensal.IdSubscricao,
+                    DataRegisto = DateTime.UtcNow.AddMonths(-6)
+                },
+                new Membro
+                {
+                    IdUser = membrosUsers[1].IdUser,
+                    Nome = "Ana Costa",
+                    Telemovel = "920000002",
+                    IdSubscricao = subscricaoMensal.IdSubscricao,
+                    DataRegisto = DateTime.UtcNow.AddMonths(-2)
+                },
+                new Membro
+                {
+                    IdUser = membrosUsers[2].IdUser,
+                    Nome = "Membro Inativo",
+                    Telemovel = "920000003",
+                    IdSubscricao = subscricaoMensal.IdSubscricao,
+                    DataRegisto = DateTime.UtcNow.AddYears(-1)
+                }
+            );
+
+            await context.SaveChangesAsync();
+        }
+
+        var membroAtivo = context.Membros
+            .OrderBy(m => m.IdMembro)
+            .First();
+
+        // =============================
+        // EXERCÍCIOS
+        // =============================
+        if (!context.Exercicios.Any())
+        {
+            context.Exercicios.AddRange(
+                new Exercicio { Nome = "Supino Reto", GrupoMuscular = GrupoMuscular.Peito, Ativo = true },
+                new Exercicio { Nome = "Agachamento", GrupoMuscular = GrupoMuscular.Pernas, Ativo = true },
+                new Exercicio { Nome = "Remada", GrupoMuscular = GrupoMuscular.Costas, Ativo = true },
+                new Exercicio { Nome = "Bíceps Curl", GrupoMuscular = GrupoMuscular.Bracos, Ativo = false }
+            );
+            await context.SaveChangesAsync();
+        }
+
+        // =============================
+        // PLANO TREINO + EXERCÍCIOS
+        // =============================
+        if (!context.Planos.Any())
+        {
+            var plano = new PlanoTreino
             {
-                IdUser = rececao.IdUser,
-                Nome = "Receção",
-                Funcao = Funcao.Rececao,
-                Telemovel = "910000002"
-            },
-            new Funcionario
+                Nome = "Plano Hipertrofia",
+                IdFuncionario = ptPrincipal.IdFuncionario,
+                DataCriacao = DateTime.UtcNow.AddMonths(-1)
+            };
+
+            context.Planos.Add(plano);
+            await context.SaveChangesAsync();
+
+            var exerciciosAtivos = context.Exercicios
+                .Where(e => e.Ativo)
+                .OrderBy(e => e.IdExercicio)
+                .ToList();
+
+            context.PlanosExercicios.AddRange(
+                new PlanoExercicio { IdPlano = plano.IdPlano, IdExercicio = exerciciosAtivos[0].IdExercicio, Series = 4, Repeticoes = 10, Carga = 60 },
+                new PlanoExercicio { IdPlano = plano.IdPlano, IdExercicio = exerciciosAtivos[1].IdExercicio, Series = 4, Repeticoes = 12 }
+            );
+
+            await context.SaveChangesAsync();
+        }
+
+        // =============================
+        // AULAS + AULAS MARCADAS
+        // =============================
+        if (!context.Aulas.Any())
+        {
+            var aula = new Aula
             {
-                IdUser = ptUser.IdUser,
-                Nome = "PT",
-                Funcao = Funcao.PT,
-                Telemovel = "910000003"
-            }
-        };
+                Nome = "Yoga",
+                DiaSemana = DiaSemana.Segunda,
+                HoraInicio = new TimeSpan(18, 0, 0),
+                HoraFim = new TimeSpan(19, 0, 0),
+                Capacidade = 15,
+                IdFuncionario = ptPrincipal.IdFuncionario
+            };
 
+            context.Aulas.Add(aula);
+            await context.SaveChangesAsync();
 
-        context.Funcionarios.AddRange(funcionarios);
-        await context.SaveChangesAsync();
+            context.AulasMarcadas.AddRange(
+                new AulaMarcada { IdAula = aula.IdAula, DataAula = DateTime.UtcNow.AddDays(-7) },
+                new AulaMarcada { IdAula = aula.IdAula, DataAula = DateTime.UtcNow },
+                new AulaMarcada { IdAula = aula.IdAula, DataAula = DateTime.UtcNow.AddDays(7) }
+            );
 
-        // Membros
-        var sub = subscricoes.First();
+            await context.SaveChangesAsync();
+        }
 
-        var membros = new[]
+        // =============================
+        // RESERVA AULA
+        // =============================
+        if (!context.MembrosAulas.Any())
         {
-            new Membro { IdUser = users[3].IdUser, Nome = "Membro 1",  Telemovel = "920000001", IdSubscricao = sub.IdSubscricao, DataRegisto = DateTime.UtcNow },
-            new Membro { IdUser = users[4].IdUser, Nome = "Membro 2",  Telemovel = "920000001", IdSubscricao = sub.IdSubscricao, DataRegisto = DateTime.UtcNow }
-        };
+            var aulaMarcada = context.AulasMarcadas
+                .OrderBy(a => a.DataAula)
+                .First();
 
-        context.Membros.AddRange(membros);
-        await context.SaveChangesAsync();
+            context.MembrosAulas.Add(
+                new MembroAula
+                {
+                    IdMembro = membroAtivo.IdMembro,
+                    IdAulaMarcada = aulaMarcada.Id,
+                    DataReserva = DateTime.UtcNow.AddDays(-8),
+                    Presenca = Presenca.Presente
+                }
+            );
 
-        // Exercícios
-        var exercicios = new[]
+            await context.SaveChangesAsync();
+        }
+
+        // =============================
+        // AVALIAÇÃO FÍSICA
+        // =============================
+        if (!context.AvaliacoesFisicas.Any())
         {
-            new Exercicio { Nome = "Supino Reto", GrupoMuscular = GrupoMuscular.Peito, Descricao = "exercicio para peito", FotoUrl = "" },
-            new Exercicio { Nome = "Agachamento", GrupoMuscular = GrupoMuscular.Pernas, Descricao = "exercicio para pernas", FotoUrl = "" }
-        };
+            context.AvaliacoesFisicas.Add(
+                new AvaliacaoFisica
+                {
+                    IdMembro = membroAtivo.IdMembro,
+                    IdFuncionario = ptPrincipal.IdFuncionario,
+                    DataAvaliacao = DateTime.UtcNow.AddMonths(-1),
+                    Peso = 82,
+                    Altura = 1.75m,
+                    Imc = 26.78m,
+                    MassaGorda = 18,
+                    Observacoes = "Avaliação inicial"
+                }
+            );
 
-        context.Exercicios.AddRange(exercicios);
-        await context.SaveChangesAsync();
+            await context.SaveChangesAsync();
+        }
 
-        // Plano de treino
-        var ptFuncionario = funcionarios.First(f => f.Funcao == Funcao.PT);
-
-        var plano = new PlanoTreino
+        // =============================
+        // PAGAMENTOS
+        // =============================
+        if (!context.Pagamentos.Any())
         {
-            Nome = "Plano Inicial",
-            IdFuncionario = ptFuncionario.IdFuncionario,
-            DataCriacao = DateTime.UtcNow
-        };
+            context.Pagamentos.AddRange(
+                new Pagamento
+                {
+                    IdMembro = membroAtivo.IdMembro,
+                    IdSubscricao = subscricaoMensal.IdSubscricao,
+                    ValorPago = 30,
+                    MetodoPagamento = MetodoPagamento.Cartao,
+                    EstadoPagamento = EstadoPagamento.Pago,
+                    MesReferente = DateTime.UtcNow.AddMonths(-1),
+                    DataPagamento = DateTime.UtcNow.AddMonths(-1)
+                },
+                new Pagamento
+                {
+                    IdMembro = membroAtivo.IdMembro,
+                    IdSubscricao = subscricaoMensal.IdSubscricao,
+                    ValorPago = 30,
+                    MetodoPagamento = MetodoPagamento.MBWay,
+                    EstadoPagamento = EstadoPagamento.Pendente,
+                    MesReferente = DateTime.UtcNow
+                }
+            );
 
-        context.Planos.Add(plano);
-        await context.SaveChangesAsync();
+            await context.SaveChangesAsync();
+        }
 
-        context.PlanosExercicios.AddRange(
-            new PlanoExercicio { IdPlano = plano.IdPlano, IdExercicio = exercicios[0].IdExercicio, Series = 3, Repeticoes = 10 },
-            new PlanoExercicio { IdPlano = plano.IdPlano, IdExercicio = exercicios[1].IdExercicio, Series = 3, Repeticoes = 12 }
-        );
+        // =============================
+        // RESERVAS AVALIAÇÃO FÍSICA
+        // =============================
+        if (!context.MembrosAvaliacoes.Any())
+        {
+            var avaliacao = context.AvaliacoesFisicas
+                .OrderBy(a => a.IdAvaliacao)
+                .First();
 
-        await context.SaveChangesAsync();
+            context.MembrosAvaliacoes.AddRange(
+                new MembroAvaliacao
+                {
+                    IdMembro = membroAtivo.IdMembro,
+                    DataReserva = DateTime.UtcNow.AddDays(7),
+                    Estado = EstadoAvaliacao.Reservado
+                },
+                new MembroAvaliacao
+                {
+                    IdMembro = membroAtivo.IdMembro,
+                    DataReserva = avaliacao.DataAvaliacao,
+                    Estado = EstadoAvaliacao.Presente,
+                    IdAvaliacaoFisica = avaliacao.IdAvaliacao
+                },
+                new MembroAvaliacao
+                {
+                    IdMembro = membroAtivo.IdMembro,
+                    DataReserva = DateTime.UtcNow.AddDays(-3),
+                    Estado = EstadoAvaliacao.Cancelado,
+                    DataCancelamento = DateTime.UtcNow.AddDays(-3)
+                }
+            );
+
+            await context.SaveChangesAsync();
+        }
     }
 }
