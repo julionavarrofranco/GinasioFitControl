@@ -9,123 +9,138 @@ public static class DbInitializer
     {
         using var scope = services.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<GinasioDbContext>();
+        var hasher = new PasswordHasher<User>();
 
         await context.Database.MigrateAsync();
-
-        var hasher = new PasswordHasher<User>();
 
         // =============================
         // SUBSCRIÇÕES
         // =============================
-        if (!context.Subscricoes.Any())
+        var subscricoesSeed = new[]
         {
-            context.Subscricoes.AddRange(
-                new Subscricao { Nome = "Mensal", Tipo = TipoSubscricao.Mensal, Preco = 30, Ativo = true },
-                new Subscricao { Nome = "Trimestral", Tipo = TipoSubscricao.Trimestral, Preco = 80, Ativo = true },
-                new Subscricao { Nome = "Anual", Tipo = TipoSubscricao.Anual, Preco = 200, Ativo = true },
-                new Subscricao { Nome = "Promo Antiga", Tipo = TipoSubscricao.Mensal, Preco = 25, Ativo = false }
-            );
-            await context.SaveChangesAsync();
+            new Subscricao { Nome = "Mensal", Tipo = TipoSubscricao.Mensal, Preco = 30, Ativo = true },
+            new Subscricao { Nome = "Trimestral", Tipo = TipoSubscricao.Trimestral, Preco = 80, Ativo = true },
+            new Subscricao { Nome = "Anual", Tipo = TipoSubscricao.Anual, Preco = 200, Ativo = true },
+            new Subscricao { Nome = "Promo Antiga", Tipo = TipoSubscricao.Mensal, Preco = 25, Ativo = false }
+        };
+
+        foreach (var s in subscricoesSeed)
+        {
+            if (!await context.Subscricoes.AnyAsync(x => x.Nome == s.Nome))
+                context.Subscricoes.Add(s);
         }
 
-        var subscricaoMensal = context.Subscricoes
-            .Where(s => s.Tipo == TipoSubscricao.Mensal && s.Ativo)
-            .OrderBy(s => s.IdSubscricao)
-            .First();
+        await context.SaveChangesAsync();
+
+        var subscricaoMensal = await context.Subscricoes
+            .FirstAsync(s => s.Tipo == TipoSubscricao.Mensal && s.Ativo);
 
         // =============================
         // USERS
         // =============================
-        if (!context.Users.Any())
+        var usersSeed = new[]
         {
-            var users = new[]
-            {
-                new User { Email="admin@fit.local", Tipo=Tipo.Funcionario, Ativo=true },
-                new User { Email="rececao@fit.local", Tipo=Tipo.Funcionario, Ativo=true },
-                new User { Email="pt@fit.local", Tipo=Tipo.Funcionario, Ativo=true },
-                new User { Email="pt2@fit.local", Tipo=Tipo.Funcionario, Ativo=true },
+            ("admin@fit.local", Tipo.Funcionario),
+            ("rececao@fit.local", Tipo.Funcionario),
+            ("pt@fit.local", Tipo.Funcionario),
+            ("pt2@fit.local", Tipo.Funcionario),
 
-                new User { Email="m1@fit.local", Tipo=Tipo.Membro, Ativo=true },
-                new User { Email="m2@fit.local", Tipo=Tipo.Membro, Ativo=true },
-                new User { Email="m3@fit.local", Tipo=Tipo.Membro, Ativo=false },
-                new User { Email="m4@fit.local", Tipo=Tipo.Membro, Ativo=true, PrimeiraVez=true }
+            ("m1@fit.local", Tipo.Membro),
+            ("m2@fit.local", Tipo.Membro),
+            ("m3@fit.local", Tipo.Membro),
+            ("m4@fit.local", Tipo.Membro)
+        };
+
+        foreach (var (email, tipo) in usersSeed)
+        {
+            if (await context.Users.AnyAsync(u => u.Email == email))
+                continue;
+
+            var user = new User
+            {
+                Email = email,
+                Tipo = tipo,
+                Ativo = true,
+                PrimeiraVez = true
             };
 
-            foreach (var u in users)
-                u.PasswordHash = hasher.HashPassword(u, "Teste@123!");
-
-            context.Users.AddRange(users);
-            await context.SaveChangesAsync();
+            user.PasswordHash = hasher.HashPassword(user, "Teste@123!");
+            context.Users.Add(user);
         }
 
+        await context.SaveChangesAsync();
+
         // =============================
-        // FUNCIONÁRIOS
+        // FUNCIONÁRIOS (CRÍTICO)
         // =============================
-        if (!context.Funcionarios.Any())
+        var funcionariosSeed = new[]
         {
-            var admin = context.Users.Where(u => u.Email == "admin@fit.local").OrderBy(u => u.IdUser).First();
-            var rececao = context.Users.Where(u => u.Email == "rececao@fit.local").OrderBy(u => u.IdUser).First();
-            var pt1 = context.Users.Where(u => u.Email == "pt@fit.local").OrderBy(u => u.IdUser).First();
-            var pt2 = context.Users.Where(u => u.Email == "pt2@fit.local").OrderBy(u => u.IdUser).First();
+            ("admin@fit.local", "Admin", Funcao.Admin, "910000001"),
+            ("rececao@fit.local", "Receção", Funcao.Rececao, null),
+            ("pt@fit.local", "PT João", Funcao.PT, null),
+            ("pt2@fit.local", "PT Maria", Funcao.PT, null)
+        };
 
-            context.Funcionarios.AddRange(
-                new Funcionario { IdUser = admin.IdUser, Nome = "Admin", Funcao = Funcao.Admin, Telemovel = "910000001" },
-                new Funcionario { IdUser = rececao.IdUser, Nome = "Receção", Funcao = Funcao.Rececao },
-                new Funcionario { IdUser = pt1.IdUser, Nome = "PT João", Funcao = Funcao.PT },
-                new Funcionario { IdUser = pt2.IdUser, Nome = "PT Maria", Funcao = Funcao.PT }
-            );
+        foreach (var (email, nome, funcao, telemovel) in funcionariosSeed)
+        {
+            var user = await context.Users.FirstAsync(u => u.Email == email);
 
-            await context.SaveChangesAsync();
+            if (user.Tipo != Tipo.Funcionario)
+                continue;
+
+            if (await context.Funcionarios.AnyAsync(f => f.IdUser == user.IdUser))
+                continue;
+
+            context.Funcionarios.Add(new Funcionario
+            {
+                IdUser = user.IdUser,
+                Nome = nome,
+                Funcao = funcao,
+                Telemovel = telemovel ?? "910000000"
+            });
         }
 
-        var ptPrincipal = context.Funcionarios
+        await context.SaveChangesAsync();
+
+        var ptPrincipal = await context.Funcionarios
             .Where(f => f.Funcao == Funcao.PT)
             .OrderBy(f => f.IdFuncionario)
-            .First();
+            .FirstAsync();
 
         // =============================
         // MEMBROS
         // =============================
-        if (!context.Membros.Any())
+        var membrosSeed = new[]
         {
-            var membrosUsers = context.Users
-                .Where(u => u.Tipo == Tipo.Membro)
-                .OrderBy(u => u.IdUser)
-                .ToList();
+            ("m1@fit.local", "Carlos Silva", "920000001"),
+            ("m2@fit.local", "Ana Costa", "920000002"),
+            ("m3@fit.local", "Membro Inativo", "920000003"),
+            ("m4@fit.local", "Novo Membro", "920000004")
+        };
 
-            context.Membros.AddRange(
-                new Membro
-                {
-                    IdUser = membrosUsers[0].IdUser,
-                    Nome = "Carlos Silva",
-                    Telemovel = "920000001",
-                    IdSubscricao = subscricaoMensal.IdSubscricao,
-                    DataRegisto = DateTime.UtcNow.AddMonths(-6)
-                },
-                new Membro
-                {
-                    IdUser = membrosUsers[1].IdUser,
-                    Nome = "Ana Costa",
-                    Telemovel = "920000002",
-                    IdSubscricao = subscricaoMensal.IdSubscricao,
-                    DataRegisto = DateTime.UtcNow.AddMonths(-2)
-                },
-                new Membro
-                {
-                    IdUser = membrosUsers[2].IdUser,
-                    Nome = "Membro Inativo",
-                    Telemovel = "920000003",
-                    IdSubscricao = subscricaoMensal.IdSubscricao,
-                    DataRegisto = DateTime.UtcNow.AddYears(-1)
-                }
-            );
+        foreach (var (email, nome, telemovel) in membrosSeed)
+        {
+            var user = await context.Users.FirstAsync(u => u.Email == email);
 
-            await context.SaveChangesAsync();
+            if (user.Tipo != Tipo.Membro)
+                continue;
+
+            if (await context.Membros.AnyAsync(m => m.IdUser == user.IdUser))
+                continue;
+
+            context.Membros.Add(new Membro
+            {
+                IdUser = user.IdUser,
+                Nome = nome,
+                Telemovel = telemovel,
+                IdSubscricao = subscricaoMensal.IdSubscricao,
+                DataRegisto = DateTime.UtcNow
+            });
         }
 
-        var membroAtivo = context.Membros
-            .OrderBy(m => m.IdMembro)
-            .First();
+        await context.SaveChangesAsync();
+
+        var membroAtivo = await context.Membros.FirstAsync();
 
         // =============================
         // EXERCÍCIOS

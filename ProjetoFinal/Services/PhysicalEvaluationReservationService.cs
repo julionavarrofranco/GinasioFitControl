@@ -108,19 +108,32 @@ namespace ProjetoFinal.Services
             await _context.SaveChangesAsync();
             return true;
         }
-        
-        public async Task<List<MembroAvaliacao>> GetReservationsAsync()
+
+        public async Task<List<MemberEvaluationReservationSummaryDto>> GetReservationsAsync()
         {
             return await _context.MembrosAvaliacoes
                 .AsNoTracking()
-                .Include(r => r.Membro)
-                .Include(r => r.AvaliacaoFisica)
+                .Include(r => r.Membro) // necessário para Nome e Telemovel
+                .Include(r => r.AvaliacaoFisica) // carrega AvaliacaoFisica, Funcionario será acessado no Select
                 .Where(r => r.Estado == EstadoAvaliacao.Reservado && r.DataDesativacao == null)
                 .OrderBy(r => r.DataReserva)
+                .Select(r => new MemberEvaluationReservationSummaryDto
+                {
+                    IdMembroAvaliacao = r.IdMembroAvaliacao,
+                    IdMembro = r.IdMembro,
+                    NomeMembro = r.Membro != null ? r.Membro.Nome : string.Empty,
+                    TelemovelMembro = r.Membro != null ? r.Membro.Telemovel : string.Empty,
+                    IdFuncionario = r.AvaliacaoFisica != null ? r.AvaliacaoFisica.IdFuncionario : (int?)null,
+                    NomeFuncionario = r.AvaliacaoFisica != null && r.AvaliacaoFisica.Funcionario != null
+                        ? r.AvaliacaoFisica.Funcionario.Nome
+                        : string.Empty,
+                    DataReserva = r.DataReserva,
+                    EstadoString = r.Estado.ToString()
+                })
                 .ToListAsync();
         }
 
-        public async Task<List<MembroAvaliacao>> GetCompletedReservationsAsync()
+        public async Task<List<MemberEvaluationReservationSummaryDto>> GetCompletedReservationsAsync()
         {
             return await _context.MembrosAvaliacoes
                 .AsNoTracking()
@@ -128,8 +141,22 @@ namespace ProjetoFinal.Services
                 .Include(r => r.AvaliacaoFisica)
                 .Where(r => r.Estado == EstadoAvaliacao.Presente || r.Estado == EstadoAvaliacao.Faltou)
                 .OrderByDescending(r => r.DataReserva)
+                .Select(r => new MemberEvaluationReservationSummaryDto
+                {
+                    IdMembroAvaliacao = r.IdMembroAvaliacao,
+                    IdMembro = r.IdMembro,
+                    NomeMembro = r.Membro != null ? r.Membro.Nome : string.Empty,
+                    TelemovelMembro = r.Membro != null ? r.Membro.Telemovel : string.Empty,
+                    IdFuncionario = r.AvaliacaoFisica != null ? r.AvaliacaoFisica.IdFuncionario : (int?)null,
+                    NomeFuncionario = r.AvaliacaoFisica != null && r.AvaliacaoFisica.Funcionario != null
+                        ? r.AvaliacaoFisica.Funcionario.Nome
+                        : string.Empty,
+                    DataReserva = r.DataReserva,
+                    EstadoString = r.Estado.ToString()
+                })
                 .ToListAsync();
         }
+
 
     }
 }

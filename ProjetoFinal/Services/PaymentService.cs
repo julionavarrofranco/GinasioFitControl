@@ -166,9 +166,10 @@ namespace ProjetoFinal.Services
                 {
                     IdPagamento = p.IdPagamento,
                     ValorPago = p.ValorPago,
-                    EstadoPagamento = p.EstadoPagamento,
+                    EstadoPagamento = p.EstadoPagamento.ToString(),
                     MesReferente = p.MesReferente,
                     DataPagamento = p.DataPagamento,
+                    MetodoPagamento = p.MetodoPagamento.ToString(),
                     IdMembro = p.Membro.IdMembro,
                     NomeMembro = p.Membro.Nome,
                     Subscricao = p.Subscricao.Tipo.ToString()
@@ -189,9 +190,10 @@ namespace ProjetoFinal.Services
                 {
                     IdPagamento = p.IdPagamento,
                     ValorPago = p.ValorPago,
-                    EstadoPagamento = p.EstadoPagamento,
+                    EstadoPagamento = p.EstadoPagamento.ToString(),
                     MesReferente = p.MesReferente,
                     DataPagamento = p.DataPagamento,
+                    MetodoPagamento = p.MetodoPagamento.ToString(),
                     IdMembro = p.Membro.IdMembro,
                     NomeMembro = p.Membro.Nome,
                     Subscricao = p.Subscricao.Tipo.ToString()
@@ -212,9 +214,10 @@ namespace ProjetoFinal.Services
                 {
                     IdPagamento = p.IdPagamento,
                     ValorPago = p.ValorPago,
-                    EstadoPagamento = p.EstadoPagamento,
+                    EstadoPagamento = p.EstadoPagamento.ToString(),
                     MesReferente = p.MesReferente,
                     DataPagamento = p.DataPagamento,
+                    MetodoPagamento = p.MetodoPagamento.ToString(),
                     IdMembro = p.Membro.IdMembro,
                     NomeMembro = p.Membro.Nome,
                     Subscricao = p.Subscricao.Tipo.ToString()
