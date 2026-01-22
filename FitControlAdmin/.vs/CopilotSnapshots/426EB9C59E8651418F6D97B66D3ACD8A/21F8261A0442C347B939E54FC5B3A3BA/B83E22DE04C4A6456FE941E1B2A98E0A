@@ -1,0 +1,272 @@
+﻿<Window x:Class="FitControlAdmin.TestPhysicalEvaluationWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Teste - Criar Reserva e Avaliacao Fisica"
+        Height="500" Width="600"
+        WindowStartupLocation="CenterOwner"
+        Background="#1f2937"
+        ResizeMode="NoResize">
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Title -->
+        <TextBlock Grid.Row="0"
+                   Text="Teste - Criar Reserva para Avaliacao Fisica"
+                   FontSize="18"
+                   FontWeight="Bold"
+                   Foreground="#e6e6e8"
+                   Margin="0,0,0,20"/>
+
+        <!-- Info -->
+        <TextBlock Grid.Row="1"
+                   Text="Use esta janela para testar a criacao de uma reserva de avaliacao fisica e depois complet&#x00E1;-la com dados da avaliacao."
+                   FontSize="12"
+                   Foreground="#95a5a6"
+                   TextWrapping="Wrap"
+                   Margin="0,0,0,20"/>
+
+        <!-- Content -->
+        <StackPanel Grid.Row="2" VerticalAlignment="Top">
+            <!-- Passo 1: Criar Reserva -->
+            <Border Background="#272936" 
+                    CornerRadius="8" 
+                    Padding="15" 
+                    Margin="0,0,0,20">
+                <StackPanel>
+                    <TextBlock Text="Passo 1: Criar Reserva"
+                               FontSize="14"
+                               FontWeight="Bold"
+                               Foreground="#e6e6e8"
+                               Margin="0,0,0,15"/>
+
+                    <StackPanel Margin="0,0,0,10">
+                        <TextBlock Text="ID do Membro:"
+                                   Foreground="#95a5a6"
+                                   FontSize="11"
+                                   Margin="0,0,0,5"/>
+                        <TextBox x:Name="IdMembroTextBox"
+                                 Background="#1f2937"
+                                 Foreground="White"
+                                 BorderBrush="#34495E"
+                                 BorderThickness="1"
+                                 Padding="10,8"
+                                 FontSize="12"
+                                 Text="1"/>
+                    </StackPanel>
+
+                    <StackPanel Margin="0,0,0,10">
+                        <TextBlock Text="Data da Reserva (ex: 2024-12-20 14:30):"
+                                   Foreground="#95a5a6"
+                                   FontSize="11"
+                                   Margin="0,0,0,5"/>
+                        <TextBox x:Name="DataReservaTextBox"
+                                 Background="#1f2937"
+                                 Foreground="White"
+                                 BorderBrush="#34495E"
+                                 BorderThickness="1"
+                                 Padding="10,8"
+                                 FontSize="12"
+                                 Text="2024-12-20 14:30"/>
+                    </StackPanel>
+
+                    <Button x:Name="CriarReservaButton"
+                            Content="1. Criar Reserva"
+                            Click="CriarReservaButton_Click"
+                            Padding="15,10"
+                            Background="#27AE60"
+                            Foreground="White"
+                            BorderThickness="0"
+                            Cursor="Hand"
+                            FontSize="13">
+                        <Button.Style>
+                            <Style TargetType="Button">
+                                <Setter Property="Background" Value="#27AE60"/>
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Background" Value="#229954"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+
+                    <TextBlock x:Name="ReservaStatusText"
+                               Foreground="#95a5a6"
+                               FontSize="11"
+                               Margin="0,10,0,0"
+                               TextWrapping="Wrap"/>
+                </StackPanel>
+            </Border>
+
+            <!-- Passo 2: Completar com Avaliacao Fisica -->
+            <Border Background="#272936" 
+                    CornerRadius="8" 
+                    Padding="15" 
+                    Margin="0,0,0,20">
+                <StackPanel>
+                    <TextBlock Text="Passo 2: Completar Avaliacao Fisica"
+                               FontSize="14"
+                               FontWeight="Bold"
+                               Foreground="#e6e6e8"
+                               Margin="0,0,0,15"/>
+
+                    <StackPanel Margin="0,0,0,10">
+                        <TextBlock Text="ID da Avaliacao:"
+                                   Foreground="#95a5a6"
+                                   FontSize="11"
+                                   Margin="0,0,0,5"/>
+                        <TextBox x:Name="IdAvaliacaoTextBox"
+                                 Background="#1f2937"
+                                 Foreground="White"
+                                 BorderBrush="#34495E"
+                                 BorderThickness="1"
+                                 Padding="10,8"
+                                 FontSize="12"
+                                 IsReadOnly="True"
+                                 Text="(sera preenchido apos passo 1)"/>
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                        <StackPanel Width="280" Margin="0,0,10,0">
+                            <TextBlock Text="Peso (kg):"
+                                       Foreground="#95a5a6"
+                                       FontSize="11"
+                                       Margin="0,0,0,5"/>
+                            <TextBox x:Name="PesoTextBox"
+                                     Background="#1f2937"
+                                     Foreground="White"
+                                     BorderBrush="#34495E"
+                                     BorderThickness="1"
+                                     Padding="10,8"
+                                     FontSize="12"
+                                     Text="75"/>
+                        </StackPanel>
+                        <StackPanel Width="280">
+                            <TextBlock Text="Altura (m):"
+                                       Foreground="#95a5a6"
+                                       FontSize="11"
+                                       Margin="0,0,0,5"/>
+                            <TextBox x:Name="AlturaTextBox"
+                                     Background="#1f2937"
+                                     Foreground="White"
+                                     BorderBrush="#34495E"
+                                     BorderThickness="1"
+                                     Padding="10,8"
+                                     FontSize="12"
+                                     Text="1.75"/>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                        <StackPanel Width="280" Margin="0,0,10,0">
+                            <TextBlock Text="Massa Muscular (%):"
+                                       Foreground="#95a5a6"
+                                       FontSize="11"
+                                       Margin="0,0,0,5"/>
+                            <TextBox x:Name="MassaMuscularTextBox"
+                                     Background="#1f2937"
+                                     Foreground="White"
+                                     BorderBrush="#34495E"
+                                     BorderThickness="1"
+                                     Padding="10,8"
+                                     FontSize="12"
+                                     Text="45"/>
+                        </StackPanel>
+                        <StackPanel Width="280">
+                            <TextBlock Text="Massa Gorda (%):"
+                                       Foreground="#95a5a6"
+                                       FontSize="11"
+                                       Margin="0,0,0,5"/>
+                            <TextBox x:Name="MassaGordaTextBox"
+                                     Background="#1f2937"
+                                     Foreground="White"
+                                     BorderBrush="#34495E"
+                                     BorderThickness="1"
+                                     Padding="10,8"
+                                     FontSize="12"
+                                     Text="20"/>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <StackPanel Margin="0,0,0,10">
+                        <TextBlock Text="Observacoes:"
+                                   Foreground="#95a5a6"
+                                   FontSize="11"
+                                   Margin="0,0,0,5"/>
+                        <TextBox x:Name="ObservacoesTextBox"
+                                 Background="#1f2937"
+                                 Foreground="White"
+                                 BorderBrush="#34495E"
+                                 BorderThickness="1"
+                                 Padding="10,8"
+                                 FontSize="12"
+                                 Height="60"
+                                 TextWrapping="Wrap"
+                                 VerticalScrollBarVisibility="Auto"
+                                 AcceptsReturn="True"
+                                 Text="Teste de avaliacao fisica"/>
+                    </StackPanel>
+
+                    <Button x:Name="CriarAvaliacaoButton"
+                            Content="2. Criar Avaliacao Fisica"
+                            Click="CriarAvaliacaoButton_Click"
+                            Padding="15,10"
+                            Background="#02acc3"
+                            Foreground="White"
+                            BorderThickness="0"
+                            Cursor="Hand"
+                            FontSize="13">
+                        <Button.Style>
+                            <Style TargetType="Button">
+                                <Setter Property="Background" Value="#02acc3"/>
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Background" Value="#0299b0"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+
+                    <TextBlock x:Name="AvaliacaoStatusText"
+                               Foreground="#95a5a6"
+                               FontSize="11"
+                               Margin="0,10,0,0"
+                               TextWrapping="Wrap"/>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+
+        <!-- Buttons -->
+        <StackPanel Grid.Row="3" 
+                    Orientation="Horizontal" 
+                    HorizontalAlignment="Right"
+                    Margin="0,20,0,0">
+            <Button Content="Fechar"
+                    Click="FechaButton_Click"
+                    Padding="30,10"
+                    Background="#e74c3c"
+                    Foreground="White"
+                    BorderThickness="0"
+                    Cursor="Hand"
+                    FontSize="12">
+                <Button.Style>
+                    <Style TargetType="Button">
+                        <Setter Property="Background" Value="#e74c3c"/>
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#c0392b"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+            </Button>
+        </StackPanel>
+    </Grid>
+</Window>

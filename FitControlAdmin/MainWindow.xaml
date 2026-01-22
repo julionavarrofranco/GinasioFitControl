@@ -375,6 +375,20 @@
                     <!-- Separator -->
                     <Border Height="1" Background="#34495E" Margin="10,10"/>
 
+                    <!-- Teste Avaliações (DEBUG) -->
+                    <Button x:Name="BtnTesteAvaliacao" Style="{StaticResource SidebarButtonStyle}"
+                            Background="Transparent" 
+                            BorderBrush="#f39c12" 
+                            BorderThickness="1">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="🧪 " Foreground="#f39c12" FontSize="14"/>
+                            <TextBlock Text="Teste Avaliação" Foreground="White" FontSize="14"/>
+                        </StackPanel>
+                    </Button>
+
+                    <!-- Separator -->
+                    <Border Height="1" Background="#34495E" Margin="10,10"/>
+
                     <!-- Configurações -->
                     <Button x:Name="BtnConfig" Style="{StaticResource SidebarButtonStyle}"
                             Background="Transparent" 
@@ -1087,7 +1101,6 @@
                                 <DataGridTextColumn Header="ID Pagamento" Binding="{Binding IdPagamento}" Width="90"/>
                                 <DataGridTextColumn Header="ID Membro" Binding="{Binding IdMembro}" Width="80"/>
                                 <DataGridTextColumn Header="Membro" Binding="{Binding NomeMembro}" Width="150"/>
-                                <DataGridTextColumn Header="ID Subscrição" Binding="{Binding IdSubscricao}" Width="90"/>
                                 <DataGridTextColumn Header="Subscrição" Binding="{Binding NomeSubscricao}" Width="120"/>
                                 <DataGridTextColumn Header="Data Pagamento" Binding="{Binding DataPagamento, StringFormat=dd/MM/yyyy}" Width="110"/>
                                 <DataGridTextColumn Header="Valor Pago" Binding="{Binding ValorPago, StringFormat=C}" Width="100"/>

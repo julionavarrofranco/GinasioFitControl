@@ -33,6 +33,7 @@ namespace FitControlAdmin.Models
         public DateTime? DataNascimento { get; set; }
         public int? IdSubscricao { get; set; }
         public string? Funcao { get; set; }
+        public MetodoPagamento? MetodoPagamento { get; set; }
     }
 
     public class MemberDto

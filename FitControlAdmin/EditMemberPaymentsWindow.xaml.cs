@@ -24,23 +24,36 @@ namespace FitControlAdmin
             Title = $"Gestão de Pagamentos - {member.Nome}";
             MemberInfoText.Text = $"Membro: {member.Nome} | Email: {member.Email} | Subscrição Atual: {member.Subscricao}";
 
-            LoadPayments();
+            this.Loaded += EditMemberPaymentsWindow_Loaded;
+        }
+        private async void EditMemberPaymentsWindow_Loaded(object sender, RoutedEventArgs e)
+        {
+            await LoadPayments();
         }
 
-        private async void LoadPayments()
+        private async Task LoadPayments()
         {
             try
             {
-                // Load all active payments and subscriptions
-                var paymentsTask = _apiService.GetPaymentsByActiveStateAsync(true);
+                // Load active and inactive payments, plus subscriptions
+                var activePaymentsTask = _apiService.GetPaymentsByActiveStateAsync(true);
+                var inactivePaymentsTask = _apiService.GetPaymentsByActiveStateAsync(false);
                 var subscriptionsTask = _apiService.GetSubscriptionsByStateAsync(true);
 
-                await Task.WhenAll(paymentsTask, subscriptionsTask);
+                await Task.WhenAll(activePaymentsTask, inactivePaymentsTask, subscriptionsTask);
 
-                _allPayments = await paymentsTask;
-                _allSubscriptions = await subscriptionsTask;
+                var activePayments = activePaymentsTask.Result;
+                var inactivePayments = inactivePaymentsTask.Result;
+                _allSubscriptions = subscriptionsTask.Result;
 
-                if (_allPayments != null && _allSubscriptions != null)
+                // Combine active and inactive payments
+                _allPayments = new List<PaymentResponseDto>();
+                if (activePayments != null)
+                    _allPayments.AddRange(activePayments);
+                if (inactivePayments != null)
+                    _allPayments.AddRange(inactivePayments);
+
+                if (_allPayments.Count > 0 && _allSubscriptions != null)
                 {
                     // Filter payments for this member
                     var memberPayments = _allPayments
@@ -50,8 +63,7 @@ namespace FitControlAdmin
                             IdPagamento = p.IdPagamento,
                             IdMembro = p.IdMembro,
                             NomeMembro = _member.Nome,
-                            IdSubscricao = p.IdSubscricao,
-                            NomeSubscricao = _allSubscriptions.FirstOrDefault(s => s.IdSubscricao == p.IdSubscricao)?.Nome ?? "N/A",
+                            NomeSubscricao = p.Subscricao ?? "N/A",
                             DataPagamento = p.DataPagamento,
                             ValorPago = p.ValorPago,
                             MetodoPagamento = FormatEnumName(p.MetodoPagamento.ToString()),
@@ -66,6 +78,10 @@ namespace FitControlAdmin
 
                     PaymentsDataGrid.ItemsSource = memberPayments;
                 }
+                else
+                {
+                    PaymentsDataGrid.ItemsSource = new List<PaymentDisplayModel>();
+                }
             }
             catch (Exception ex)
             {
@@ -74,13 +90,13 @@ namespace FitControlAdmin
             }
         }
 
-        private void CreatePaymentButton_Click(object sender, RoutedEventArgs e)
+        private async void CreatePaymentButton_Click(object sender, RoutedEventArgs e)
         {
             var createWindow = new CreatePaymentWindow(_apiService, _member.IdMembro);
             createWindow.Owner = this;
             if (createWindow.ShowDialog() == true)
             {
-                LoadPayments();
+                await LoadPayments();
             }
         }
 
@@ -102,7 +118,7 @@ namespace FitControlAdmin
                     editWindow.Owner = this;
                     if (editWindow.ShowDialog() == true)
                     {
-                        LoadPayments();
+                        await LoadPayments();
                     }
                 }
                 catch (Exception ex)
@@ -137,7 +153,7 @@ namespace FitControlAdmin
                         {
                             MessageBox.Show("Pagamento marcado como pago com sucesso!",
                                 "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
-                            LoadPayments();
+                            await LoadPayments();
                         }
                         else
                         {

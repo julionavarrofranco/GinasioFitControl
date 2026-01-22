@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Net.Http.Headers;
@@ -516,11 +516,18 @@ namespace FitControlAdmin.Services
 
                 var errorContent = await response.Content.ReadAsStringAsync();
                 var message = ExtractMessage(errorContent);
+                
+                // If no message extracted, try to get the full error content for debugging
+                if (string.IsNullOrEmpty(message))
+                {
+                    message = errorContent.Length > 500 ? errorContent.Substring(0, 500) + "..." : errorContent;
+                }
+                
                 return (false, message ?? $"Erro ao criar pagamento ({response.StatusCode}).", null);
             }
             catch (Exception ex)
             {
-                return (false, ex.Message, null);
+                return (false, $"Exceção: {ex.Message}\n\nStack: {ex.StackTrace}", null);
             }
         }
 
@@ -528,18 +535,30 @@ namespace FitControlAdmin.Services
         {
             try
             {
+                // Debug: Log the request data
+                System.Diagnostics.Debug.WriteLine($"UpdatePaymentAsync: Updating payment {idPagamento}");
+                System.Diagnostics.Debug.WriteLine($"UpdatePaymentAsync: MetodoPagamento={updateDto.MetodoPagamento}, EstadoPagamento={updateDto.EstadoPagamento}");
+
                 var response = await _httpClient.PatchAsJsonAsync($"/api/Payment/update-payment/{idPagamento}", updateDto);
+
+                // Debug: Log response details
+                System.Diagnostics.Debug.WriteLine($"UpdatePaymentAsync: Response status: {response.StatusCode}");
+
                 if (response.IsSuccessStatusCode)
                 {
+                    System.Diagnostics.Debug.WriteLine("UpdatePaymentAsync: Update successful");
                     return (true, null);
                 }
 
                 var errorContent = await response.Content.ReadAsStringAsync();
+                System.Diagnostics.Debug.WriteLine($"UpdatePaymentAsync: Error content: {errorContent}");
+
                 var message = ExtractMessage(errorContent);
                 return (false, message ?? $"Erro ao atualizar pagamento ({response.StatusCode}).");
             }
             catch (Exception ex)
             {
+                System.Diagnostics.Debug.WriteLine($"UpdatePaymentAsync: Exception: {ex.Message}");
                 return (false, ex.Message);
             }
         }
@@ -751,8 +770,21 @@ namespace FitControlAdmin.Services
                 var response = await _httpClient.PostAsync($"/api/PhysicalEvaluationReservation/{idMembro}?dataReserva={dataReserva:yyyy-MM-ddTHH:mm:ss}", null);
                 if (response.IsSuccessStatusCode)
                 {
-                    var reservation = await response.Content.ReadFromJsonAsync<PhysicalEvaluationReservationResponseDto>();
-                    return (true, null, reservation);
+                    var rawReservation = await response.Content.ReadFromJsonAsync<MembroAvaliacao>();
+                    if (rawReservation != null)
+                    {
+                        var reservation = new PhysicalEvaluationReservationResponseDto
+                        {
+                            IdAvaliacao = rawReservation.IdMembroAvaliacao,
+                            IdMembro = rawReservation.IdMembro,
+                            IdFuncionario = null,
+                            DataAvaliacao = rawReservation.DataReserva,
+                            Estado = rawReservation.Estado.ToString(),
+                            NomeMembro = rawReservation.Membro?.Nome,
+                            NomeFuncionario = null
+                        };
+                        return (true, null, reservation);
+                    }
                 }
 
                 var errorContent = await response.Content.ReadAsStringAsync();
@@ -812,7 +844,20 @@ namespace FitControlAdmin.Services
                 var response = await _httpClient.GetAsync("/api/PhysicalEvaluationReservation/active");
                 if (response.IsSuccessStatusCode)
                 {
-                    return await response.Content.ReadFromJsonAsync<List<PhysicalEvaluationReservationResponseDto>>();
+                    var rawReservations = await response.Content.ReadFromJsonAsync<List<MembroAvaliacao>>();
+                    if (rawReservations != null)
+                    {
+                        return rawReservations.Select(r => new PhysicalEvaluationReservationResponseDto
+                        {
+                            IdAvaliacao = r.IdMembroAvaliacao,
+                            IdMembro = r.IdMembro,
+                            IdFuncionario = null, // Active reservations don't have assigned PT yet
+                            DataAvaliacao = r.DataReserva,
+                            Estado = r.Estado.ToString(),
+                            NomeMembro = r.Membro?.Nome,
+                            NomeFuncionario = null
+                        }).ToList();
+                    }
                 }
                 return null;
             }
@@ -829,7 +874,20 @@ namespace FitControlAdmin.Services
                 var response = await _httpClient.GetAsync("/api/PhysicalEvaluationReservation/completed");
                 if (response.IsSuccessStatusCode)
                 {
-                    return await response.Content.ReadFromJsonAsync<List<PhysicalEvaluationReservationResponseDto>>();
+                    var rawReservations = await response.Content.ReadFromJsonAsync<List<MembroAvaliacao>>();
+                    if (rawReservations != null)
+                    {
+                        return rawReservations.Select(r => new PhysicalEvaluationReservationResponseDto
+                        {
+                            IdAvaliacao = r.IdMembroAvaliacao,
+                            IdMembro = r.IdMembro,
+                            IdFuncionario = r.AvaliacaoFisica?.IdFuncionario,
+                            DataAvaliacao = r.DataReserva,
+                            Estado = r.Estado.ToString(),
+                            NomeMembro = r.Membro?.Nome,
+                            NomeFuncionario = r.AvaliacaoFisica?.Funcionario?.Nome
+                        }).ToList();
+                    }
                 }
                 return null;
             }
@@ -884,4 +942,3 @@ namespace FitControlAdmin.Services
         #endregion
     }
 }
-

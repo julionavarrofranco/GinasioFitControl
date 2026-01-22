@@ -30,7 +30,7 @@ namespace FitControlAdmin
             if (_subscriptions != null)
             {
                 SubscricaoComboBox.ItemsSource = _subscriptions;
-                var selectedSub = _subscriptions.FirstOrDefault(s => s.IdSubscricao == _payment.IdSubscricao);
+                var selectedSub = _subscriptions.FirstOrDefault(s => FormatEnumName(s.Tipo.ToString()) == _payment.Subscricao);
                 if (selectedSub != null)
                     SubscricaoComboBox.SelectedItem = selectedSub;
             }
@@ -43,7 +43,7 @@ namespace FitControlAdmin
                 var item = new ComboBoxItem { Content = displayName, Tag = metodo };
                 MetodoPagamentoComboBox.Items.Add(item);
                 
-                if (metodo == _payment.MetodoPagamento)
+                if (metodo.ToString() == _payment.MetodoPagamento)
                     MetodoPagamentoComboBox.SelectedItem = item;
             }
 
@@ -55,7 +55,7 @@ namespace FitControlAdmin
                 var item = new ComboBoxItem { Content = displayName, Tag = estado };
                 EstadoPagamentoComboBox.Items.Add(item);
                 
-                if (estado == _payment.EstadoPagamento)
+                if (estado.ToString() == _payment.EstadoPagamento)
                     EstadoPagamentoComboBox.SelectedItem = item;
             }
         }
@@ -88,28 +88,30 @@ namespace FitControlAdmin
                 // Update payment method if changed
                 if (MetodoPagamentoComboBox.SelectedItem is ComboBoxItem selectedMetodo &&
                     selectedMetodo.Tag is MetodoPagamento metodoPagamento &&
-                    metodoPagamento != _payment.MetodoPagamento)
+                    metodoPagamento.ToString() != _payment.MetodoPagamento)
                 {
                     updateDto.MetodoPagamento = metodoPagamento;
                     hasChanges = true;
+                    System.Diagnostics.Debug.WriteLine($"EditPaymentWindow: MetodoPagamento changed from {_payment.MetodoPagamento} to {metodoPagamento}");
                 }
 
                 // Update payment state if changed
                 if (EstadoPagamentoComboBox.SelectedItem is ComboBoxItem selectedEstado &&
                     selectedEstado.Tag is EstadoPagamento estadoPagamento &&
-                    estadoPagamento != _payment.EstadoPagamento)
+                    estadoPagamento.ToString() != _payment.EstadoPagamento)
                 {
                     updateDto.EstadoPagamento = estadoPagamento;
                     hasChanges = true;
+                    System.Diagnostics.Debug.WriteLine($"EditPaymentWindow: EstadoPagamento changed from {_payment.EstadoPagamento} to {estadoPagamento}");
                 }
 
-                // Note: Subscription change is not supported by UpdatePaymentDto
-                // If subscription changed, inform user
+                // Update subscription if changed
                 if (SubscricaoComboBox.SelectedItem is SubscriptionResponseDto selectedSub &&
-                    selectedSub.IdSubscricao != _payment.IdSubscricao)
+                    FormatEnumName(selectedSub.Tipo.ToString()) != _payment.Subscricao)
                 {
-                    MessageBox.Show("A alteração de subscrição não é suportada. Por favor, crie um novo pagamento com a subscrição desejada.",
-                        "Informação", MessageBoxButton.OK, MessageBoxImage.Information);
+                    updateDto.IdSubscricao = selectedSub.IdSubscricao;
+                    hasChanges = true;
+                    System.Diagnostics.Debug.WriteLine($"EditPaymentWindow: Subscricao changed from '{_payment.Subscricao}' to '{FormatEnumName(selectedSub.Tipo.ToString())}' (IdSubscricao: {selectedSub.IdSubscricao})");
                 }
 
                 if (!hasChanges)

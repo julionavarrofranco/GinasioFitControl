@@ -89,8 +89,12 @@ namespace FitControlAdmin
                     if (_isEditMode && _paymentToEdit != null)
                     {
                         // Pre-select subscription from payment being edited
-                        SubscricaoComboBox.SelectedValue = _paymentToEdit.IdSubscricao;
-                        SubscricaoComboBox.IsEnabled = false; // Disable subscription change when editing
+                        var selectedSub = subscriptions.FirstOrDefault(s => FormatEnumName(s.Tipo.ToString()) == _paymentToEdit.Subscricao);
+                        if (selectedSub != null)
+                        {
+                            SubscricaoComboBox.SelectedValue = selectedSub.IdSubscricao;
+                        }
+                        // Allow subscription change when editing (API now supports it)
                     }
                     else if (_memberInfo != null && !string.IsNullOrEmpty(_memberInfo.Subscricao))
                     {
@@ -120,7 +124,7 @@ namespace FitControlAdmin
                 if (_isEditMode && _paymentToEdit != null)
                 {
                     // Pre-select payment method from payment being edited
-                    var selectedMetodo = metodosList.FirstOrDefault(m => ((dynamic)m).Value == _paymentToEdit.MetodoPagamento);
+                    var selectedMetodo = metodosList.FirstOrDefault(m => ((dynamic)m).Value.ToString() == _paymentToEdit.MetodoPagamento);
                     if (selectedMetodo != null)
                         MetodoPagamentoComboBox.SelectedItem = selectedMetodo;
                 }
@@ -227,41 +231,61 @@ namespace FitControlAdmin
                 // Verificar se estamos editando um pagamento existente
                 // Verificar novamente se há pagamento para editar (pode ter mudado após LoadData)
                 bool shouldUpdate = _paymentToEdit != null && _paymentToEdit.IdPagamento > 0;
-                
+
                 if (shouldUpdate)
                 {
                     // Modo edição - atualizar pagamento existente
-                    // Apenas método de pagamento pode ser editado (IdSubscricao e MesReferente não podem ser alterados)
-                    
-                    // Obter método de pagamento
+                    // Método de pagamento e subscrição podem ser editados (MesReferente não pode ser alterado)
+
+                    // Obter valores selecionados
                     dynamic metodoItem = MetodoPagamentoComboBox.SelectedItem;
                     var metodoPagamento = (MetodoPagamento)metodoItem.Value;
+                    var idSubscricao = (int)SubscricaoComboBox.SelectedValue;
+
+                    // Carregar subscrições para verificar mudança
+                    var subscriptions = await _apiService.GetSubscriptionsByStateAsync(true);
+                    var currentSubscription = subscriptions?.FirstOrDefault(s => FormatEnumName(s.Tipo.ToString()) == _paymentToEdit.Subscricao);
 
                     // Verificar se houve alteração
-                    if (metodoPagamento == _paymentToEdit.MetodoPagamento)
+                    var metodoChanged = metodoPagamento.ToString() != _paymentToEdit.MetodoPagamento;
+                    var subscricaoChanged = currentSubscription == null || idSubscricao != currentSubscription.IdSubscricao;
+
+                    if (!metodoChanged && !subscricaoChanged)
                     {
-                        MessageBox.Show("Nenhuma alteração foi realizada.", 
+                        MessageBox.Show("Nenhuma alteração foi realizada.",
                             "Informação", MessageBoxButton.OK, MessageBoxImage.Information);
                         return;
                     }
 
-                    // Criar DTO de atualização (apenas MetodoPagamento pode ser alterado)
-                    var updateDto = new UpdatePaymentDto
-                    {
-                        MetodoPagamento = metodoPagamento
-                    };
+                    // Criar DTO de atualização
+                    var updateDto = new UpdatePaymentDto();
+                    if (metodoChanged)
+                        updateDto.MetodoPagamento = metodoPagamento;
+                    if (subscricaoChanged)
+                        updateDto.IdSubscricao = idSubscricao;
+
+                    // Debug: Log what we're updating
+                    System.Diagnostics.Debug.WriteLine($"ConfirmButton_Click: Updating payment {_paymentToEdit.IdPagamento}");
+                    System.Diagnostics.Debug.WriteLine($"ConfirmButton_Click: MetodoChanged={metodoChanged}, SubscricaoChanged={subscricaoChanged}");
+                    System.Diagnostics.Debug.WriteLine($"ConfirmButton_Click: New MetodoPagamento={metodoPagamento}, New IdSubscricao={idSubscricao}");
 
                     // Atualizar pagamento
                     var (success, errorMessage) = await _apiService.UpdatePaymentAsync(_paymentToEdit.IdPagamento, updateDto);
                     if (success)
                     {
-                        MessageBox.Show("Pagamento atualizado com sucesso!", 
+                        // Debug: Log successful update
+                        System.Diagnostics.Debug.WriteLine("ConfirmButton_Click: Payment update successful");
+
+                        MessageBox.Show("Pagamento atualizado com sucesso!",
                             "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
                         DialogResult = true;
                         Close();
                     }
                     else
                     {
+                        // Debug: Log failed update
+                        System.Diagnostics.Debug.WriteLine($"ConfirmButton_Click: Payment update failed: {errorMessage}");
+
                         // Mensagem de erro específica para atualização
                         var errorMsg = errorMessage ?? "Erro ao atualizar pagamento.";
                         // Garantir que a mensagem indica que é um erro de atualização
@@ -269,7 +293,7 @@ namespace FitControlAdmin
                         {
                             errorMsg = "Não é possível atualizar: " + errorMsg;
                         }
-                        MessageBox.Show(errorMsg, 
+                        MessageBox.Show(errorMsg,
                             "Erro ao Atualizar", MessageBoxButton.OK, MessageBoxImage.Error);
                     }
                 }
@@ -327,4 +351,3 @@ namespace FitControlAdmin
         }
     }
 }
-

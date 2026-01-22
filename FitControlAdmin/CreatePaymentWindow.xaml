@@ -50,19 +50,18 @@
 
                 <ComboBox.ItemTemplate>
                     <DataTemplate>
-                        <TextBlock Text="{Binding Nome}"
-                                   Foreground="{Binding RelativeSource={RelativeSource AncestorType=ComboBox}, Path=Foreground}"/>
+                        <TextBlock Text="{Binding Nome}"/>
                     </DataTemplate>
                 </ComboBox.ItemTemplate>
 
                 <ComboBox.ItemContainerStyle>
                     <Style TargetType="ComboBoxItem">
                         <Setter Property="Background" Value="#e6e6e8"/>
-                        <Setter Property="Foreground" Value="White"/>
+                        <Setter Property="Foreground" Value="Black"/>
                         <Style.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
                                 <Setter Property="Background" Value="#34495E"/>
-                                <Setter Property="Foreground" Value="White"/>
+                                <Setter Property="Foreground" Value="Black"/>
                             </Trigger>
                             <Trigger Property="IsSelected" Value="True">
                                 <Setter Property="Background" Value="#02acc3"/>
@@ -92,15 +91,14 @@
 
                 <ComboBox.ItemTemplate>
                     <DataTemplate>
-                        <TextBlock Text="{Binding Nome}"
-                                   Foreground="{Binding RelativeSource={RelativeSource AncestorType=ComboBox}, Path=Foreground}"/>
+                        <TextBlock Text="{Binding Nome}"/>
                     </DataTemplate>
                 </ComboBox.ItemTemplate>
 
                 <ComboBox.ItemContainerStyle>
                     <Style TargetType="ComboBoxItem">
                         <Setter Property="Background" Value="#e6e6e8"/>
-                        <Setter Property="Foreground" Value="White"/>
+                        <Setter Property="Foreground" Value="Black"/>
                         <Style.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
                                 <Setter Property="Background" Value="#e6e6e8"/>
@@ -134,15 +132,14 @@
 
                 <ComboBox.ItemTemplate>
                     <DataTemplate>
-                        <TextBlock Text="{Binding DisplayName}"
-                                   Foreground="{Binding RelativeSource={RelativeSource AncestorType=ComboBox}, Path=Foreground}"/>
+                        <TextBlock Text="{Binding DisplayName}"/>
                     </DataTemplate>
                 </ComboBox.ItemTemplate>
 
                 <ComboBox.ItemContainerStyle>
                     <Style TargetType="ComboBoxItem">
                         <Setter Property="Background" Value="#e6e6e8"/>
-                        <Setter Property="Foreground" Value="White"/>
+                        <Setter Property="Foreground" Value="Black"/>
                         <Style.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
                                 <Setter Property="Background" Value="#e6e6e8"/>

@@ -1,0 +1,74 @@
+﻿// Ficheiro do Backend (API): Services/PaymentService.cs
+// EXEMPLO - adaptado ao teu contexto
+
+using Microsoft.EntityFrameworkCore;
+using ProjetoFinal.Models;
+using ProjetoFinal.Models.DTOs;
+using ProjetoFinal.Services.Interfaces;
+
+namespace ProjetoFinal.Services
+{
+    public class PaymentService : IPaymentService
+    {
+        private readonly ApplicationDbContext _context;
+
+        public PaymentService(ApplicationDbContext context)
+        {
+            _context = context;
+        }
+
+        public async Task<Pagamento> CreatePaymentAsync(PaymentDto request)
+        {
+            // Validações e criação do pagamento
+            // ...implementa conforme o teu contexto...
+            throw new NotImplementedException();
+        }
+
+        public async Task<string> UpdatePaymentAsync(int idPagamento, UpdatePaymentDto request)
+        {
+            // Atualização do pagamento
+            // ...implementa conforme o teu contexto...
+            throw new NotImplementedException();
+        }
+
+        public async Task ChangePaymentActiveStateAsync(int idPagamento, bool ativo)
+        {
+            // Mudar estado ativo/inativo
+            // ...implementa conforme o teu contexto...
+            throw new NotImplementedException();
+        }
+
+        public async Task<List<Pagamento>> GetAllPaymentsAsync()
+        {
+            return await _context.Pagamentos.ToListAsync();
+        }
+
+        public async Task<List<Pagamento>> GetPaymentsByActiveStateAsync(bool ativo)
+        {
+            return await _context.Pagamentos
+                .Where(p => (ativo && p.DataDesativacao == null) || (!ativo && p.DataDesativacao != null))
+                .ToListAsync();
+        }
+
+        public async Task<List<Pagamento>> GetPaymentsByDateAsync(DateTime inicio, DateTime fim)
+        {
+            // Implementar filtro por data
+            // ...implementa conforme o teu contexto...
+            throw new NotImplementedException();
+        }
+
+        public async Task<List<Pagamento>> GetPaymentsByPaymentStateAsync(EstadoPagamento estado)
+        {
+            // Implementar filtro por estado de pagamento
+            // ...implementa conforme o teu contexto...
+            throw new NotImplementedException();
+        }
+
+        public async Task<decimal> GetMonthlyRevenueAsync(int ano, int mes)
+        {
+            // Calcular receita mensal
+            // ...implementa conforme o teu contexto...
+            throw new NotImplementedException();
+        }
+    }
+}

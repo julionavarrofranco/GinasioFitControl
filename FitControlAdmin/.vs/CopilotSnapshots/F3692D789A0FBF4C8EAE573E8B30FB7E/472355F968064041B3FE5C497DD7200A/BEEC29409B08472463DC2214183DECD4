@@ -1,0 +1,14 @@
+﻿        [Authorize(Policy = "CanManagePayments")]
+        [HttpGet]
+        public async Task<IActionResult> GetAllPayments()
+        {
+            try
+            {
+                var pagamentos = await _paymentService.GetAllPaymentsAsync();
+                return Ok(pagamentos);
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, new { message = "Erro interno do servidor." });
+            }
+        }

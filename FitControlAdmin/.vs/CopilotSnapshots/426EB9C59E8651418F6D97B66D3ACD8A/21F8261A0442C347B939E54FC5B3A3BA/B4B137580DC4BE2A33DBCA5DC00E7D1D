@@ -1,0 +1,171 @@
+﻿using FitControlAdmin.Models;
+using FitControlAdmin.Services;
+using System;
+using System.Windows;
+
+namespace FitControlAdmin
+{
+    public partial class TestPhysicalEvaluationWindow : Window
+    {
+        private readonly ApiService _apiService;
+        private int? _currentIdAvaliacao = null;
+        private int? _currentIdMembro = null;
+
+        public TestPhysicalEvaluationWindow(ApiService apiService)
+        {
+            InitializeComponent();
+            _apiService = apiService;
+        }
+
+        private async void CriarReservaButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                // Validar inputs
+                if (!int.TryParse(IdMembroTextBox.Text, out var idMembro))
+                {
+                    ReservaStatusText.Text = "? ID do Membro inválido!";
+                    return;
+                }
+
+                if (!DateTime.TryParse(DataReservaTextBox.Text, out var dataReserva))
+                {
+                    ReservaStatusText.Text = "? Data inválida! Use formato: yyyy-MM-dd HH:mm";
+                    return;
+                }
+
+                ReservaStatusText.Text = "? Criando reserva...";
+
+                // Criar reserva
+                var (success, errorMessage, reservation) = await _apiService.CreateReservationAsync(idMembro, dataReserva);
+
+                if (success && reservation != null)
+                {
+                    _currentIdAvaliacao = reservation.IdAvaliacao;
+                    _currentIdMembro = idMembro;
+
+                    IdAvaliacaoTextBox.Text = _currentIdAvaliacao.ToString();
+                    ReservaStatusText.Text = $"? Reserva criada com sucesso!\n" +
+                        $"   ID Avaliação: {reservation.IdAvaliacao}\n" +
+                        $"   Data: {dataReserva:dd/MM/yyyy HH:mm}\n\n" +
+                        $"Agora preencha os dados da avaliação e clique no Passo 2.";
+                    ReservaStatusText.Foreground = System.Windows.Media.Brushes.LightGreen;
+                }
+                else
+                {
+                    ReservaStatusText.Text = $"? Erro ao criar reserva:\n{errorMessage ?? "Erro desconhecido"}";
+                    ReservaStatusText.Foreground = System.Windows.Media.Brushes.LightCoral;
+                }
+            }
+            catch (Exception ex)
+            {
+                ReservaStatusText.Text = $"? Exceção: {ex.Message}";
+                ReservaStatusText.Foreground = System.Windows.Media.Brushes.LightCoral;
+            }
+        }
+
+        private async void CriarAvaliacaoButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                // Validar que temos uma avaliação criada
+                if (_currentIdAvaliacao == null)
+                {
+                    AvaliacaoStatusText.Text = "? Crie uma reserva primeiro (Passo 1)!";
+                    return;
+                }
+
+                // Validar inputs
+                if (!decimal.TryParse(PesoTextBox.Text, out var peso) || peso <= 0)
+                {
+                    AvaliacaoStatusText.Text = "? Peso inválido!";
+                    return;
+                }
+
+                if (!decimal.TryParse(AlturaTextBox.Text, out var altura) || altura <= 0)
+                {
+                    AvaliacaoStatusText.Text = "? Altura inválida!";
+                    return;
+                }
+
+                if (!decimal.TryParse(MassaMuscularTextBox.Text, out var massaMuscular))
+                {
+                    AvaliacaoStatusText.Text = "? Massa Muscular inválida!";
+                    return;
+                }
+
+                if (!decimal.TryParse(MassaGordaTextBox.Text, out var massaGorda))
+                {
+                    AvaliacaoStatusText.Text = "? Massa Gorda inválida!";
+                    return;
+                }
+
+                AvaliacaoStatusText.Text = "? Criando avaliação física...";
+
+                // Calcular IMC
+                var imc = peso / (altura * altura);
+
+                // Obter IdFuncionario do utilizador atual
+                var currentUser = await _apiService.GetCurrentUserAsync();
+                if (currentUser == null)
+                {
+                    AvaliacaoStatusText.Text = "? Não foi possível obter dados do utilizador atual!";
+                    return;
+                }
+
+                var employees = await _apiService.GetAllEmployeesAsync();
+                var employee = employees?.Find(e => e.IdUser == currentUser.IdUser);
+                
+                if (employee == null)
+                {
+                    AvaliacaoStatusText.Text = "? Utilizador atual não é um funcionário!";
+                    return;
+                }
+
+                // Criar avaliação física
+                var avaliacaoDto = new PhysicalEvaluationDto
+                {
+                    IdMembro = _currentIdMembro.Value,
+                    IdFuncionario = employee.IdFuncionario,
+                    DataAvaliacao = DateTime.Now,
+                    Peso = peso,
+                    Altura = altura,
+                    Imc = imc,
+                    MassaMuscular = massaMuscular,
+                    MassaGorda = massaGorda,
+                    Observacoes = ObservacoesTextBox.Text
+                };
+
+                var (success, errorMessage, evaluation) = await _apiService.CreatePhysicalEvaluationAsync(avaliacaoDto);
+
+                if (success && evaluation != null)
+                {
+                    AvaliacaoStatusText.Text = $"? Avaliação Física criada com sucesso!\n" +
+                        $"   ID: {evaluation.IdAvaliacao}\n" +
+                        $"   Peso: {peso} kg\n" +
+                        $"   Altura: {altura} m\n" +
+                        $"   IMC: {imc:F2}\n" +
+                        $"   Massa Muscular: {massaMuscular}%\n" +
+                        $"   Massa Gorda: {massaGorda}%\n\n" +
+                        $"? Teste concluído com sucesso!";
+                    AvaliacaoStatusText.Foreground = System.Windows.Media.Brushes.LightGreen;
+                }
+                else
+                {
+                    AvaliacaoStatusText.Text = $"? Erro ao criar avaliação:\n{errorMessage ?? "Erro desconhecido"}";
+                    AvaliacaoStatusText.Foreground = System.Windows.Media.Brushes.LightCoral;
+                }
+            }
+            catch (Exception ex)
+            {
+                AvaliacaoStatusText.Text = $"? Exceção: {ex.Message}";
+                AvaliacaoStatusText.Foreground = System.Windows.Media.Brushes.LightCoral;
+            }
+        }
+
+        private void FechaButton_Click(object sender, RoutedEventArgs e)
+        {
+            Close();
+        }
+    }
+}

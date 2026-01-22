@@ -1,4 +1,4 @@
-﻿using FitControlAdmin.Models;
+using FitControlAdmin.Models;
 using FitControlAdmin.Services;
 using System;
 using System.Collections.Generic;
@@ -149,11 +149,11 @@ namespace FitControlAdmin
             LoadExercises();
         }
 
-        private void ShowPaymentManagement()
+        private async void ShowPaymentManagement()
         {
             HideAllPanels();
             PaymentManagementPanel.Visibility = Visibility.Visible;
-            LoadPayments();
+            await LoadPayments();
         }
 
         private void ShowPhysicalEvaluationManagement()
@@ -539,7 +539,15 @@ namespace FitControlAdmin
             BtnPagamentos.Visibility = Visibility.Visible;
             BtnAulas.Visibility = Visibility.Visible;
             BtnExercicios.Visibility = Visibility.Visible;
-            BtnAvaliacoesFisicas.Visibility = Visibility.Visible;
+            if (string.Equals(_userFuncao, "PT", StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(_userFuncao, "Admin", StringComparison.OrdinalIgnoreCase))
+            {
+                BtnAvaliacoesFisicas.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                BtnAvaliacoesFisicas.Visibility = Visibility.Collapsed;
+            }
             BtnAtribuirPTs.Visibility = Visibility.Visible;
             BtnRelatorios.Visibility = Visibility.Visible;
             BtnConfig.Visibility = Visibility.Visible;
@@ -822,9 +830,17 @@ namespace FitControlAdmin
         private List<SubscriptionResponseDto>? _allSubscriptions = null;
         private List<SubscriptionResponseDto>? _subscriptionsForMembers = null;
 
-        private async void LoadPayments()
+        private async Task LoadPayments()
         {
-            PaymentStatusText.Text = "A carregar pagamentos...";
+            System.Diagnostics.Debug.WriteLine("LoadPayments: Starting to load payments");
+
+            // Atualizar na thread da UI
+            Dispatcher.Invoke(() =>
+            {
+                PaymentStatusText.Text = "A carregar pagamentos...";
+                PaymentsDataGrid.ItemsSource = null; // Limpar primeiro
+            });
+
             try
             {
                 // Carregar pagamentos, membros e subscrições em paralelo
@@ -842,6 +858,13 @@ namespace FitControlAdmin
                 var activeSubscriptions = await subscriptionsTask;
                 var inactiveSubscriptions = await inactiveSubscriptionsTask;
 
+                // Debug: Verificar se os dados foram carregados
+                System.Diagnostics.Debug.WriteLine($"Active Payments: {activePayments?.Count ?? 0}");
+                System.Diagnostics.Debug.WriteLine($"Inactive Payments: {inactivePayments?.Count ?? 0}");
+                System.Diagnostics.Debug.WriteLine($"Members: {members?.Count ?? 0}");
+                System.Diagnostics.Debug.WriteLine($"Active Subscriptions: {activeSubscriptions?.Count ?? 0}");
+                System.Diagnostics.Debug.WriteLine($"Inactive Subscriptions: {inactiveSubscriptions?.Count ?? 0}");
+
                 // Combinar todos os pagamentos
                 var allPayments = new List<PaymentResponseDto>();
                 if (activePayments != null) allPayments.AddRange(activePayments);
@@ -852,19 +875,25 @@ namespace FitControlAdmin
                 if (activeSubscriptions != null) allSubscriptions.AddRange(activeSubscriptions);
                 if (inactiveSubscriptions != null) allSubscriptions.AddRange(inactiveSubscriptions);
 
+                // Debug: Log payment details
+                foreach (var payment in allPayments)
+                {
+                    System.Diagnostics.Debug.WriteLine($"LoadPayments: Payment {payment.IdPagamento} - Subscricao: '{payment.Subscricao}'");
+                }
+
                 // Criar lista de display com todos os dados dos pagamentos
                 var displayList = allPayments.Select(payment =>
                 {
                     var member = members?.FirstOrDefault(m => m.IdMembro == payment.IdMembro);
-                    var subscription = allSubscriptions?.FirstOrDefault(s => s.IdSubscricao == payment.IdSubscricao);
+
+                    var subscription = allSubscriptions.FirstOrDefault(s => s.Tipo.ToString() == payment.Subscricao);
 
                     var displayModel = new PaymentDisplayModel
                     {
                         IdPagamento = payment.IdPagamento,
                         IdMembro = payment.IdMembro,
                         NomeMembro = member?.Nome ?? "Membro não encontrado",
-                        IdSubscricao = payment.IdSubscricao,
-                        NomeSubscricao = subscription?.Nome ?? "Subscrição não encontrada",
+                        NomeSubscricao = payment.Subscricao ?? "Subscrição não encontrada",
                         DataPagamento = payment.DataPagamento,
                         ValorPago = payment.ValorPago,
                         MetodoPagamento = FormatEnumName(payment.MetodoPagamento.ToString()),
@@ -878,17 +907,42 @@ namespace FitControlAdmin
                     return displayModel;
                 }).OrderByDescending(p => p.DataRegisto).ToList();
 
-                // Sempre definir ItemsSource, mesmo que seja uma lista vazia
-                PaymentsDataGrid.ItemsSource = null; // Limpar primeiro
-                PaymentsDataGrid.ItemsSource = displayList;
-                
-                PaymentStatusText.Text = displayList.Count > 0 ? $"Total: {displayList.Count} pagamentos" : "Nenhum pagamento encontrado";
+                System.Diagnostics.Debug.WriteLine($"LoadPayments: Created {displayList.Count} display items");
+
+                // Atualizar na thread da UI
+                Dispatcher.Invoke(() =>
+                {
+                    try
+                    {
+                        // Sempre definir ItemsSource, mesmo que seja uma lista vazia
+                        PaymentsDataGrid.ItemsSource = null; // Limpar primeiro
+                        PaymentsDataGrid.ItemsSource = displayList;
+                        
+                        // Forçar atualização do DataGrid
+                        PaymentsDataGrid.UpdateLayout();
+                        
+                        PaymentStatusText.Text = displayList.Count > 0 
+                            ? $"Total: {displayList.Count} pagamentos" 
+                            : "Nenhum pagamento encontrado";
+                    }
+                    catch (Exception uiEx)
+                    {
+                        PaymentStatusText.Text = $"Erro ao atualizar interface: {uiEx.Message}";
+                        MessageBox.Show($"Erro ao atualizar interface: {uiEx.Message}", "Erro",
+                            MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                });
             }
             catch (Exception ex)
             {
-                PaymentsDataGrid.ItemsSource = null;
-                PaymentStatusText.Text = "Erro: " + ex.Message;
-                MessageBox.Show($"Erro ao carregar pagamentos: {ex.Message}", "Erro",
+                // Atualizar na thread da UI
+                Dispatcher.Invoke(() =>
+                {
+                    PaymentsDataGrid.ItemsSource = null;
+                    PaymentStatusText.Text = "Erro: " + ex.Message;
+                });
+                
+                MessageBox.Show($"Erro ao carregar pagamentos: {ex.Message}\n\nDetalhes: {ex}", "Erro",
                     MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
@@ -899,14 +953,17 @@ namespace FitControlAdmin
             if (enumName == "MBWay") return "MBWay";
             if (enumName == "Cartao") return "Cartão";
             if (enumName == "Bracos") return "Braços";
-            
+            if (enumName == "Mensal") return "mensal";
+            if (enumName == "Trimestral") return "trimestral";
+            if (enumName == "Anual") return "anual";
+
             // Adiciona espaço antes de letras maiúsculas (exceto a primeira)
             return System.Text.RegularExpressions.Regex.Replace(enumName, "(?<!^)([A-Z])", " $1");
         }
 
-        private void RefreshPaymentsButton_Click(object sender, RoutedEventArgs e)
+        private async void RefreshPaymentsButton_Click(object sender, RoutedEventArgs e)
         {
-            LoadPayments();
+            await LoadPayments();
         }
 
         private async void EditPaymentButton_Click(object sender, RoutedEventArgs e)
@@ -915,6 +972,9 @@ namespace FitControlAdmin
             {
                 try
                 {
+                    // Debug: Log the payment ID being edited
+                    System.Diagnostics.Debug.WriteLine($"EditPaymentButton_Click: Editing payment {idPagamento}");
+
                     // Get payment details from display model
                     PaymentDisplayModel? displayPayment = null;
                     if (PaymentsDataGrid.SelectedItem is PaymentDisplayModel selectedPayment)
@@ -958,6 +1018,9 @@ namespace FitControlAdmin
                         return;
                     }
 
+                    // Debug: Log payment details before editing
+                    System.Diagnostics.Debug.WriteLine($"EditPaymentButton_Click: Payment before edit - Id: {payment.IdPagamento}, Subscricao: {payment.Subscricao}");
+
                     // Get member details
                     var members = await _apiService.GetAllMembersAsync();
                     var member = members?.FirstOrDefault(m => m.IdMembro == payment.IdMembro);
@@ -971,9 +1034,12 @@ namespace FitControlAdmin
                     // Open CreatePaymentWindow in edit mode
                     var createPaymentWindow = new CreatePaymentWindow(_apiService, payment.IdMembro, payment, member);
                     createPaymentWindow.Owner = this;
-                    if (createPaymentWindow.ShowDialog() == true)
+                    var result = createPaymentWindow.ShowDialog();
+                    System.Diagnostics.Debug.WriteLine($"EditPaymentButton_Click: Dialog result: {result}");
+                    if (result == true)
                     {
-                        LoadPayments();
+                        System.Diagnostics.Debug.WriteLine("EditPaymentButton_Click: Reloading payments after edit");
+                        await LoadPayments();
                     }
                 }
                 catch (Exception ex)

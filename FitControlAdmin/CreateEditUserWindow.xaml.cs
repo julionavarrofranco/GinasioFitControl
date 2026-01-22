@@ -132,11 +132,13 @@ namespace FitControlAdmin
                             
                             foreach (ComboBoxItem item in MetodoPagamentoComboBox.Items)
                             {
-                                if (item.Tag is MetodoPagamento metodo && metodo == lastPayment.MetodoPagamento)
+                                if (item.Tag is MetodoPagamento metodo && Enum.TryParse<MetodoPagamento>(lastPayment.MetodoPagamento, out var lastMetodo) &&
+    metodo == lastMetodo)
                                 {
                                     MetodoPagamentoComboBox.SelectedItem = item;
                                     break;
                                 }
+
                             }
                         }
                     }
@@ -221,6 +223,17 @@ namespace FitControlAdmin
                 return;
             }
 
+            // Validate payment method for new members
+            if (!_isEditMode && TipoComboBox.SelectedIndex == 0) // Criar novo membro
+            {
+                if (MetodoPagamentoComboBox == null || MetodoPagamentoComboBox.SelectedItem == null)
+                {
+                    MessageBox.Show("Por favor, selecione um método de pagamento.", 
+                        "Validação", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+            }
+
             try
             {
                 if (_isEditMode && _existingUser != null)
@@ -256,7 +269,7 @@ namespace FitControlAdmin
                         success = updateSuccess;
                         errorMessage = updateError ?? "";
 
-                        // Update payment method if changed
+                        // Update payment method if changed or create payment if needed
                         if (success && MetodoPagamentoComboBox != null && MetodoPagamentoComboBox.SelectedItem is ComboBoxItem selectedPaymentMethod)
                         {
                             var newMetodoPagamento = (MetodoPagamento)selectedPaymentMethod.Tag;
@@ -273,26 +286,149 @@ namespace FitControlAdmin
                                 .OrderByDescending(p => p.MesReferente)
                                 .ThenByDescending(p => p.DataRegisto)
                                 .FirstOrDefault();
-                            
-                            // Update payment method if it changed or if payment exists
+
+                            // Update payment method if payment exists
+                            var selectedSubscription = SubscricaoComboBox.SelectedItem as SubscriptionResponseDto;
+
                             if (lastPayment != null)
                             {
-                                if (lastPayment.MetodoPagamento != newMetodoPagamento)
+                                if (Enum.TryParse<MetodoPagamento>(lastPayment.MetodoPagamento, out var lastMetodo))
                                 {
-                                    var paymentUpdateDto = new UpdatePaymentDto
+                                    if (lastMetodo != newMetodoPagamento)
                                     {
-                                        MetodoPagamento = newMetodoPagamento
-                                    };
-                                    
-                                    var (paymentUpdateSuccess, paymentUpdateError) = await _apiService.UpdatePaymentAsync(lastPayment.IdPagamento, paymentUpdateDto);
-                                    if (!paymentUpdateSuccess)
-                                    {
-                                        MessageBox.Show($"Dados do membro atualizados, mas houve um erro ao atualizar o método de pagamento: {paymentUpdateError ?? "Erro desconhecido"}",
-                                            "Aviso", MessageBoxButton.OK, MessageBoxImage.Warning);
+                                        var paymentUpdateDto = new UpdatePaymentDto
+                                        {
+                                            MetodoPagamento = newMetodoPagamento,
+                                            IdSubscricao = selectedSubscription?.IdSubscricao ?? lastPayment.IdSubscricao
+                                        };
+
+                                        var (paymentUpdateSuccess, paymentUpdateError) = await _apiService.UpdatePaymentAsync(lastPayment.IdPagamento, paymentUpdateDto);
                                     }
                                 }
                             }
-                            // If no payment exists, we could create one, but that's probably not desired here
+
+
+                            // If no payment exists but subscription is selected, try to create a payment
+                            // Note: The PaymentService calculates MesReferente automatically and may reject if payment already exists
+                            else if (SubscricaoComboBox != null)
+                            {
+                                try
+                                {
+                                    // Verify subscription is active before attempting to create payment
+                                    if (!selectedSubscription.Ativo)
+                                    {
+                                        MessageBox.Show($"Dados do membro atualizados, mas não foi possível criar o pagamento: A subscrição selecionada está inativa.",
+                                            "Aviso", MessageBoxButton.OK, MessageBoxImage.Warning);
+                                    }
+                                    else
+                                    {
+                                        // The PaymentService will calculate the MesReferente automatically based on current date
+                                        // It will use current month if day <= 25, otherwise next month
+                                        var paymentDto = new PaymentDto
+                                        {
+                                            IdMembro = member.IdMembro,
+                                            IdSubscricao = selectedSubscription.IdSubscricao,
+                                            MetodoPagamento = newMetodoPagamento,
+                                            MesReferente = DateTime.UtcNow // Service will recalculate this
+                                        };
+                                        
+                                        var (paymentCreateSuccess, paymentCreateError, createdPayment) = await _apiService.CreatePaymentAsync(paymentDto);
+                                        if (!paymentCreateSuccess)
+                                        {
+                                            // Check if error is because payment already exists for this period
+                                            var paymentErrorMessage = paymentCreateError ?? "Erro desconhecido";
+                                            var errorLower = paymentErrorMessage.ToLower();
+                                            
+                                            if (errorLower.Contains("já existe") || errorLower.Contains("já existe um pagamento") || errorLower.Contains("payment already exists"))
+                                            {
+                                                // Payment already exists for this period, try to find and update it
+                                                // Calculate the expected MesReferente (same logic as PaymentService)
+                                                var hoje = DateTime.UtcNow;
+                                                var expectedMesReferente = hoje.Day > 25
+                                                    ? new DateTime(hoje.Year, hoje.Month, 1).AddMonths(1)
+                                                    : new DateTime(hoje.Year, hoje.Month, 1);
+                                                
+                                                // Refresh payments list to get the latest data
+                                                var refreshedActivePayments = await _apiService.GetPaymentsByActiveStateAsync(true);
+                                                var refreshedInactivePayments = await _apiService.GetPaymentsByActiveStateAsync(false);
+                                                var refreshedPaymentsList = new List<PaymentResponseDto>();
+                                                if (refreshedActivePayments != null) refreshedPaymentsList.AddRange(refreshedActivePayments);
+                                                if (refreshedInactivePayments != null) refreshedPaymentsList.AddRange(refreshedInactivePayments);
+                                                
+                                                // Try to find the payment for this member and subscription
+                                                // First, try to find payment matching the expected period
+                                                var paymentToUpdate = refreshedPaymentsList
+                                                    .Where(p => p.IdMembro == member.IdMembro &&
+                                                                p.Subscricao == FormatEnumName(selectedSubscription.Tipo.ToString()) &&
+                                                                p.MesReferente.Year == expectedMesReferente.Year &&
+                                                                p.MesReferente.Month == expectedMesReferente.Month &&
+                                                                p.DataDesativacao == null) // Only active payments
+                                                    .OrderByDescending(p => p.DataRegisto)
+                                                    .FirstOrDefault();
+                                                
+                                                // If not found, try to find any active payment for this member and subscription
+                                                if (paymentToUpdate == null)
+                                                {
+                                                    paymentToUpdate = refreshedPaymentsList
+                                                        .Where(p => p.IdMembro == member.IdMembro &&
+                                                                    p.Subscricao == FormatEnumName(selectedSubscription.Tipo.ToString()) &&
+                                                                    p.DataDesativacao == null)
+                                                        .OrderByDescending(p => p.MesReferente)
+                                                        .ThenByDescending(p => p.DataRegisto)
+                                                        .FirstOrDefault();
+                                                }
+                                                
+                                                // If still not found, try any active payment for this member
+                                                if (paymentToUpdate == null)
+                                                {
+                                                    paymentToUpdate = refreshedPaymentsList
+                                                        .Where(p => p.IdMembro == member.IdMembro && p.DataDesativacao == null)
+                                                        .OrderByDescending(p => p.MesReferente)
+                                                        .ThenByDescending(p => p.DataRegisto)
+                                                        .FirstOrDefault();
+                                                }
+                                                
+                                                if (paymentToUpdate != null)
+                                                {
+                                                    var paymentUpdateDto = new UpdatePaymentDto
+                                                    {
+                                                        MetodoPagamento = newMetodoPagamento
+                                                    };
+                                                    
+                                                    var (paymentMethodUpdateSuccess, paymentMethodUpdateError) = await _apiService.UpdatePaymentAsync(paymentToUpdate.IdPagamento, paymentUpdateDto);
+                                                    if (!paymentMethodUpdateSuccess)
+                                                    {
+                                                        MessageBox.Show($"Dados do membro atualizados. Já existe um pagamento para este período. Erro ao atualizar método de pagamento: {paymentMethodUpdateError ?? "Erro desconhecido"}",
+                                                            "Aviso", MessageBoxButton.OK, MessageBoxImage.Warning);
+                                                    }
+                                                    // If update succeeds, no message needed - it's expected behavior
+                                                }
+                                                else
+                                                {
+                                                    // Payment exists but we couldn't find it - this shouldn't happen but handle gracefully
+                                                    MessageBox.Show($"Dados do membro atualizados. Já existe um pagamento ativo para este período, mas não foi possível encontrá-lo para atualizar o método de pagamento. Por favor, atualize manualmente na secção de Pagamentos.",
+                                                        "Informação", MessageBoxButton.OK, MessageBoxImage.Information);
+                                                }
+                                            }
+                                            else
+                                            {
+                                                // Other error - show the actual error message with full details
+                                                MessageBox.Show($"Dados do membro atualizados, mas houve um erro ao criar o pagamento:\n\n{paymentErrorMessage}\n\n" +
+                                                    $"IdMembro: {member.IdMembro}\n" +
+                                                    $"IdSubscricao: {selectedSubscription.IdSubscricao}\n" +
+                                                    $"Método: {newMetodoPagamento}",
+                                                    "Erro", MessageBoxButton.OK, MessageBoxImage.Warning);
+                                            }
+                                        }
+                                        // If payment creation succeeds, no message needed - it's expected behavior
+                                    }
+                                }
+                                catch (Exception ex)
+                                {
+                                    MessageBox.Show($"Dados do membro atualizados, mas houve um erro ao criar o pagamento:\n\n{ex.Message}\n\nTipo: {ex.GetType().Name}",
+                                        "Erro", MessageBoxButton.OK, MessageBoxImage.Warning);
+                                }
+                            }
                         }
 
                         // Update active status separately
@@ -367,6 +503,8 @@ namespace FitControlAdmin
                             registerDto.DataNascimento = DataNascimentoDatePicker.SelectedDate.Value;
                         if (SubscricaoComboBox != null && SubscricaoComboBox.SelectedItem is SubscriptionResponseDto selectedSub)
                             registerDto.IdSubscricao = selectedSub.IdSubscricao;
+                        if (MetodoPagamentoComboBox != null && MetodoPagamentoComboBox.SelectedItem is ComboBoxItem selectedPaymentMethod)
+                            registerDto.MetodoPagamento = (MetodoPagamento)selectedPaymentMethod.Tag;
                     }
                     else // Funcionario
                     {
@@ -408,4 +546,3 @@ namespace FitControlAdmin
         }
     }
 }
-

@@ -7,7 +7,6 @@ namespace FitControlAdmin.Models
         public int IdPagamento { get; set; }
         public int IdMembro { get; set; }
         public string NomeMembro { get; set; } = default!;
-        public int IdSubscricao { get; set; }
         public string NomeSubscricao { get; set; } = default!;
         public DateTime DataPagamento { get; set; }
         public decimal ValorPago { get; set; }
