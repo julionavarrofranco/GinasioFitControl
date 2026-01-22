@@ -117,6 +117,12 @@ namespace ProjetoFinal.Services
 
                 alterado = true;
             }
+            if (request.IdSubscricao.HasValue && request.IdSubscricao.Value != pagamento.IdSubscricao)
+            {
+                pagamento.IdSubscricao = request.IdSubscricao.Value;
+                alterado = true;
+            }
+
 
             if (alterado)
             {
@@ -172,7 +178,8 @@ namespace ProjetoFinal.Services
                     MetodoPagamento = p.MetodoPagamento.ToString(),
                     IdMembro = p.Membro.IdMembro,
                     NomeMembro = p.Membro.Nome,
-                    Subscricao = p.Subscricao.Tipo.ToString()
+                    Subscricao = p.Subscricao.Tipo.ToString(),
+                    IdSubscricao = p.IdSubscricao
                 })
                 .ToListAsync();
         }
@@ -196,7 +203,8 @@ namespace ProjetoFinal.Services
                     MetodoPagamento = p.MetodoPagamento.ToString(),
                     IdMembro = p.Membro.IdMembro,
                     NomeMembro = p.Membro.Nome,
-                    Subscricao = p.Subscricao.Tipo.ToString()
+                    Subscricao = p.Subscricao.Tipo.ToString(),
+                    IdSubscricao = p.IdSubscricao
                 })
                 .ToListAsync();
         }
@@ -220,7 +228,8 @@ namespace ProjetoFinal.Services
                     MetodoPagamento = p.MetodoPagamento.ToString(),
                     IdMembro = p.Membro.IdMembro,
                     NomeMembro = p.Membro.Nome,
-                    Subscricao = p.Subscricao.Tipo.ToString()
+                    Subscricao = p.Subscricao.Tipo.ToString(),
+                    IdSubscricao = p.IdSubscricao
                 })
                 .ToListAsync();
         }
