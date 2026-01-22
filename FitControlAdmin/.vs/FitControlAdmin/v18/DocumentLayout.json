@@ -3,6 +3,26 @@
   "WorkspaceRootPath": "C:\\Users\\tiago\\OneDrive\\\u00C1rea de Trabalho\\PF\\nova versao\\FitControlAdmin\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{5073CBDB-9D53-959F-5B9F-F991EBB17886}|FitControlAdmin.csproj|c:\\users\\tiago\\onedrive\\\u00E1rea de trabalho\\pf\\nova versao\\fitcontroladmin\\mainwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5073CBDB-9D53-959F-5B9F-F991EBB17886}|FitControlAdmin.csproj|solutionrelative:mainwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5073CBDB-9D53-959F-5B9F-F991EBB17886}|FitControlAdmin.csproj|c:\\users\\tiago\\onedrive\\\u00E1rea de trabalho\\pf\\nova versao\\fitcontroladmin\\models\\userdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5073CBDB-9D53-959F-5B9F-F991EBB17886}|FitControlAdmin.csproj|solutionrelative:models\\userdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5073CBDB-9D53-959F-5B9F-F991EBB17886}|FitControlAdmin.csproj|c:\\users\\tiago\\onedrive\\\u00E1rea de trabalho\\pf\\nova versao\\fitcontroladmin\\mainwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{5073CBDB-9D53-959F-5B9F-F991EBB17886}|FitControlAdmin.csproj|solutionrelative:mainwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5073CBDB-9D53-959F-5B9F-F991EBB17886}|FitControlAdmin.csproj|c:\\users\\tiago\\onedrive\\\u00E1rea de trabalho\\pf\\nova versao\\fitcontroladmin\\editpaymentwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5073CBDB-9D53-959F-5B9F-F991EBB17886}|FitControlAdmin.csproj|solutionrelative:editpaymentwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5073CBDB-9D53-959F-5B9F-F991EBB17886}|FitControlAdmin.csproj|c:\\users\\tiago\\onedrive\\\u00E1rea de trabalho\\pf\\nova versao\\fitcontroladmin\\editmemberpaymentswindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5073CBDB-9D53-959F-5B9F-F991EBB17886}|FitControlAdmin.csproj|solutionrelative:editmemberpaymentswindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{5073CBDB-9D53-959F-5B9F-F991EBB17886}|FitControlAdmin.csproj|c:\\users\\tiago\\onedrive\\\u00E1rea de trabalho\\pf\\nova versao\\fitcontroladmin\\createedituserwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{5073CBDB-9D53-959F-5B9F-F991EBB17886}|FitControlAdmin.csproj|solutionrelative:createedituserwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
@@ -15,16 +35,8 @@
       "RelativeMoniker": "D:0:0:{5073CBDB-9D53-959F-5B9F-F991EBB17886}|FitControlAdmin.csproj|solutionrelative:createpaymentwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{5073CBDB-9D53-959F-5B9F-F991EBB17886}|FitControlAdmin.csproj|c:\\users\\tiago\\onedrive\\\u00E1rea de trabalho\\pf\\nova versao\\fitcontroladmin\\editpaymentwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{5073CBDB-9D53-959F-5B9F-F991EBB17886}|FitControlAdmin.csproj|solutionrelative:editpaymentwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{5073CBDB-9D53-959F-5B9F-F991EBB17886}|FitControlAdmin.csproj|c:\\users\\tiago\\onedrive\\\u00E1rea de trabalho\\pf\\nova versao\\fitcontroladmin\\services\\apiservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{5073CBDB-9D53-959F-5B9F-F991EBB17886}|FitControlAdmin.csproj|solutionrelative:services\\apiservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{5073CBDB-9D53-959F-5B9F-F991EBB17886}|FitControlAdmin.csproj|c:\\users\\tiago\\onedrive\\\u00E1rea de trabalho\\pf\\nova versao\\fitcontroladmin\\mainwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{5073CBDB-9D53-959F-5B9F-F991EBB17886}|FitControlAdmin.csproj|solutionrelative:mainwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{5073CBDB-9D53-959F-5B9F-F991EBB17886}|FitControlAdmin.csproj|c:\\users\\tiago\\onedrive\\\u00E1rea de trabalho\\pf\\nova versao\\fitcontroladmin\\editmemberpaymentswindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
@@ -39,16 +51,8 @@
       "RelativeMoniker": "D:0:0:{5073CBDB-9D53-959F-5B9F-F991EBB17886}|FitControlAdmin.csproj|solutionrelative:models\\paymentdisplaymodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{5073CBDB-9D53-959F-5B9F-F991EBB17886}|FitControlAdmin.csproj|c:\\users\\tiago\\onedrive\\\u00E1rea de trabalho\\pf\\nova versao\\fitcontroladmin\\editmemberpaymentswindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{5073CBDB-9D53-959F-5B9F-F991EBB17886}|FitControlAdmin.csproj|solutionrelative:editmemberpaymentswindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{5073CBDB-9D53-959F-5B9F-F991EBB17886}|FitControlAdmin.csproj|c:\\users\\tiago\\onedrive\\\u00E1rea de trabalho\\pf\\nova versao\\fitcontroladmin\\createedituserwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
       "RelativeMoniker": "D:0:0:{5073CBDB-9D53-959F-5B9F-F991EBB17886}|FitControlAdmin.csproj|solutionrelative:createedituserwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{5073CBDB-9D53-959F-5B9F-F991EBB17886}|FitControlAdmin.csproj|c:\\users\\tiago\\onedrive\\\u00E1rea de trabalho\\pf\\nova versao\\fitcontroladmin\\mainwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
-      "RelativeMoniker": "D:0:0:{5073CBDB-9D53-959F-5B9F-F991EBB17886}|FitControlAdmin.csproj|solutionrelative:mainwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{5073CBDB-9D53-959F-5B9F-F991EBB17886}|FitControlAdmin.csproj|c:\\users\\tiago\\onedrive\\\u00E1rea de trabalho\\pf\\nova versao\\fitcontroladmin\\createpaymentwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
@@ -57,10 +61,6 @@
     {
       "AbsoluteMoniker": "D:0:0:{5073CBDB-9D53-959F-5B9F-F991EBB17886}|FitControlAdmin.csproj|c:\\users\\tiago\\onedrive\\\u00E1rea de trabalho\\pf\\nova versao\\fitcontroladmin\\services\\interfaces\\ipaymentservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{5073CBDB-9D53-959F-5B9F-F991EBB17886}|FitControlAdmin.csproj|solutionrelative:services\\interfaces\\ipaymentservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{5073CBDB-9D53-959F-5B9F-F991EBB17886}|FitControlAdmin.csproj|c:\\users\\tiago\\onedrive\\\u00E1rea de trabalho\\pf\\nova versao\\fitcontroladmin\\models\\userdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{5073CBDB-9D53-959F-5B9F-F991EBB17886}|FitControlAdmin.csproj|solutionrelative:models\\userdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -70,11 +70,11 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 1,
+          "SelectedChildIndex": 2,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 8,
               "Title": "ApiService.cs",
               "DocumentMoniker": "C:\\Users\\tiago\\OneDrive\\\u00C1rea de Trabalho\\PF\\nova versao\\FitControlAdmin\\Services\\ApiService.cs",
               "RelativeDocumentMoniker": "Services\\ApiService.cs",
@@ -86,42 +86,45 @@
               "IsPinned": true
             },
             {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{cce594b6-0c39-4442-ba28-10c64ac7e89f}"
+            },
+            {
               "$type": "Document",
               "DocumentIndex": 0,
-              "Title": "CreateEditUserWindow.xaml.cs",
-              "DocumentMoniker": "C:\\Users\\tiago\\OneDrive\\\u00C1rea de Trabalho\\PF\\nova versao\\FitControlAdmin\\CreateEditUserWindow.xaml.cs",
-              "RelativeDocumentMoniker": "CreateEditUserWindow.xaml.cs",
-              "ToolTip": "C:\\Users\\tiago\\OneDrive\\\u00C1rea de Trabalho\\PF\\nova versao\\FitControlAdmin\\CreateEditUserWindow.xaml.cs",
-              "RelativeToolTip": "CreateEditUserWindow.xaml.cs",
-              "ViewState": "AgIAACsBAAAAAAAAAAAkwD4BAAAlAAAAAAAAAA==",
+              "Title": "MainWindow.xaml.cs",
+              "DocumentMoniker": "C:\\Users\\tiago\\OneDrive\\\u00C1rea de Trabalho\\PF\\nova versao\\FitControlAdmin\\MainWindow.xaml.cs",
+              "RelativeDocumentMoniker": "MainWindow.xaml.cs",
+              "ToolTip": "C:\\Users\\tiago\\OneDrive\\\u00C1rea de Trabalho\\PF\\nova versao\\FitControlAdmin\\MainWindow.xaml.cs",
+              "RelativeToolTip": "MainWindow.xaml.cs",
+              "ViewState": "AgIAALIFAAAAAAAAAAAcwLkFAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-01-14T13:53:22.388Z",
+              "WhenOpened": "2026-01-18T15:53:19.877Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 2,
-              "Title": "CreatePaymentWindow.xaml.cs",
-              "DocumentMoniker": "C:\\Users\\tiago\\OneDrive\\\u00C1rea de Trabalho\\PF\\nova versao\\FitControlAdmin\\CreatePaymentWindow.xaml.cs",
-              "RelativeDocumentMoniker": "CreatePaymentWindow.xaml.cs",
-              "ToolTip": "C:\\Users\\tiago\\OneDrive\\\u00C1rea de Trabalho\\PF\\nova versao\\FitControlAdmin\\CreatePaymentWindow.xaml.cs",
-              "RelativeToolTip": "CreatePaymentWindow.xaml.cs",
-              "ViewState": "AgIAAG0AAAAAAAAAAAAnwHYAAAArAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-01-14T15:28:14.175Z",
+              "Title": "MainWindow.xaml",
+              "DocumentMoniker": "C:\\Users\\tiago\\OneDrive\\\u00C1rea de Trabalho\\PF\\nova versao\\FitControlAdmin\\MainWindow.xaml",
+              "RelativeDocumentMoniker": "MainWindow.xaml",
+              "ToolTip": "C:\\Users\\tiago\\OneDrive\\\u00C1rea de Trabalho\\PF\\nova versao\\FitControlAdmin\\MainWindow.xaml",
+              "RelativeToolTip": "MainWindow.xaml",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2026-01-16T16:07:20.254Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 1,
-              "Title": "PaymentModels.cs",
-              "DocumentMoniker": "C:\\Users\\tiago\\OneDrive\\\u00C1rea de Trabalho\\PF\\nova versao\\FitControlAdmin\\Models\\PaymentModels.cs",
-              "RelativeDocumentMoniker": "Models\\PaymentModels.cs",
-              "ToolTip": "C:\\Users\\tiago\\OneDrive\\\u00C1rea de Trabalho\\PF\\nova versao\\FitControlAdmin\\Models\\PaymentModels.cs",
-              "RelativeToolTip": "Models\\PaymentModels.cs",
-              "ViewState": "AgIAACQAAAAAAAAAAAAuwCgAAAAuAAAAAAAAAA==",
+              "Title": "UserDto.cs",
+              "DocumentMoniker": "C:\\Users\\tiago\\OneDrive\\\u00C1rea de Trabalho\\PF\\nova versao\\FitControlAdmin\\Models\\UserDto.cs",
+              "RelativeDocumentMoniker": "Models\\UserDto.cs",
+              "ToolTip": "C:\\Users\\tiago\\OneDrive\\\u00C1rea de Trabalho\\PF\\nova versao\\FitControlAdmin\\Models\\UserDto.cs",
+              "RelativeToolTip": "Models\\UserDto.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAIAAAARAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-01-21T23:05:03.6Z",
+              "WhenOpened": "2025-12-03T16:33:17.14Z",
               "EditorCaption": ""
             },
             {
@@ -132,25 +135,64 @@
               "RelativeDocumentMoniker": "EditPaymentWindow.xaml.cs",
               "ToolTip": "C:\\Users\\tiago\\OneDrive\\\u00C1rea de Trabalho\\PF\\nova versao\\FitControlAdmin\\EditPaymentWindow.xaml.cs",
               "RelativeToolTip": "EditPaymentWindow.xaml.cs",
-              "ViewState": "AgIAAEkAAAAAAAAAAAAnwFsAAAARAAAAAAAAAA==",
+              "ViewState": "AgIAADkAAAAAAAAAAAAWwEEAAAAiAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-01-22T00:15:17.04Z"
+              "WhenOpened": "2026-01-22T00:15:17.04Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "EditMemberPaymentsWindow.xaml.cs",
+              "DocumentMoniker": "C:\\Users\\tiago\\OneDrive\\\u00C1rea de Trabalho\\PF\\nova versao\\FitControlAdmin\\EditMemberPaymentsWindow.xaml.cs",
+              "RelativeDocumentMoniker": "EditMemberPaymentsWindow.xaml.cs",
+              "ToolTip": "C:\\Users\\tiago\\OneDrive\\\u00C1rea de Trabalho\\PF\\nova versao\\FitControlAdmin\\EditMemberPaymentsWindow.xaml.cs",
+              "RelativeToolTip": "EditMemberPaymentsWindow.xaml.cs",
+              "ViewState": "AgIAAAsAAAAAAAAAAAAjwBcAAAAUAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-16T16:08:27.035Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 5,
-              "Title": "MainWindow.xaml.cs",
-              "DocumentMoniker": "C:\\Users\\tiago\\OneDrive\\\u00C1rea de Trabalho\\PF\\nova versao\\FitControlAdmin\\MainWindow.xaml.cs",
-              "RelativeDocumentMoniker": "MainWindow.xaml.cs",
-              "ToolTip": "C:\\Users\\tiago\\OneDrive\\\u00C1rea de Trabalho\\PF\\nova versao\\FitControlAdmin\\MainWindow.xaml.cs",
-              "RelativeToolTip": "MainWindow.xaml.cs",
-              "ViewState": "AgIAAGgDAAAAAAAAAAAmwHoDAAA+AAAAAAAAAA==",
+              "Title": "CreateEditUserWindow.xaml.cs",
+              "DocumentMoniker": "C:\\Users\\tiago\\OneDrive\\\u00C1rea de Trabalho\\PF\\nova versao\\FitControlAdmin\\CreateEditUserWindow.xaml.cs",
+              "RelativeDocumentMoniker": "CreateEditUserWindow.xaml.cs",
+              "ToolTip": "C:\\Users\\tiago\\OneDrive\\\u00C1rea de Trabalho\\PF\\nova versao\\FitControlAdmin\\CreateEditUserWindow.xaml.cs",
+              "RelativeToolTip": "CreateEditUserWindow.xaml.cs",
+              "ViewState": "AgIAAJMBAAAAAAAAAAAjwKABAABWAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-01-18T15:53:19.877Z"
+              "WhenOpened": "2026-01-14T13:53:22.388Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "CreatePaymentWindow.xaml.cs",
+              "DocumentMoniker": "C:\\Users\\tiago\\OneDrive\\\u00C1rea de Trabalho\\PF\\nova versao\\FitControlAdmin\\CreatePaymentWindow.xaml.cs",
+              "RelativeDocumentMoniker": "CreatePaymentWindow.xaml.cs",
+              "ToolTip": "C:\\Users\\tiago\\OneDrive\\\u00C1rea de Trabalho\\PF\\nova versao\\FitControlAdmin\\CreatePaymentWindow.xaml.cs",
+              "RelativeToolTip": "CreatePaymentWindow.xaml.cs",
+              "ViewState": "AgIAAG0AAAAAAAAAAAAnwHYAAAArAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-14T15:28:14.175Z"
             },
             {
               "$type": "Document",
               "DocumentIndex": 6,
+              "Title": "PaymentModels.cs",
+              "DocumentMoniker": "C:\\Users\\tiago\\OneDrive\\\u00C1rea de Trabalho\\PF\\nova versao\\FitControlAdmin\\Models\\PaymentModels.cs",
+              "RelativeDocumentMoniker": "Models\\PaymentModels.cs",
+              "ToolTip": "C:\\Users\\tiago\\OneDrive\\\u00C1rea de Trabalho\\PF\\nova versao\\FitControlAdmin\\Models\\PaymentModels.cs",
+              "RelativeToolTip": "Models\\PaymentModels.cs",
+              "ViewState": "AgIAACQAAAAAAAAAAAAuwCgAAAAuAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-21T23:05:03.6Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
               "Title": "EditMemberPaymentsWindow.xaml",
               "DocumentMoniker": "C:\\Users\\tiago\\OneDrive\\\u00C1rea de Trabalho\\PF\\nova versao\\FitControlAdmin\\EditMemberPaymentsWindow.xaml",
               "RelativeDocumentMoniker": "EditMemberPaymentsWindow.xaml",
@@ -161,7 +203,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 7,
+              "DocumentIndex": 10,
               "Title": "CreateEditExerciseWindow.xaml.cs",
               "DocumentMoniker": "C:\\Users\\tiago\\OneDrive\\\u00C1rea de Trabalho\\PF\\nova versao\\FitControlAdmin\\CreateEditExerciseWindow.xaml.cs",
               "RelativeDocumentMoniker": "CreateEditExerciseWindow.xaml.cs",
@@ -173,7 +215,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 8,
+              "DocumentIndex": 11,
               "Title": "PaymentDisplayModel.cs",
               "DocumentMoniker": "C:\\Users\\tiago\\OneDrive\\\u00C1rea de Trabalho\\PF\\nova versao\\FitControlAdmin\\Models\\PaymentDisplayModel.cs",
               "RelativeDocumentMoniker": "Models\\PaymentDisplayModel.cs",
@@ -185,30 +227,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 9,
-              "Title": "EditMemberPaymentsWindow.xaml.cs",
-              "DocumentMoniker": "C:\\Users\\tiago\\OneDrive\\\u00C1rea de Trabalho\\PF\\nova versao\\FitControlAdmin\\EditMemberPaymentsWindow.xaml.cs",
-              "RelativeDocumentMoniker": "EditMemberPaymentsWindow.xaml.cs",
-              "ToolTip": "C:\\Users\\tiago\\OneDrive\\\u00C1rea de Trabalho\\PF\\nova versao\\FitControlAdmin\\EditMemberPaymentsWindow.xaml.cs",
-              "RelativeToolTip": "EditMemberPaymentsWindow.xaml.cs",
-              "ViewState": "AgIAAIMAAAAAAAAAAAAewJYAAABDAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-01-16T16:08:27.035Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 11,
-              "Title": "MainWindow.xaml",
-              "DocumentMoniker": "C:\\Users\\tiago\\OneDrive\\\u00C1rea de Trabalho\\PF\\nova versao\\FitControlAdmin\\MainWindow.xaml",
-              "RelativeDocumentMoniker": "MainWindow.xaml",
-              "ToolTip": "C:\\Users\\tiago\\OneDrive\\\u00C1rea de Trabalho\\PF\\nova versao\\FitControlAdmin\\MainWindow.xaml",
-              "RelativeToolTip": "MainWindow.xaml",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
-              "WhenOpened": "2026-01-16T16:07:20.254Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 10,
+              "DocumentIndex": 12,
               "Title": "CreateEditUserWindow.xaml",
               "DocumentMoniker": "C:\\Users\\tiago\\OneDrive\\\u00C1rea de Trabalho\\PF\\nova versao\\FitControlAdmin\\CreateEditUserWindow.xaml",
               "RelativeDocumentMoniker": "CreateEditUserWindow.xaml",
@@ -219,7 +238,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 12,
+              "DocumentIndex": 13,
               "Title": "CreatePaymentWindow.xaml",
               "DocumentMoniker": "C:\\Users\\tiago\\OneDrive\\\u00C1rea de Trabalho\\PF\\nova versao\\FitControlAdmin\\CreatePaymentWindow.xaml",
               "RelativeDocumentMoniker": "CreatePaymentWindow.xaml",
@@ -230,7 +249,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 13,
+              "DocumentIndex": 14,
               "Title": "IPaymentService.cs",
               "DocumentMoniker": "C:\\Users\\tiago\\OneDrive\\\u00C1rea de Trabalho\\PF\\nova versao\\FitControlAdmin\\Services\\Interfaces\\IPaymentService.cs",
               "RelativeDocumentMoniker": "Services\\Interfaces\\IPaymentService.cs",
@@ -239,18 +258,6 @@
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-01-16T16:18:55.444Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 14,
-              "Title": "UserDto.cs",
-              "DocumentMoniker": "C:\\Users\\tiago\\OneDrive\\\u00C1rea de Trabalho\\PF\\nova versao\\FitControlAdmin\\Models\\UserDto.cs",
-              "RelativeDocumentMoniker": "Models\\UserDto.cs",
-              "ToolTip": "C:\\Users\\tiago\\OneDrive\\\u00C1rea de Trabalho\\PF\\nova versao\\FitControlAdmin\\Models\\UserDto.cs",
-              "RelativeToolTip": "Models\\UserDto.cs",
-              "ViewState": "AgIAAFMAAAAAAAAAAABRwFYAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-12-03T16:33:17.14Z"
             }
           ]
         }

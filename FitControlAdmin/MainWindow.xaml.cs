@@ -64,8 +64,7 @@ namespace FitControlAdmin
             BtnFuncionarios.Click += (s, e) =>
             {
                 HighlightActiveButton(BtnFuncionarios);
-                UserManagementTitle.Text = "Gestão de Funcionários";
-                ShowUserManagement();
+                ShowEmployeeManagement();
             };
 
             BtnMembros.Click += (s, e) =>
@@ -75,10 +74,10 @@ namespace FitControlAdmin
                 ShowUserManagement();
             };
 
-            BtnSubscricoes.Click += (s, e) =>
+            BtnSubscricoes.Click += async (s, e) =>
             {
                 HighlightActiveButton(BtnSubscricoes);
-                ShowPlaceholder("Gestão de Subscrições");
+                await ShowSubscriptionManagement();
             };
 
             BtnPagamentos.Click += (s, e) =>
@@ -105,18 +104,6 @@ namespace FitControlAdmin
                 ShowPhysicalEvaluationManagement();
             };
 
-            BtnAtribuirPTs.Click += (s, e) =>
-            {
-                HighlightActiveButton(BtnAtribuirPTs);
-                ShowPlaceholder("Atribuir PTs");
-            };
-
-            BtnRelatorios.Click += (s, e) =>
-            {
-                HighlightActiveButton(BtnRelatorios);
-                ShowPlaceholder("Relatórios");
-            };
-
             BtnConfig.Click += (s, e) =>
             {
                 HighlightActiveButton(BtnConfig);
@@ -140,6 +127,107 @@ namespace FitControlAdmin
             HideAllPanels();
             UserManagementPanel.Visibility = Visibility.Visible;
             LoadUsers();
+        }
+
+        private void ShowEmployeeManagement()
+        {
+            HideAllPanels();
+            EmployeeManagementPanel.Visibility = Visibility.Visible;
+            LoadEmployees();
+        }
+
+        private async void LoadEmployees()
+        {
+            EmployeeStatusText.Text = "A carregar funcionários...";
+            try
+            {
+                var employees = await _apiService.GetAllEmployeesAsync();
+                if (employees != null)
+                {
+                    EmployeesDataGrid.ItemsSource = employees;
+                    EmployeeStatusText.Text = $"Total: {employees.Count} funcionários";
+                }
+                else
+                {
+                    EmployeeStatusText.Text = "Erro ao carregar funcionários";
+                    MessageBox.Show("Erro ao carregar funcionários. Verifique a conexão com o servidor.",
+                        "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+            catch (Exception ex)
+            {
+                EmployeeStatusText.Text = "Erro: " + ex.Message;
+                MessageBox.Show($"Erro: {ex.Message}", "Erro",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void RefreshEmployeesButton_Click(object sender, RoutedEventArgs e)
+        {
+            LoadEmployees();
+        }
+
+        private async void EditEmployeeButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button button)
+            {
+                try
+                {
+                    // Get EmployeeDto from DataContext
+                    EmployeeDto? employee = null;
+
+                    // Try to get from DataGridRow
+                    var parent = button.Parent;
+                    while (parent != null && !(parent is System.Windows.Controls.DataGridRow))
+                    {
+                        parent = System.Windows.Media.VisualTreeHelper.GetParent(parent);
+                    }
+
+                    if (parent is System.Windows.Controls.DataGridRow row && row.Item is EmployeeDto rowEmployee)
+                    {
+                        employee = rowEmployee;
+                    }
+                    else if (button.DataContext is EmployeeDto contextEmployee)
+                    {
+                        employee = contextEmployee;
+                    }
+                    else if (EmployeesDataGrid.SelectedItem is EmployeeDto selectedEmployee)
+                    {
+                        employee = selectedEmployee;
+                    }
+
+                    if (employee == null)
+                    {
+                        MessageBox.Show("Não foi possível identificar o funcionário a editar.",
+                            "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                        return;
+                    }
+
+                    // Convert EmployeeDto to UserDto
+                    var user = new UserDto
+                    {
+                        IdUser = employee.IdUser,
+                        Email = employee.Email,
+                        Nome = employee.Nome,
+                        Telemovel = employee.Telemovel,
+                        Tipo = "Funcionario",
+                        Ativo = true, // EmployeeDto doesn't have Ativo property, assume active
+                        Funcao = employee.Funcao
+                    };
+
+                    var editWindow = new CreateEditUserWindow(_apiService, user);
+                    editWindow.Owner = this;
+                    if (editWindow.ShowDialog() == true)
+                    {
+                        LoadEmployees();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Erro ao carregar funcionário: {ex.Message}",
+                        "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
         }
 
         private void ShowExerciseManagement()
@@ -174,10 +262,12 @@ namespace FitControlAdmin
         {
             DashboardPanel.Visibility = Visibility.Collapsed;
             UserManagementPanel.Visibility = Visibility.Collapsed;
+            EmployeeManagementPanel.Visibility = Visibility.Collapsed;
             SettingsPanel.Visibility = Visibility.Collapsed;
             ExerciseManagementPanel.Visibility = Visibility.Collapsed;
             PaymentManagementPanel.Visibility = Visibility.Collapsed;
             PhysicalEvaluationManagementPanel.Visibility = Visibility.Collapsed;
+            SubscriptionManagementPanel.Visibility = Visibility.Collapsed;
             PlaceholderText.Visibility = Visibility.Collapsed;
         }
 
@@ -242,11 +332,7 @@ namespace FitControlAdmin
 
         private void HighlightActiveButton(Button active)
         {
-            var buttons = new[]
-            {
-                BtnDashboard, BtnFuncionarios, BtnMembros, BtnSubscricoes,
-                BtnPagamentos, BtnAulas, BtnExercicios, BtnAvaliacoesFisicas, BtnAtribuirPTs, BtnRelatorios, BtnConfig
-            };
+            var buttons = new[] { BtnDashboard, BtnFuncionarios, BtnMembros, BtnSubscricoes, BtnPagamentos, BtnExercicios, BtnAvaliacoesFisicas, BtnConfig };
 
             foreach (var btn in buttons)
             {
@@ -548,8 +634,6 @@ namespace FitControlAdmin
             {
                 BtnAvaliacoesFisicas.Visibility = Visibility.Collapsed;
             }
-            BtnAtribuirPTs.Visibility = Visibility.Visible;
-            BtnRelatorios.Visibility = Visibility.Visible;
             BtnConfig.Visibility = Visibility.Visible;
 
             if (string.Equals(_userTipo, "Membro", StringComparison.OrdinalIgnoreCase))
@@ -561,17 +645,14 @@ namespace FitControlAdmin
                 BtnPagamentos.Visibility = Visibility.Collapsed;
                 BtnExercicios.Visibility = Visibility.Collapsed;
                 BtnAvaliacoesFisicas.Visibility = Visibility.Collapsed;
-                BtnAtribuirPTs.Visibility = Visibility.Collapsed;
-                BtnRelatorios.Visibility = Visibility.Collapsed;
                 BtnConfig.Visibility = Visibility.Collapsed;
             }
             else if (string.Equals(_userTipo, "Funcionario", StringComparison.OrdinalIgnoreCase))
             {
                 if (string.Equals(_userFuncao, "Rececao", StringComparison.OrdinalIgnoreCase))
                 {
-                    // Receção não gere PTs nem relatórios avançados
-                    BtnAtribuirPTs.Visibility = Visibility.Collapsed;
-                    BtnRelatorios.Visibility = Visibility.Collapsed;
+                    // Receção tem acesso limitado
+                    // (botões já removidos do menu)
                 }
                 else if (string.Equals(_userFuncao, "PT", StringComparison.OrdinalIgnoreCase))
                 {
@@ -580,8 +661,6 @@ namespace FitControlAdmin
                     BtnSubscricoes.Visibility = Visibility.Collapsed;
                     BtnPagamentos.Visibility = Visibility.Collapsed;
                     BtnAvaliacoesFisicas.Visibility = Visibility.Visible; // PTs podem ver avaliações físicas
-                    BtnAtribuirPTs.Visibility = Visibility.Collapsed;
-                    BtnRelatorios.Visibility = Visibility.Collapsed;
                     BtnConfig.Visibility = Visibility.Collapsed;
                 }
                 // Admin vê tudo
@@ -1151,6 +1230,11 @@ namespace FitControlAdmin
                 // Preencher tabela de reservas ativas
                 if (activeReservations != null)
                 {
+                    // Mapear o estado para português
+                    foreach (var reservation in activeReservations)
+                    {
+                        reservation.Estado = MapEstadoToPortuguese(reservation.Estado);
+                    }
                     ReservationsDataGrid.ItemsSource = activeReservations;
                 }
                 else
@@ -1251,7 +1335,7 @@ namespace FitControlAdmin
                     // Buscar informações do membro
                     var members = await _apiService.GetAllMembersAsync();
                     var member = members?.FirstOrDefault(m => m.IdMembro == idMembro);
-                    
+
                     if (member == null)
                     {
                         MessageBox.Show("Membro não encontrado.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
@@ -1266,6 +1350,290 @@ namespace FitControlAdmin
                 catch (Exception ex)
                 {
                     MessageBox.Show($"Erro ao abrir histórico: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+        }
+
+        private string MapEstadoToPortuguese(string estado)
+        {
+            return estado switch
+            {
+                "Reservado" => "Pendente",
+                "Presente" => "Em Andamento",
+                "Cancelado" => "Cancelado",
+                "Faltou" => "Faltou",
+                _ => estado
+            };
+        }
+
+        #endregion
+
+        #region Subscription Management
+
+        private async Task ShowSubscriptionManagement()
+        {
+            HideAllPanels();
+            SubscriptionManagementPanel.Visibility = Visibility.Visible;
+            await LoadSubscriptions();
+        }
+
+        private async Task LoadSubscriptions()
+        {
+            SubscriptionStatusText.Text = "A carregar subscrições...";
+            try
+            {
+                // Carregar subscrições ativas e inativas
+                var activeSubscriptionsTask = _apiService.GetSubscriptionsByStateAsync(true);
+                var inactiveSubscriptionsTask = _apiService.GetSubscriptionsByStateAsync(false);
+
+                await Task.WhenAll(activeSubscriptionsTask, inactiveSubscriptionsTask);
+
+                var activeSubscriptions = await activeSubscriptionsTask;
+                var inactiveSubscriptions = await inactiveSubscriptionsTask;
+
+                var allSubscriptions = new List<SubscriptionResponseDto>();
+                if (activeSubscriptions != null) allSubscriptions.AddRange(activeSubscriptions);
+                if (inactiveSubscriptions != null) allSubscriptions.AddRange(inactiveSubscriptions);
+
+                // Ordenar por nome e depois por tipo
+                allSubscriptions = allSubscriptions
+                    .OrderBy(s => s.Nome)
+                    .ThenBy(s => s.Tipo)
+                    .ToList();
+
+                SubscriptionsDataGrid.ItemsSource = allSubscriptions;
+                SubscriptionStatusText.Text = $"Total: {allSubscriptions.Count} subscrições";
+            }
+            catch (Exception ex)
+            {
+                SubscriptionStatusText.Text = "Erro: " + ex.Message;
+                MessageBox.Show($"Erro ao carregar subscrições: {ex.Message}", "Erro",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private async void RefreshSubscriptionsButton_Click(object sender, RoutedEventArgs e)
+        {
+            await LoadSubscriptions();
+        }
+
+        private async void CreateSubscriptionButton_Click(object sender, RoutedEventArgs e)
+        {
+            // Para criar uma nova subscrição, passamos null como subscription
+            // O EditSubscriptionWindow deve detectar isso e mostrar em modo criação
+            var createWindow = new EditSubscriptionWindow(_apiService, null);
+            createWindow.Owner = this;
+            if (createWindow.ShowDialog() == true)
+            {
+                await LoadSubscriptions();
+            }
+        }
+
+        // Search handlers
+        private void UserSearchTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            ApplyUserSearchFilter();
+        }
+
+        private void UserSearchTextBox_GotFocus(object sender, RoutedEventArgs e)
+        {
+            if (UserSearchTextBox.Text == "Pesquisar por nome...")
+            {
+                UserSearchTextBox.Text = "";
+            }
+        }
+
+        private void UserSearchTextBox_LostFocus(object sender, RoutedEventArgs e)
+        {
+            if (string.IsNullOrWhiteSpace(UserSearchTextBox.Text))
+            {
+                UserSearchTextBox.Text = "Pesquisar por nome...";
+            }
+        }
+
+        private void EmployeeSearchTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            ApplyEmployeeSearchFilter();
+        }
+
+        private void EmployeeSearchTextBox_GotFocus(object sender, RoutedEventArgs e)
+        {
+            if (EmployeeSearchTextBox.Text == "Pesquisar por nome...")
+            {
+                EmployeeSearchTextBox.Text = "";
+            }
+        }
+
+        private void EmployeeSearchTextBox_LostFocus(object sender, RoutedEventArgs e)
+        {
+            if (string.IsNullOrWhiteSpace(EmployeeSearchTextBox.Text))
+            {
+                EmployeeSearchTextBox.Text = "Pesquisar por nome...";
+            }
+        }
+
+        private void PaymentSearchTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            ApplyPaymentSearchFilter();
+        }
+
+        private void PaymentSearchTextBox_GotFocus(object sender, RoutedEventArgs e)
+        {
+            if (PaymentSearchTextBox.Text == "Pesquisar por nome de membro...")
+            {
+                PaymentSearchTextBox.Text = "";
+            }
+        }
+
+        private void PaymentSearchTextBox_LostFocus(object sender, RoutedEventArgs e)
+        {
+            if (string.IsNullOrWhiteSpace(PaymentSearchTextBox.Text))
+            {
+                PaymentSearchTextBox.Text = "Pesquisar por nome de membro...";
+            }
+        }
+
+        // Search filter methods
+        private void ApplyUserSearchFilter()
+        {
+            // Don't apply filter if controls are not initialized or data is not loaded
+            if (MembersDataGrid == null || UserSearchTextBox == null || MembersDataGrid.ItemsSource == null)
+            {
+                return;
+            }
+
+            if (MembersDataGrid.ItemsSource is IEnumerable<MemberDto> allMembers && allMembers != null)
+            {
+                var searchText = UserSearchTextBox.Text?.Trim().ToLower() ?? string.Empty;
+
+                // Treat placeholder text as empty search
+                if (string.IsNullOrWhiteSpace(searchText) || searchText == "pesquisar por nome...")
+                {
+                    MembersDataGrid.ItemsSource = allMembers;
+                    StatusText.Text = $"Total: {allMembers.Count()} utilizadores";
+                }
+                else
+                {
+                    var filtered = allMembers.Where(m =>
+                        m != null && (
+                        (m.Nome?.ToLower().Contains(searchText) ?? false) ||
+                        (m.Email?.ToLower().Contains(searchText) ?? false) ||
+                        (m.Telemovel?.Contains(searchText) ?? false))
+                    ).ToList();
+
+                    MembersDataGrid.ItemsSource = filtered;
+                    StatusText.Text = $"Mostrando {filtered.Count} de {allMembers.Count()} utilizadores (filtro: '{searchText}')";
+                }
+            }
+            else
+            {
+                // If no data is loaded, show empty state
+                StatusText.Text = "Nenhum dado carregado";
+            }
+        }
+
+        private void ApplyEmployeeSearchFilter()
+        {
+            // Don't apply filter if controls are not initialized or data is not loaded
+            if (EmployeesDataGrid == null || EmployeeSearchTextBox == null || EmployeesDataGrid.ItemsSource == null)
+            {
+                return;
+            }
+
+            if (EmployeesDataGrid.ItemsSource is IEnumerable<EmployeeDto> allEmployees && allEmployees != null)
+            {
+                var searchText = EmployeeSearchTextBox.Text?.Trim().ToLower() ?? string.Empty;
+
+                // Treat placeholder text as empty search
+                if (string.IsNullOrWhiteSpace(searchText) || searchText == "pesquisar por nome...")
+                {
+                    EmployeesDataGrid.ItemsSource = allEmployees;
+                    EmployeeStatusText.Text = $"Total: {allEmployees.Count()} funcionários";
+                }
+                else
+                {
+                    var filtered = allEmployees.Where(e =>
+                        e != null && (
+                        (e.Nome?.ToLower().Contains(searchText) ?? false) ||
+                        (e.Email?.ToLower().Contains(searchText) ?? false) ||
+                        (e.Telemovel?.Contains(searchText) ?? false) ||
+                        (e.Funcao?.ToLower().Contains(searchText) ?? false))
+                    ).ToList();
+
+                    EmployeesDataGrid.ItemsSource = filtered;
+                    EmployeeStatusText.Text = $"Mostrando {filtered.Count} de {allEmployees.Count()} funcionários (filtro: '{searchText}')";
+                }
+            }
+            else
+            {
+                // If no data is loaded, show empty state
+                EmployeeStatusText.Text = "Nenhum dado carregado";
+            }
+        }
+
+        private void ApplyPaymentSearchFilter()
+        {
+            // Don't apply filter if controls are not initialized or data is not loaded
+            if (PaymentsDataGrid == null || PaymentSearchTextBox == null || PaymentsDataGrid.ItemsSource == null)
+            {
+                return;
+            }
+
+            if (PaymentsDataGrid.ItemsSource is IEnumerable<PaymentDisplayModel> allPayments && allPayments != null)
+            {
+                var searchText = PaymentSearchTextBox.Text?.Trim().ToLower() ?? string.Empty;
+
+                // Treat placeholder text as empty search
+                if (string.IsNullOrWhiteSpace(searchText) || searchText == "pesquisar por nome de membro...")
+                {
+                    PaymentsDataGrid.ItemsSource = allPayments;
+                    PaymentStatusText.Text = $"Total: {allPayments.Count()} pagamentos";
+                }
+                else
+                {
+                    var filtered = allPayments.Where(p =>
+                        p != null && (p.NomeMembro?.ToLower().Contains(searchText) ?? false)
+                    ).ToList();
+
+                    PaymentsDataGrid.ItemsSource = filtered;
+                    PaymentStatusText.Text = $"Mostrando {filtered.Count} de {allPayments.Count()} pagamentos (filtro: '{searchText}')";
+                }
+            }
+            else
+            {
+                // If no data is loaded, show empty state
+                PaymentStatusText.Text = "Nenhum dado carregado";
+            }
+        }
+
+        private async void EditSubscriptionButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button button && button.Tag is int idSubscricao)
+            {
+                try
+                {
+                    // Find the subscription in the current data
+                    var subscription = SubscriptionsDataGrid.ItemsSource
+                        .Cast<SubscriptionResponseDto>()
+                        .FirstOrDefault(s => s.IdSubscricao == idSubscricao);
+
+                    if (subscription == null)
+                    {
+                        MessageBox.Show("Subscrição não encontrada.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                        return;
+                    }
+
+                    var editWindow = new EditSubscriptionWindow(_apiService, subscription);
+                    editWindow.Owner = this;
+                    if (editWindow.ShowDialog() == true)
+                    {
+                        await LoadSubscriptions();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Erro ao abrir edição de subscrição: {ex.Message}",
+                        "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
         }

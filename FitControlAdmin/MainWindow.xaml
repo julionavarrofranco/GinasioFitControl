@@ -356,36 +356,6 @@
                         </StackPanel>
                     </Button>
 
-                    <!-- Relatórios -->
-                    <Button x:Name="BtnRelatorios" Style="{StaticResource SidebarButtonStyle}">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="📈 " Foreground="#02acc3" FontSize="14"/>
-                            <TextBlock Text="Relatórios" Foreground="White" FontSize="14"/>
-                        </StackPanel>
-                    </Button>
-
-                    <!-- Atribuir PTs -->
-                    <Button x:Name="BtnAtribuirPTs" Style="{StaticResource SidebarButtonStyle}">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="👨‍🏫 " Foreground="#02acc3" FontSize="14"/>
-                            <TextBlock Text="Atribuir PTs" Foreground="White" FontSize="14"/>
-                        </StackPanel>
-                    </Button>
-
-                    <!-- Separator -->
-                    <Border Height="1" Background="#34495E" Margin="10,10"/>
-
-                    <!-- Teste Avaliações (DEBUG) -->
-                    <Button x:Name="BtnTesteAvaliacao" Style="{StaticResource SidebarButtonStyle}"
-                            Background="Transparent" 
-                            BorderBrush="#f39c12" 
-                            BorderThickness="1">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="🧪 " Foreground="#f39c12" FontSize="14"/>
-                            <TextBlock Text="Teste Avaliação" Foreground="White" FontSize="14"/>
-                        </StackPanel>
-                    </Button>
-
                     <!-- Separator -->
                     <Border Height="1" Background="#34495E" Margin="10,10"/>
 
@@ -480,17 +450,18 @@
                            Foreground="#e6e6e8"
                            Margin="0,0,0,20"/>
 
+                <!-- Search and Actions -->
                 <Grid Margin="0,0,0,15">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
-                    
-                    <Button x:Name="RefreshButton" 
+
+                    <Button x:Name="RefreshButton"
                             Grid.Column="0"
-                            Content="Atualizar" 
-                            Click="RefreshButton_Click" 
+                            Content="Atualizar"
+                            Click="RefreshButton_Click"
                             Padding="15,8" Margin="0,0,10,0"
                             Background="#02acc3"
                             Foreground="White"
@@ -508,10 +479,53 @@
                             </Style>
                         </Button.Style>
                     </Button>
-                    
+
+                    <!-- Search Box -->
+                    <Border Grid.Column="1"
+                            Background="#1f2937"
+                            CornerRadius="6"
+                            Padding="10,8"
+                            Margin="0,0,10,0">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="🔍"
+                                       Grid.Column="0"
+                                       Foreground="#95a5a6"
+                                       FontSize="14"
+                                       VerticalAlignment="Center"
+                                       Margin="0,0,8,0"/>
+                            <TextBox x:Name="UserSearchTextBox"
+                                     Grid.Column="1"
+                                     Background="Transparent"
+                                     BorderThickness="0"
+                                     Foreground="#95a5a6"
+                                     FontSize="14"
+                                     VerticalContentAlignment="Center"
+                                     TextChanged="UserSearchTextBox_TextChanged"
+                                     GotFocus="UserSearchTextBox_GotFocus"
+                                     LostFocus="UserSearchTextBox_LostFocus"
+                                     CaretBrush="White"
+                                     Tag="Pesquisar por nome...">
+                                <TextBox.Style>
+                                    <Style TargetType="TextBox">
+                                        <Setter Property="Text" Value="Pesquisar por nome..."/>
+                                        <Style.Triggers>
+                                            <Trigger Property="IsFocused" Value="True">
+                                                <Setter Property="Foreground" Value="#e6e6e8"/>
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBox.Style>
+                            </TextBox>
+                        </Grid>
+                    </Border>
+
                     <StackPanel Grid.Column="2" Orientation="Horizontal">
-                        <Button x:Name="CreateMembroButton" Content="Criar Membro" 
-                                Click="CreateMembroButton_Click" 
+                        <Button x:Name="CreateMembroButton" Content="Criar Membro"
+                                Click="CreateMembroButton_Click"
                                 Padding="15,8" Margin="0,0,10,0"
                                 Background="#27AE60"
                                 Foreground="White"
@@ -529,8 +543,8 @@
                                 </Style>
                             </Button.Style>
                         </Button>
-                        <Button x:Name="CreateFuncionarioButton" Content="Criar Funcionário" 
-                                Click="CreateFuncionarioButton_Click" 
+                        <Button x:Name="CreateFuncionarioButton" Content="Criar Funcionário"
+                                Click="CreateFuncionarioButton_Click"
                                 Padding="15,8" Margin="0,0,0,0"
                                 Background="#27AE60"
                                 Foreground="White"
@@ -632,6 +646,163 @@
 
                 <TextBlock x:Name="StatusText" 
                            Margin="0,15,0,0" 
+                           Foreground="#95a5a6"
+                           FontSize="14"/>
+            </StackPanel>
+
+            <!-- Employee Management Panel -->
+            <StackPanel x:Name="EmployeeManagementPanel" Margin="20,90,20,20" VerticalAlignment="Top" Visibility="Collapsed">
+                <TextBlock Text="Gestão de Funcionários"
+                           FontSize="24"
+                           FontWeight="Bold"
+                           Foreground="#e6e6e8"
+                           Margin="0,0,0,20"/>
+
+                <!-- Search and Actions -->
+                <Grid Margin="0,0,0,15">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Button x:Name="RefreshEmployeesButton"
+                            Grid.Column="0"
+                            Content="Atualizar"
+                            Click="RefreshEmployeesButton_Click"
+                            Padding="15,8" Margin="0,0,10,0"
+                            Background="#02acc3"
+                            Foreground="White"
+                            BorderThickness="0"
+                            Cursor="Hand"
+                            FontSize="14">
+                        <Button.Style>
+                            <Style TargetType="Button">
+                                <Setter Property="Background" Value="#02acc3"/>
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Background" Value="#0299b0"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+
+                    <!-- Search Box -->
+                    <Border Grid.Column="1"
+                            Background="#1f2937"
+                            CornerRadius="6"
+                            Padding="10,8"
+                            Margin="0,0,10,0">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="🔍"
+                                       Grid.Column="0"
+                                       Foreground="#95a5a6"
+                                       FontSize="14"
+                                       VerticalAlignment="Center"
+                                       Margin="0,0,8,0"/>
+                            <TextBox x:Name="EmployeeSearchTextBox"
+                                     Grid.Column="1"
+                                     Background="Transparent"
+                                     BorderThickness="0"
+                                     Foreground="#95a5a6"
+                                     FontSize="14"
+                                     VerticalContentAlignment="Center"
+                                     TextChanged="EmployeeSearchTextBox_TextChanged"
+                                     GotFocus="EmployeeSearchTextBox_GotFocus"
+                                     LostFocus="EmployeeSearchTextBox_LostFocus"
+                                     CaretBrush="White"
+                                     Tag="Pesquisar por nome...">
+                                <TextBox.Style>
+                                    <Style TargetType="TextBox">
+                                        <Setter Property="Text" Value="Pesquisar por nome..."/>
+                                        <Style.Triggers>
+                                            <Trigger Property="IsFocused" Value="True">
+                                                <Setter Property="Foreground" Value="#e6e6e8"/>
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBox.Style>
+                            </TextBox>
+                        </Grid>
+                    </Border>
+
+                    <StackPanel Grid.Column="2" Orientation="Horizontal">
+                        <Button x:Name="CreateFuncionarioButton2" Content="Criar Funcionário"
+                                Click="CreateFuncionarioButton_Click"
+                                Padding="15,8"
+                                Background="#27AE60"
+                                Foreground="White"
+                                BorderThickness="0"
+                                Cursor="Hand"
+                                FontSize="14">
+                            <Button.Style>
+                                <Style TargetType="Button">
+                                    <Setter Property="Background" Value="#27AE60"/>
+                                    <Style.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Background" Value="#229954"/>
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                        </Button>
+                    </StackPanel>
+                </Grid>
+
+                <Border Background="#272936" CornerRadius="10" Padding="20">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+                        <DataGrid x:Name="EmployeesDataGrid"
+                                  AutoGenerateColumns="False"
+                                  IsReadOnly="True"
+                                  SelectionMode="Single"
+                                  GridLinesVisibility="All"
+                                  HeadersVisibility="Column">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="ID User" Binding="{Binding IdUser}" Width="60"/>
+                                <DataGridTextColumn Header="ID Funcionário" Binding="{Binding IdFuncionario}" Width="80"/>
+                                <DataGridTextColumn Header="Nome" Binding="{Binding Nome}" Width="150"/>
+                                <DataGridTextColumn Header="Email" Binding="{Binding Email}" Width="200"/>
+                                <DataGridTextColumn Header="Telemóvel" Binding="{Binding Telemovel}" Width="120"/>
+                                <DataGridTextColumn Header="Função" Binding="{Binding Funcao}" Width="120"/>
+                                <DataGridTextColumn Header="Data Registo" Binding="{Binding DataRegisto, StringFormat=dd/MM/yyyy}" Width="120"/>
+                                <DataGridCheckBoxColumn Header="Ativo" Binding="{Binding Ativo}" Width="60"/>
+                                <DataGridTemplateColumn Header="Ações" Width="150">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Button Content="Editar" Click="EditEmployeeButton_Click"
+                                                    Tag="{Binding IdUser}"
+                                                    Padding="8,4" Margin="2"
+                                                    Background="#02acc3"
+                                                    Foreground="White"
+                                                    BorderThickness="0"
+                                                    Cursor="Hand"
+                                                    FontSize="12">
+                                                <Button.Style>
+                                                    <Style TargetType="Button">
+                                                        <Setter Property="Background" Value="#02acc3"/>
+                                                        <Style.Triggers>
+                                                            <Trigger Property="IsMouseOver" Value="True">
+                                                                <Setter Property="Background" Value="#0299b0"/>
+                                                            </Trigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Button.Style>
+                                            </Button>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </ScrollViewer>
+                </Border>
+
+                <TextBlock x:Name="EmployeeStatusText"
+                           Margin="0,15,0,0"
                            Foreground="#95a5a6"
                            FontSize="14"/>
             </StackPanel>
@@ -1060,16 +1231,17 @@
                            Foreground="#e6e6e8"
                            Margin="0,0,0,20"/>
 
+                <!-- Search and Actions -->
                 <Grid Margin="0,0,0,15">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
-                    
-                    <Button x:Name="RefreshPaymentsButton" 
+
+                    <Button x:Name="RefreshPaymentsButton"
                             Grid.Column="0"
-                            Content="Atualizar" 
-                            Click="RefreshPaymentsButton_Click" 
+                            Content="Atualizar"
+                            Click="RefreshPaymentsButton_Click"
                             Padding="15,8" Margin="0,0,10,0"
                             Background="#02acc3"
                             Foreground="White"
@@ -1087,6 +1259,49 @@
                             </Style>
                         </Button.Style>
                     </Button>
+
+                    <!-- Search Box -->
+                    <Border Grid.Column="1"
+                            Background="#1f2937"
+                            CornerRadius="6"
+                            Padding="10,8"
+                            Margin="0,0,0,0">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="🔍"
+                                       Grid.Column="0"
+                                       Foreground="#95a5a6"
+                                       FontSize="14"
+                                       VerticalAlignment="Center"
+                                       Margin="0,0,8,0"/>
+                            <TextBox x:Name="PaymentSearchTextBox"
+                                     Grid.Column="1"
+                                     Background="Transparent"
+                                     BorderThickness="0"
+                                     Foreground="#95a5a6"
+                                     FontSize="14"
+                                     VerticalContentAlignment="Center"
+                                     TextChanged="PaymentSearchTextBox_TextChanged"
+                                     GotFocus="PaymentSearchTextBox_GotFocus"
+                                     LostFocus="PaymentSearchTextBox_LostFocus"
+                                     CaretBrush="White"
+                                     Tag="Pesquisar por nome de membro...">
+                                <TextBox.Style>
+                                    <Style TargetType="TextBox">
+                                        <Setter Property="Text" Value="Pesquisar por nome de membro..."/>
+                                        <Style.Triggers>
+                                            <Trigger Property="IsFocused" Value="True">
+                                                <Setter Property="Foreground" Value="#e6e6e8"/>
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBox.Style>
+                            </TextBox>
+                        </Grid>
+                    </Border>
                 </Grid>
 
                 <Border Background="#272936" CornerRadius="10" Padding="20">
@@ -1102,12 +1317,11 @@
                                 <DataGridTextColumn Header="ID Membro" Binding="{Binding IdMembro}" Width="80"/>
                                 <DataGridTextColumn Header="Membro" Binding="{Binding NomeMembro}" Width="150"/>
                                 <DataGridTextColumn Header="Subscrição" Binding="{Binding NomeSubscricao}" Width="120"/>
-                                <DataGridTextColumn Header="Data Pagamento" Binding="{Binding DataPagamento, StringFormat=dd/MM/yyyy}" Width="110"/>
-                                <DataGridTextColumn Header="Valor Pago" Binding="{Binding ValorPago, StringFormat=C}" Width="100"/>
                                 <DataGridTextColumn Header="Método Pagamento" Binding="{Binding MetodoPagamento}" Width="130"/>
+                                <DataGridTextColumn Header="Data Pagamento" Binding="{Binding DataPagamento, StringFormat=dd/MM/yyyy}" Width="110"/>
+                                <DataGridTextColumn Header="Valor Pago" Binding="{Binding ValorPago, StringFormat={}{0:F2}€}" Width="100"/>
                                 <DataGridTextColumn Header="Estado Pagamento" Binding="{Binding EstadoPagamento}" Width="130"/>
                                 <DataGridTextColumn Header="Mês Referente" Binding="{Binding MesReferente, StringFormat=MM/yyyy}" Width="100"/>
-                                <DataGridTextColumn Header="Data Registo" Binding="{Binding DataRegisto, StringFormat=dd/MM/yyyy}" Width="110"/>
                                 <DataGridTextColumn Header="Status" Binding="{Binding StatusAtivo}" Width="80"/>
                                 <DataGridTemplateColumn Header="Ações" Width="100">
                                     <DataGridTemplateColumn.CellTemplate>
@@ -1145,6 +1359,128 @@
                            Margin="0,15,0,0" 
                            Foreground="#95a5a6"
                            FontSize="14"/>
+            </StackPanel>
+
+            <!-- Subscription Management Panel -->
+            <StackPanel x:Name="SubscriptionManagementPanel" Margin="20,90,20,20" VerticalAlignment="Top" Visibility="Collapsed">
+                <!-- Header with Add Button -->
+                <Grid Margin="0,0,0,20">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Text="Gestão de Subscrições"
+                               Grid.Column="0"
+                               FontSize="24"
+                               FontWeight="Bold"
+                               Foreground="#e6e6e8"
+                               VerticalAlignment="Center"/>
+
+                    <!-- Add Subscription Button -->
+                    <Button x:Name="CreateSubscriptionButton"
+                            Grid.Column="1"
+                            Content="+ Adicionar Subscrição"
+                            Click="CreateSubscriptionButton_Click"
+                            Padding="20,10"
+                            Background="#27AE60"
+                            Foreground="White"
+                            BorderThickness="0"
+                            Cursor="Hand"
+                            FontSize="14"
+                            FontWeight="SemiBold">
+                        <Button.Style>
+                            <Style TargetType="Button">
+                                <Setter Property="Background" Value="#27AE60"/>
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Background" Value="#229954"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+                </Grid>
+
+                <!-- Refresh Button -->
+                <Button x:Name="RefreshSubscriptionsButton"
+                        Content="Atualizar"
+                        Click="RefreshSubscriptionsButton_Click"
+                        Padding="15,8"
+                        Margin="0,0,0,15"
+                        Background="#02acc3"
+                        Foreground="White"
+                        BorderThickness="0"
+                        Cursor="Hand"
+                        FontSize="14"
+                        HorizontalAlignment="Left">
+                    <Button.Style>
+                        <Style TargetType="Button">
+                            <Setter Property="Background" Value="#02acc3"/>
+                            <Style.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="#0299b0"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
+
+                <!-- DataGrid in ScrollViewer -->
+                <Border Background="#272936" CornerRadius="10" Padding="20" Margin="0,0,0,15">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto"
+                                  HorizontalScrollBarVisibility="Auto"
+                                  MaxHeight="400">
+                        <DataGrid x:Name="SubscriptionsDataGrid"
+                                  AutoGenerateColumns="False"
+                                  IsReadOnly="True"
+                                  SelectionMode="Single"
+                                  GridLinesVisibility="All"
+                                  HeadersVisibility="Column">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="ID" Binding="{Binding IdSubscricao}" Width="60"/>
+                                <DataGridTextColumn Header="Nome" Binding="{Binding Nome}" Width="150"/>
+                                <DataGridTextColumn Header="Tipo" Binding="{Binding Tipo, Converter={StaticResource EnumNameConverter}}" Width="120"/>
+                                <DataGridTextColumn Header="Preço" Binding="{Binding Preco, StringFormat={}{0:F2}€}" Width="100"/>
+                                <DataGridCheckBoxColumn Header="Ativo" Binding="{Binding Ativo}" Width="60"/>
+                                <DataGridTemplateColumn Header="Ações" Width="100">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Button Content="Editar"
+                                                    Click="EditSubscriptionButton_Click"
+                                                    Tag="{Binding IdSubscricao}"
+                                                    Padding="8,4"
+                                                    Margin="2"
+                                                    Background="#02acc3"
+                                                    Foreground="White"
+                                                    BorderThickness="0"
+                                                    Cursor="Hand"
+                                                    FontSize="12">
+                                                <Button.Style>
+                                                    <Style TargetType="Button">
+                                                        <Setter Property="Background" Value="#02acc3"/>
+                                                        <Style.Triggers>
+                                                            <Trigger Property="IsMouseOver" Value="True">
+                                                                <Setter Property="Background" Value="#0299b0"/>
+                                                            </Trigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Button.Style>
+                                            </Button>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </ScrollViewer>
+                </Border>
+
+                <!-- Status Text -->
+                <TextBlock x:Name="SubscriptionStatusText"
+                           Margin="0,0,0,0"
+                           Foreground="#95a5a6"
+                           FontSize="14"
+                           HorizontalAlignment="Left"/>
             </StackPanel>
 
             <!-- Physical Evaluation Management Panel -->

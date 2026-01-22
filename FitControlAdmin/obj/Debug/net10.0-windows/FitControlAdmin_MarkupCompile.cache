@@ -10,11 +10,11 @@ none
 false
 TRACE;DEBUG;NET;NET10_0;NETCOREAPP;WINDOWS;WINDOWS7_0;NET5_0_OR_GREATER;NET6_0_OR_GREATER;NET7_0_OR_GREATER;NET8_0_OR_GREATER;NET9_0_OR_GREATER;NET10_0_OR_GREATER;NETCOREAPP3_0_OR_GREATER;NETCOREAPP3_1_OR_GREATER;WINDOWS7_0_OR_GREATER
 C:\Users\tiago\OneDrive\Área de Trabalho\PF\nova versao\FitControlAdmin\App.xaml
-11-2914959
+12-1080497210
 
-28-1344313386
-2131459611862
-ChangePasswordDialog.xaml;ConfirmDialog.xaml;CreateEditExerciseWindow.xaml;CreateEditUserWindow.xaml;CreatePaymentWindow.xaml;CreatePhysicalEvaluationWindow.xaml;EditMemberPaymentsWindow.xaml;EditPaymentWindow.xaml;LoginWindow.xaml;MainWindow.xaml;MemberEvaluationHistoryWindow.xaml;
+29-1229474571
+213-582759952
+ChangePasswordDialog.xaml;ConfirmDialog.xaml;CreateEditExerciseWindow.xaml;CreateEditUserWindow.xaml;CreatePaymentWindow.xaml;CreatePhysicalEvaluationWindow.xaml;EditMemberPaymentsWindow.xaml;EditPaymentWindow.xaml;EditSubscriptionWindow.xaml;LoginWindow.xaml;MainWindow.xaml;MemberEvaluationHistoryWindow.xaml;
 
 False
 

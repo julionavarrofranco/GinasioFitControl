@@ -844,18 +844,19 @@ namespace FitControlAdmin.Services
                 var response = await _httpClient.GetAsync("/api/PhysicalEvaluationReservation/active");
                 if (response.IsSuccessStatusCode)
                 {
-                    var rawReservations = await response.Content.ReadFromJsonAsync<List<MembroAvaliacao>>();
+                    // Use the correct DTO from the API
+                    var rawReservations = await response.Content.ReadFromJsonAsync<List<MemberEvaluationReservationSummaryDto>>();
                     if (rawReservations != null)
                     {
                         return rawReservations.Select(r => new PhysicalEvaluationReservationResponseDto
                         {
                             IdAvaliacao = r.IdMembroAvaliacao,
                             IdMembro = r.IdMembro,
-                            IdFuncionario = null, // Active reservations don't have assigned PT yet
+                            IdFuncionario = r.IdFuncionario,
                             DataAvaliacao = r.DataReserva,
-                            Estado = r.Estado.ToString(),
-                            NomeMembro = r.Membro?.Nome,
-                            NomeFuncionario = null
+                            Estado = r.EstadoString,
+                            NomeMembro = r.NomeMembro,
+                            NomeFuncionario = r.NomeFuncionario
                         }).ToList();
                     }
                 }
@@ -874,18 +875,19 @@ namespace FitControlAdmin.Services
                 var response = await _httpClient.GetAsync("/api/PhysicalEvaluationReservation/completed");
                 if (response.IsSuccessStatusCode)
                 {
-                    var rawReservations = await response.Content.ReadFromJsonAsync<List<MembroAvaliacao>>();
+                    // Use the correct DTO from the API
+                    var rawReservations = await response.Content.ReadFromJsonAsync<List<MemberEvaluationReservationSummaryDto>>();
                     if (rawReservations != null)
                     {
                         return rawReservations.Select(r => new PhysicalEvaluationReservationResponseDto
                         {
                             IdAvaliacao = r.IdMembroAvaliacao,
                             IdMembro = r.IdMembro,
-                            IdFuncionario = r.AvaliacaoFisica?.IdFuncionario,
-                            DataAvaliacao = r.DataReserva,
-                            Estado = r.Estado.ToString(),
-                            NomeMembro = r.Membro?.Nome,
-                            NomeFuncionario = r.AvaliacaoFisica?.Funcionario?.Nome
+                            IdFuncionario = r.IdFuncionario,
+                            DataAvaliacao = r.DataAvaliacao ?? r.DataReserva,
+                            Estado = r.EstadoString,
+                            NomeMembro = r.NomeMembro,
+                            NomeFuncionario = r.NomeFuncionario
                         }).ToList();
                     }
                 }
@@ -936,6 +938,67 @@ namespace FitControlAdmin.Services
             catch
             {
                 return null;
+            }
+        }
+
+        public async Task<(bool Success, string? ErrorMessage)> UpdateSubscriptionAsync(int idSubscricao, UpdateSubscriptionDto updateDto)
+        {
+            try
+            {
+                var response = await _httpClient.PatchAsJsonAsync($"/api/Subscription/update-subscription/{idSubscricao}", updateDto);
+                if (response.IsSuccessStatusCode)
+                {
+                    return (true, null);
+                }
+
+                var errorContent = await response.Content.ReadAsStringAsync();
+                var message = ExtractMessage(errorContent);
+                return (false, message ?? $"Erro ao atualizar subscrição ({response.StatusCode}).");
+            }
+            catch (Exception ex)
+            {
+                return (false, ex.Message);
+            }
+        }
+
+        public async Task<(bool Success, string? ErrorMessage, SubscriptionResponseDto? Subscription)> CreateSubscriptionAsync(CreateSubscriptionDto createDto)
+        {
+            try
+            {
+                var response = await _httpClient.PostAsJsonAsync("/api/Subscription", createDto);
+                if (response.IsSuccessStatusCode)
+                {
+                    var subscription = await response.Content.ReadFromJsonAsync<SubscriptionResponseDto>();
+                    return (true, null, subscription);
+                }
+
+                var errorContent = await response.Content.ReadAsStringAsync();
+                var message = ExtractMessage(errorContent);
+                return (false, message ?? $"Erro ao criar subscrição ({response.StatusCode}).", null);
+            }
+            catch (Exception ex)
+            {
+                return (false, ex.Message, null);
+            }
+        }
+
+        public async Task<(bool Success, string? ErrorMessage)> ChangeSubscriptionStatusAsync(int idSubscricao, bool ativo)
+        {
+            try
+            {
+                var response = await _httpClient.PatchAsync($"/api/Subscription/change-active-status/{idSubscricao}?ativo={ativo}", null);
+                if (response.IsSuccessStatusCode)
+                {
+                    return (true, null);
+                }
+
+                var errorContent = await response.Content.ReadAsStringAsync();
+                var message = ExtractMessage(errorContent);
+                return (false, message ?? $"Erro ao alterar estado da subscrição ({response.StatusCode}).");
+            }
+            catch (Exception ex)
+            {
+                return (false, ex.Message);
             }
         }
 
