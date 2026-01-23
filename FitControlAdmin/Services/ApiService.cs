@@ -124,6 +124,35 @@ namespace FitControlAdmin.Services
             }
         }
 
+        public async Task<UserDto?> GetUserByIdAsync(int idUser, bool includeFuncionario = false, bool includeMembro = false)
+        {
+            try
+            {
+                var queryParams = new List<string>();
+                if (includeFuncionario) queryParams.Add("includeFuncionario=true");
+                if (includeMembro) queryParams.Add("includeMembro=true");
+
+                var queryString = queryParams.Any() ? "?" + string.Join("&", queryParams) : "";
+                var response = await _httpClient.GetAsync($"/api/User/{idUser}{queryString}");
+
+                if (response.IsSuccessStatusCode)
+                {
+                    return await response.Content.ReadFromJsonAsync<UserDto>();
+                }
+                else
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    System.Diagnostics.Debug.WriteLine($"GetUserByIdAsync failed: {response.StatusCode} - {errorContent}");
+                }
+                return null;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"GetUserByIdAsync exception: {ex.Message}");
+                return null;
+            }
+        }
+
         public async Task<bool> UpdateUserAsync(int id, UserUpdateDto updateDto)
         {
             try
@@ -165,14 +194,23 @@ namespace FitControlAdmin.Services
             try
             {
                 var response = await _httpClient.GetAsync("/api/Employee");
+                System.Diagnostics.Debug.WriteLine($"GetAllEmployeesAsync: Response status: {response.StatusCode}");
                 if (response.IsSuccessStatusCode)
                 {
-                    return await response.Content.ReadFromJsonAsync<List<EmployeeDto>>();
+                    var employees = await response.Content.ReadFromJsonAsync<List<EmployeeDto>>();
+                    System.Diagnostics.Debug.WriteLine($"GetAllEmployeesAsync: Found {employees?.Count ?? 0} employees");
+                    return employees;
+                }
+                else
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    System.Diagnostics.Debug.WriteLine($"GetAllEmployeesAsync: Error response: {errorContent}");
                 }
                 return null;
             }
-            catch
+            catch (Exception ex)
             {
+                System.Diagnostics.Debug.WriteLine($"GetAllEmployeesAsync: Exception: {ex.Message}");
                 return null;
             }
         }
@@ -995,6 +1033,206 @@ namespace FitControlAdmin.Services
                 var errorContent = await response.Content.ReadAsStringAsync();
                 var message = ExtractMessage(errorContent);
                 return (false, message ?? $"Erro ao alterar estado da subscrição ({response.StatusCode}).");
+            }
+            catch (Exception ex)
+            {
+                return (false, ex.Message);
+            }
+        }
+
+        #endregion
+
+        #region Class Management Methods
+
+        public async Task<List<AulaResponseDto>?> GetAllClassesAsync()
+        {
+            try
+            {
+                // Try different possible endpoints for getting classes
+                var endpoints = new[]
+                {
+                    "/api/Class",
+                    "/api/Class/GetAll",
+                    "/api/Class/List",
+                    "/api/Aulas",
+                    "/api/Aulas/GetAll",
+                    "/api/Aulas/List"
+                };
+
+                foreach (var endpoint in endpoints)
+                {
+                    System.Diagnostics.Debug.WriteLine($"GetAllClassesAsync: Trying endpoint {endpoint}");
+                    var response = await _httpClient.GetAsync(endpoint);
+                    System.Diagnostics.Debug.WriteLine($"GetAllClassesAsync: Response status for {endpoint}: {response.StatusCode}");
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var classes = await response.Content.ReadFromJsonAsync<List<AulaResponseDto>>();
+                        System.Diagnostics.Debug.WriteLine($"GetAllClassesAsync: Retrieved {classes?.Count ?? 0} classes from API using endpoint {endpoint}");
+
+                        // Log each class for debugging
+                        if (classes != null)
+                        {
+                            foreach (var aula in classes)
+                            {
+                                System.Diagnostics.Debug.WriteLine($"GetAllClassesAsync: Found class - ID: {aula.IdAula}, Nome: {aula.Nome}, Dia: {aula.DiaSemana}");
+                            }
+                        }
+
+                        return classes;
+                    }
+                    else
+                    {
+                        var errorContent = await response.Content.ReadAsStringAsync();
+                        System.Diagnostics.Debug.WriteLine($"GetAllClassesAsync: Error response for {endpoint}: {errorContent}");
+                    }
+                }
+
+                System.Diagnostics.Debug.WriteLine("GetAllClassesAsync: No working endpoint found for getting classes");
+                return null;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"GetAllClassesAsync: Exception: {ex.Message}");
+                return null;
+            }
+        }
+
+        public async Task<(bool Success, string? ErrorMessage, AulaResponseDto? Class)> CreateClassAsync(AulaDto classDto)
+        {
+            try
+            {
+                var response = await _httpClient.PostAsJsonAsync("/api/Class", classDto);
+                if (response.IsSuccessStatusCode)
+                {
+                    var classResponse = await response.Content.ReadFromJsonAsync<AulaResponseDto>();
+                    return (true, null, classResponse);
+                }
+
+                var errorContent = await response.Content.ReadAsStringAsync();
+                var message = ExtractMessage(errorContent);
+                return (false, message ?? $"Erro ao criar aula ({response.StatusCode}).", null);
+            }
+            catch (Exception ex)
+            {
+                return (false, ex.Message, null);
+            }
+        }
+
+        public async Task<(bool Success, string? ErrorMessage)> UpdateClassAsync(int idAula, UpdateClassDto updateDto)
+        {
+            try
+            {
+                var response = await _httpClient.PatchAsJsonAsync($"/api/Class/{idAula}", updateDto);
+                if (response.IsSuccessStatusCode)
+                {
+                    return (true, null);
+                }
+
+                var errorContent = await response.Content.ReadAsStringAsync();
+                var message = ExtractMessage(errorContent);
+                return (false, message ?? $"Erro ao atualizar aula ({response.StatusCode}).");
+            }
+            catch (Exception ex)
+            {
+                return (false, ex.Message);
+            }
+        }
+
+        public async Task<(bool Success, string? ErrorMessage)> DeleteClassAsync(int idAula)
+        {
+            try
+            {
+                var response = await _httpClient.DeleteAsync($"/api/Class/{idAula}");
+                if (response.IsSuccessStatusCode)
+                {
+                    return (true, null);
+                }
+
+                var errorContent = await response.Content.ReadAsStringAsync();
+                var message = ExtractMessage(errorContent);
+                return (false, message ?? $"Erro ao eliminar aula ({response.StatusCode}).");
+            }
+            catch (Exception ex)
+            {
+                return (false, ex.Message);
+            }
+        }
+
+        public async Task<List<ClassReservationSummaryDto>?> GetClassReservationsAsync()
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync("/api/Class/reservations");
+                if (response.IsSuccessStatusCode)
+                {
+                    return await response.Content.ReadFromJsonAsync<List<ClassReservationSummaryDto>>();
+                }
+                return null;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        public async Task<ClassAttendanceDto?> GetClassAttendanceAsync(int idAulaMarcada)
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync($"/api/Class/attendance/{idAulaMarcada}");
+                if (response.IsSuccessStatusCode)
+                {
+                    return await response.Content.ReadFromJsonAsync<ClassAttendanceDto>();
+                }
+                return null;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        public async Task<(bool Success, string? ErrorMessage)> MarkClassAttendanceAsync(int idAulaMarcada, List<MemberReservationDto> attendance)
+        {
+            try
+            {
+                var response = await _httpClient.PostAsJsonAsync($"/api/Class/attendance/{idAulaMarcada}", attendance);
+                if (response.IsSuccessStatusCode)
+                {
+                    return (true, null);
+                }
+
+                var errorContent = await response.Content.ReadAsStringAsync();
+                var message = ExtractMessage(errorContent);
+                return (false, message ?? $"Erro ao marcar presença ({response.StatusCode}).");
+            }
+            catch (Exception ex)
+            {
+                return (false, ex.Message);
+            }
+        }
+
+        public async Task<(bool Success, string? ErrorMessage)> CreateClassScheduleAsync(int idAula, DateTime startDate, DateTime endDate)
+        {
+            try
+            {
+                var scheduleDto = new
+                {
+                    IdAula = idAula,
+                    StartDate = startDate,
+                    EndDate = endDate
+                };
+
+                var response = await _httpClient.PostAsJsonAsync("/api/Class/schedule", scheduleDto);
+                if (response.IsSuccessStatusCode)
+                {
+                    return (true, null);
+                }
+
+                var errorContent = await response.Content.ReadAsStringAsync();
+                var message = ExtractMessage(errorContent);
+                return (false, message ?? $"Erro ao criar agendamento ({response.StatusCode}).");
             }
             catch (Exception ex)
             {

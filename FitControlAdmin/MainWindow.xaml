@@ -768,7 +768,7 @@
                                 <DataGridTextColumn Header="Nome" Binding="{Binding Nome}" Width="150"/>
                                 <DataGridTextColumn Header="Email" Binding="{Binding Email}" Width="200"/>
                                 <DataGridTextColumn Header="Telemóvel" Binding="{Binding Telemovel}" Width="120"/>
-                                <DataGridTextColumn Header="Função" Binding="{Binding Funcao}" Width="120"/>
+                                <DataGridTextColumn Header="Função" Binding="{Binding Funcao, Converter={StaticResource EnumNameConverter}}" Width="120"/>
                                 <DataGridTextColumn Header="Data Registo" Binding="{Binding DataRegisto, StringFormat=dd/MM/yyyy}" Width="120"/>
                                 <DataGridCheckBoxColumn Header="Ativo" Binding="{Binding Ativo}" Width="60"/>
                                 <DataGridTemplateColumn Header="Ações" Width="150">
@@ -1590,6 +1590,33 @@
                                     <DataGridTextColumn Header="PT" Binding="{Binding NomeFuncionario}" Width="150"/>
                                     <DataGridTextColumn Header="Data Avaliação" Binding="{Binding DataAvaliacao, StringFormat=dd/MM/yyyy HH:mm}" Width="150"/>
                                     <DataGridTextColumn Header="Estado" Binding="{Binding Estado}" Width="120"/>
+                                    <DataGridTemplateColumn Header="Ações" Width="150">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <Button Content="Fazer Avaliação"
+                                                        Click="MakeEvaluationButton_Click"
+                                                        Tag="{Binding IdAvaliacao}"
+                                                        Padding="8,4"
+                                                        Margin="2"
+                                                        Background="#02acc3"
+                                                        Foreground="White"
+                                                        BorderThickness="0"
+                                                        Cursor="Hand"
+                                                        FontSize="12">
+                                                    <Button.Style>
+                                                        <Style TargetType="Button">
+                                                            <Setter Property="Background" Value="#02acc3"/>
+                                                            <Style.Triggers>
+                                                                <Trigger Property="IsMouseOver" Value="True">
+                                                                    <Setter Property="Background" Value="#0299b0"/>
+                                                                </Trigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </Button.Style>
+                                                </Button>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
                                 </DataGrid.Columns>
                             </DataGrid>
                         </ScrollViewer>
@@ -1832,6 +1859,205 @@
                             </Grid>
                         </StackPanel>
                     </Border>
+                </StackPanel>
+            </ScrollViewer>
+
+
+
+
+
+            <!-- Class Management Panel -->
+            <ScrollViewer x:Name="ClassManagementPanel" Margin="20,90,20,20" VerticalAlignment="Top" Visibility="Collapsed" VerticalScrollBarVisibility="Auto">
+                <StackPanel>
+                    <TextBlock Text="Gestão de Aulas"
+                               FontSize="24"
+                               FontWeight="Bold"
+                               Foreground="#e6e6e8"
+                               Margin="0,0,0,20"/>
+
+                    <!-- Search and Actions -->
+                    <Grid Margin="0,0,0,15">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Button x:Name="RefreshClassesButton"
+                                Grid.Column="0"
+                                Content="Atualizar"
+                                Click="RefreshClassesButton_Click"
+                                Padding="15,8" Margin="0,0,10,0"
+                                Background="#02acc3"
+                                Foreground="White"
+                                BorderThickness="0"
+                                Cursor="Hand"
+                                FontSize="14"/>
+                        <!-- Search Box -->
+                        <Border Grid.Column="1"
+                                Background="#1f2937"
+                                CornerRadius="6"
+                                Padding="10,8"
+                                Margin="0,0,10,0">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="🔍"
+                                           Grid.Column="0"
+                                           Foreground="#95a5a6"
+                                           FontSize="14"
+                                           VerticalAlignment="Center"
+                                           Margin="0,0,8,0"/>
+                                <TextBox x:Name="ClassSearchTextBox"
+                                         Grid.Column="1"
+                                         Background="Transparent"
+                                         BorderThickness="0"
+                                         Foreground="#95a5a6"
+                                         FontSize="14"
+                                         VerticalContentAlignment="Center"
+                                         TextChanged="ClassSearchTextBox_TextChanged"
+                                         GotFocus="ClassSearchTextBox_GotFocus"
+                                         LostFocus="ClassSearchTextBox_LostFocus"
+                                         CaretBrush="White"
+                                         Tag="Pesquisar por nome...">
+                                    <TextBox.Style>
+                                        <Style TargetType="TextBox">
+                                            <Setter Property="Text" Value="Pesquisar por nome..."/>
+                                            <Style.Triggers>
+                                                <Trigger Property="IsFocused" Value="True">
+                                                    <Setter Property="Foreground" Value="#e6e6e8"/>
+                                                </Trigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBox.Style>
+                                </TextBox>
+                            </Grid>
+                        </Border>
+                        <Button x:Name="CreateClassButton"
+                                Grid.Column="2"
+                                Content="+ Criar Aula"
+                                Click="CreateClassButton_Click"
+                                Padding="15,8"
+                                Background="#27AE60"
+                                Foreground="White"
+                                BorderThickness="0"
+                                Cursor="Hand"
+                                FontSize="14"/>
+                    </Grid>
+
+                    <!-- Classes Section -->
+                    <TextBlock Text="Aulas"
+                               FontSize="20"
+                               FontWeight="Bold"
+                               Foreground="#e6e6e8"
+                               Margin="0,0,0,15"/>
+
+                    <!-- Classes DataGrid -->
+                    <Border Background="#272936" CornerRadius="10" Padding="20" Margin="0,0,0,30">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+                            <DataGrid x:Name="ClassesDataGrid"
+                                      AutoGenerateColumns="False"
+                                      IsReadOnly="True"
+                                      SelectionMode="Single"
+                                      GridLinesVisibility="All"
+                                      HeadersVisibility="Column">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="ID" Binding="{Binding IdAula}" Width="60"/>
+                                    <DataGridTextColumn Header="Nome" Binding="{Binding Nome}" Width="200"/>
+                                    <DataGridTextColumn Header="Dia da Semana" Binding="{Binding DiaSemana, Converter={StaticResource EnumNameConverter}}" Width="120"/>
+                                    <DataGridTextColumn Header="Hora Início" Binding="{Binding HoraInicio, StringFormat=HH\\:mm}" Width="100"/>
+                                    <DataGridTextColumn Header="Hora Fim" Binding="{Binding HoraFim, StringFormat=HH\\:mm}" Width="100"/>
+                                    <DataGridTextColumn Header="Capacidade" Binding="{Binding Capacidade}" Width="100"/>
+                                    <DataGridTextColumn Header="Instrutor" Binding="{Binding Funcionario.Nome}" Width="150"/>
+                                    <DataGridTemplateColumn Header="Ações" Width="200">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <StackPanel Orientation="Horizontal">
+                                                    <Button Content="Editar"
+                                                            Click="EditClassButton_Click"
+                                                            Tag="{Binding IdAula}"
+                                                            Padding="8,4" Margin="2"
+                                                            Background="#02acc3"
+                                                            Foreground="White"
+                                                            BorderThickness="0"
+                                                            Cursor="Hand"
+                                                            FontSize="12"/>
+                                                    <Button Content="Agendar"
+                                                            Click="ScheduleClassButton_Click"
+                                                            Tag="{Binding IdAula}"
+                                                            Padding="8,4" Margin="2"
+                                                            Background="#9b59b6"
+                                                            Foreground="White"
+                                                            BorderThickness="0"
+                                                            Cursor="Hand"
+                                                            FontSize="12"/>
+                                                    <Button Content="Eliminar"
+                                                            Click="DeleteClassButton_Click"
+                                                            Tag="{Binding IdAula}"
+                                                            Padding="8,4" Margin="2"
+                                                            Background="#e74c3c"
+                                                            Foreground="White"
+                                                            BorderThickness="0"
+                                                            Cursor="Hand"
+                                                            FontSize="12"/>
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </ScrollViewer>
+                    </Border>
+
+                    <!-- Class Reservations Section -->
+                    <TextBlock Text="Aulas Agendadas"
+                               FontSize="20"
+                               FontWeight="Bold"
+                               Foreground="#e6e6e8"
+                               Margin="0,0,0,15"/>
+
+                    <Border Background="#272936" CornerRadius="10" Padding="20" Margin="0,0,0,30">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+                            <DataGrid x:Name="ClassReservationsDataGrid"
+                                      AutoGenerateColumns="False"
+                                      IsReadOnly="True"
+                                      SelectionMode="Single"
+                                      GridLinesVisibility="All"
+                                      HeadersVisibility="Column">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Data" Binding="{Binding DataAula, StringFormat=dd/MM/yyyy}" Width="100"/>
+                                    <DataGridTextColumn Header="Aula" Binding="{Binding NomeAula}" Width="200"/>
+                                    <DataGridTextColumn Header="Hora Início" Binding="{Binding HoraInicio, StringFormat=HH\\:mm}" Width="100"/>
+                                    <DataGridTextColumn Header="Hora Fim" Binding="{Binding HoraFim, StringFormat=HH\\:mm}" Width="100"/>
+                                    <DataGridTextColumn Header="Capacidade" Binding="{Binding Capacidade}" Width="100"/>
+                                    <DataGridTextColumn Header="Reservas" Binding="{Binding TotalReservas}" Width="80"/>
+                                    <DataGridTemplateColumn Header="Ações" Width="150">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <Button Content="Marcar Presença"
+                                                        Click="MarkClassAttendanceButton_Click"
+                                                        Tag="{Binding IdAulaMarcada}"
+                                                        Padding="8,4"
+                                                        Margin="2"
+                                                        Background="#f39c12"
+                                                        Foreground="White"
+                                                        BorderThickness="0"
+                                                        Cursor="Hand"
+                                                        FontSize="12"/>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </ScrollViewer>
+                    </Border>
+
+                    <TextBlock x:Name="ClassStatusText"
+                               Margin="0,15,0,0"
+                               Foreground="#95a5a6"
+                               FontSize="14"/>
                 </StackPanel>
             </ScrollViewer>
 

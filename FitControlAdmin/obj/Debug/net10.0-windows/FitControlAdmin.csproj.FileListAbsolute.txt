@@ -218,3 +218,5 @@ C:\Users\tiago\OneDrive\Área de Trabalho\PF\nova versao\FitControlAdmin\obj\Deb
 C:\Users\tiago\OneDrive\Área de Trabalho\PF\nova versao\FitControlAdmin\obj\Debug\net10.0-windows\ref\FitControlAdmin.dll
 C:\Users\tiago\OneDrive\Área de Trabalho\PF\nova versao\FitControlAdmin\obj\Debug\net10.0-windows\EditSubscriptionWindow.g.cs
 C:\Users\tiago\OneDrive\Área de Trabalho\PF\nova versao\FitControlAdmin\obj\Debug\net10.0-windows\EditSubscriptionWindow.baml
+C:\Users\tiago\OneDrive\Área de Trabalho\PF\nova versao\FitControlAdmin\obj\Debug\net10.0-windows\CreateEditClassWindow.g.cs
+C:\Users\tiago\OneDrive\Área de Trabalho\PF\nova versao\FitControlAdmin\obj\Debug\net10.0-windows\CreateEditClassWindow.baml

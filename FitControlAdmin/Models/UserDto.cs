@@ -11,6 +11,13 @@ namespace FitControlAdmin.Models
         public string? Funcao { get; set; }
         public int? IdSubscricao { get; set; }
         public DateTime? DataNascimento { get; set; }
+
+        // Propriedades para incluir informações do funcionário
+        public int? IdFuncionario { get; set; }
+        public string? NomeFuncionario { get; set; }
+        public string? EmailFuncionario { get; set; }
+        public string? TelemovelFuncionario { get; set; }
+        public Funcao? FuncaoFuncionario { get; set; }
     }
 
 
