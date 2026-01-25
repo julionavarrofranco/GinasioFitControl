@@ -118,20 +118,21 @@
 
         <!-- Buttons -->
         <StackPanel Orientation="Horizontal"
-                    HorizontalAlignment="Center"
+                    HorizontalAlignment="Right"
                     Grid.Row="2"
-                    Margin="0,0,0,20">
+                    Margin="0,0,20,20">
             <Button x:Name="SaveButton"
-                    Content="Guardar"
+                    Content="Confirmar"
                     Click="SaveButton_Click"
                     Padding="20,10"
+                    Margin="0,0,10,0"
+                    Width="120"
                     Background="#27AE60"
                     Foreground="White"
                     BorderThickness="0"
                     Cursor="Hand"
                     FontSize="14"
-                    FontWeight="SemiBold"
-                    Margin="0,0,10,0">
+                    FontWeight="SemiBold">
                 <Button.Style>
                     <Style TargetType="Button">
                         <Setter Property="Background" Value="#27AE60"/>
@@ -147,18 +148,18 @@
                     Content="Cancelar"
                     Click="CancelButton_Click"
                     Padding="20,10"
+                    Width="120"
                     Background="#34495E"
                     Foreground="White"
                     BorderThickness="0"
                     Cursor="Hand"
-                    FontSize="14"
-                    FontWeight="SemiBold">
+                    FontSize="14">
                 <Button.Style>
                     <Style TargetType="Button">
                         <Setter Property="Background" Value="#34495E"/>
                         <Style.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Background" Value="#2a3f4f"/>
+                                <Setter Property="Background" Value="#2c3e50"/>
                             </Trigger>
                         </Style.Triggers>
                     </Style>

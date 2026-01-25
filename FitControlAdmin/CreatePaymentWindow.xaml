@@ -5,7 +5,7 @@
         Title="Criar Pagamento"
         Height="550" Width="500"
         WindowStartupLocation="CenterOwner"
-        Background="#1f2937"
+        Background="#313443"
         ResizeMode="NoResize">
 
     <Window.Resources>
@@ -185,19 +185,19 @@
         <StackPanel Grid.Row="6"
                     Orientation="Horizontal"
                     HorizontalAlignment="Right"
-                    Margin="0,20,0,0">
-
+                    Margin="0,25,0,0">
             <Button x:Name="ConfirmButton"
-                    Content="Criar"
+                    Content="Confirmar"
                     Click="ConfirmButton_Click"
-                    Padding="60,10"
-                    Margin="0,0,70,0"
+                    Padding="20,10"
+                    Margin="0,0,10,0"
+                    Width="120"
                     Background="#27AE60"
                     Foreground="White"
                     BorderThickness="0"
+                    Cursor="Hand"
                     FontSize="14"
-                    FontWeight="SemiBold"
-                    Cursor="Hand">
+                    FontWeight="SemiBold">
                 <Button.Style>
                     <Style TargetType="Button">
                         <Setter Property="Background" Value="#27AE60"/>
@@ -209,28 +209,26 @@
                     </Style>
                 </Button.Style>
             </Button>
-
             <Button Content="Cancelar"
                     Click="CancelButton_Click"
-                    Padding="60,10"
-                    Background="#e74c3c"
+                    Padding="20,10"
+                    Width="120"
+                    Background="#34495E"
                     Foreground="White"
                     BorderThickness="0"
-                    FontSize="14"
-                    FontWeight="SemiBold"
-                    Cursor="Hand">
+                    Cursor="Hand"
+                    FontSize="14">
                 <Button.Style>
                     <Style TargetType="Button">
-                        <Setter Property="Background" Value="#e74c3c"/>
+                        <Setter Property="Background" Value="#34495E"/>
                         <Style.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Background" Value="#c0392b"/>
+                                <Setter Property="Background" Value="#2c3e50"/>
                             </Trigger>
                         </Style.Triggers>
                     </Style>
                 </Button.Style>
             </Button>
-
         </StackPanel>
     </Grid>
 </Window>

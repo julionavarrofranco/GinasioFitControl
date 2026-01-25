@@ -7,12 +7,12 @@
         mc:Ignorable="d"
         Title="Criar Aula" Height="600" Width="500"
         WindowStartupLocation="CenterOwner"
-        Background="#272936"
+        Background="#313443"
         Foreground="#e6e6e8"
         FontFamily="Segoe UI"
         ResizeMode="NoResize"
-        WindowStyle="None"
-        AllowsTransparency="True">
+        WindowStyle="SingleBorderWindow"
+        AllowsTransparency="False">
 
     <Window.Resources>
         <Style TargetType="TextBlock">
@@ -46,6 +46,26 @@
             <Setter Property="FontSize" Value="14"/>
             <Setter Property="Height" Value="35"/>
             <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="ItemContainerStyle">
+                <Setter.Value>
+                    <Style TargetType="ComboBoxItem">
+                        <Setter Property="Background" Value="#272936"/>
+                        <Setter Property="Foreground" Value="#e6e6e8"/>
+                        <Setter Property="BorderThickness" Value="0"/>
+                        <Setter Property="Padding" Value="12,8"/>
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#1f2937"/>
+                                <Setter Property="Foreground" Value="White"/>
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter Property="Background" Value="#02acc3"/>
+                                <Setter Property="Foreground" Value="White"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </Setter.Value>
+            </Setter>
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
                     <Setter Property="BorderBrush" Value="#02acc3"/>
@@ -115,6 +135,7 @@
                     <StackPanel Margin="0,0,0,20">
                         <TextBlock Text="Dia da Semana *"/>
                         <ComboBox x:Name="DiaSemanaComboBox"
+                                  Foreground="Black"
                                   SelectedValue="{Binding SelectedDiaSemana, UpdateSourceTrigger=PropertyChanged}">
                             <ComboBoxItem Content="Segunda" Tag="Segunda"/>
                             <ComboBoxItem Content="Terça" Tag="Terca"/>
@@ -155,43 +176,60 @@
                         <TextBlock Text="Instrutor"/>
                         <ComboBox x:Name="FuncionarioComboBox"
                                   ItemsSource="{Binding Funcionarios}"
+                                  Foreground="Black"
                                   DisplayMemberPath="Nome"
                                   SelectedValuePath="IdFuncionario"
-                                  SelectedValue="{Binding SelectedFuncionarioId, UpdateSourceTrigger=PropertyChanged}">
-                            <ComboBox.ItemContainerStyle>
-                                <Style TargetType="ComboBoxItem">
-                                    <Setter Property="Background" Value="#272936"/>
-                                    <Setter Property="Foreground" Value="#e6e6e8"/>
-                                    <Setter Property="BorderThickness" Value="0"/>
-                                    <Setter Property="Padding" Value="12,8"/>
-                                    <Style.Triggers>
-                                        <Trigger Property="IsMouseOver" Value="True">
-                                            <Setter Property="Background" Value="#1f2937"/>
-                                            <Setter Property="Foreground" Value="#e6e6e8"/>
-                                        </Trigger>
-                                        <Trigger Property="IsSelected" Value="True">
-                                            <Setter Property="Background" Value="#02acc3"/>
-                                            <Setter Property="Foreground" Value="#e6e6e8"/>
-                                        </Trigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </ComboBox.ItemContainerStyle>
-                        </ComboBox>
+                                  SelectedValue="{Binding SelectedFuncionarioId, UpdateSourceTrigger=PropertyChanged}"/>
                     </StackPanel>
                 </StackPanel>
             </ScrollViewer>
 
             <!-- Buttons -->
-            <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,30,0,0">
+            <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,25,0,0">
+                <Button x:Name="SaveButton"
+                        Content="Confirmar"
+                        Click="SaveButton_Click"
+                        Padding="20,10"
+                        Margin="0,0,10,0"
+                        Width="120"
+                        Background="#27AE60"
+                        Foreground="White"
+                        BorderThickness="0"
+                        Cursor="Hand"
+                        FontSize="14"
+                        FontWeight="SemiBold">
+                    <Button.Style>
+                        <Style TargetType="Button">
+                            <Setter Property="Background" Value="#27AE60"/>
+                            <Style.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="#229954"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
                 <Button x:Name="CancelButton"
                         Content="Cancelar"
-                        Background="#e74c3c"
                         Click="CancelButton_Click"
-                        Margin="0,0,15,0"/>
-                <Button x:Name="SaveButton"
-                        Content="{Binding SaveButtonText}"
-                        Background="#27AE60"
-                        Click="SaveButton_Click"/>
+                        Padding="20,10"
+                        Width="120"
+                        Background="#34495E"
+                        Foreground="White"
+                        BorderThickness="0"
+                        Cursor="Hand"
+                        FontSize="14">
+                    <Button.Style>
+                        <Style TargetType="Button">
+                            <Setter Property="Background" Value="#34495E"/>
+                            <Style.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="#2c3e50"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
             </StackPanel>
         </Grid>
     </Border>

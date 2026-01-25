@@ -105,6 +105,12 @@ namespace FitControlAdmin
                 ShowPhysicalEvaluationManagement();
             };
 
+            BtnPlanosTreino.Click += (s, e) =>
+            {
+                HighlightActiveButton(BtnPlanosTreino);
+                ShowTrainingPlans();
+            };
+
             BtnConfig.Click += (s, e) =>
             {
                 HighlightActiveButton(BtnConfig);
@@ -264,7 +270,12 @@ namespace FitControlAdmin
             LoadClasses();
         }
 
-
+        private void ShowTrainingPlans()
+        {
+            HideAllPanels();
+            TrainingPlansPanel.Visibility = Visibility.Visible;
+            // TODO: carregar membros, aulas e avaliações quando a API estiver disponível
+        }
 
         private void ShowPlaceholder(string text)
         {
@@ -284,6 +295,7 @@ namespace FitControlAdmin
             PhysicalEvaluationManagementPanel.Visibility = Visibility.Collapsed;
             SubscriptionManagementPanel.Visibility = Visibility.Collapsed;
             ClassManagementPanel.Visibility = Visibility.Collapsed;
+            TrainingPlansPanel.Visibility = Visibility.Collapsed;
             PlaceholderText.Visibility = Visibility.Collapsed;
         }
 
@@ -348,7 +360,7 @@ namespace FitControlAdmin
 
         private void HighlightActiveButton(Button active)
         {
-            var buttons = new[] { BtnDashboard, BtnFuncionarios, BtnMembros, BtnSubscricoes, BtnPagamentos, BtnExercicios, BtnAvaliacoesFisicas, BtnConfig };
+            var buttons = new[] { BtnDashboard, BtnFuncionarios, BtnMembros, BtnSubscricoes, BtnPagamentos, BtnExercicios, BtnAvaliacoesFisicas, BtnPlanosTreino, BtnConfig };
 
             foreach (var btn in buttons)
             {
@@ -703,14 +715,16 @@ namespace FitControlAdmin
             BtnPagamentos.Visibility = Visibility.Visible;
             BtnAulas.Visibility = Visibility.Visible;
             BtnExercicios.Visibility = Visibility.Visible;
-            if (string.Equals(_userFuncao, "PT", StringComparison.OrdinalIgnoreCase) ||
-                string.Equals(_userFuncao, "Admin", StringComparison.OrdinalIgnoreCase))
+            // Avaliações físicas: apenas PT (o Admin não tem acesso; o PT trata das avaliações)
+            if (string.Equals(_userFuncao, "PT", StringComparison.OrdinalIgnoreCase))
             {
                 BtnAvaliacoesFisicas.Visibility = Visibility.Visible;
+                BtnPlanosTreino.Visibility = Visibility.Visible;
             }
             else
             {
                 BtnAvaliacoesFisicas.Visibility = Visibility.Collapsed;
+                BtnPlanosTreino.Visibility = Visibility.Collapsed;
             }
             BtnConfig.Visibility = Visibility.Visible;
 
@@ -734,11 +748,12 @@ namespace FitControlAdmin
                 }
                 else if (string.Equals(_userFuncao, "PT", StringComparison.OrdinalIgnoreCase))
                 {
-                    // PT focado em membros, aulas e exercícios
+                    // PT: membros, aulas, exercícios, avaliações físicas e planos de treino
                     BtnFuncionarios.Visibility = Visibility.Collapsed;
                     BtnSubscricoes.Visibility = Visibility.Collapsed;
                     BtnPagamentos.Visibility = Visibility.Collapsed;
-                    BtnAvaliacoesFisicas.Visibility = Visibility.Visible; // PTs podem ver avaliações físicas
+                    BtnAvaliacoesFisicas.Visibility = Visibility.Visible;
+                    BtnPlanosTreino.Visibility = Visibility.Visible;
                     BtnConfig.Visibility = Visibility.Collapsed;
                 }
                 // Admin vê tudo
@@ -1303,27 +1318,22 @@ namespace FitControlAdmin
                 // Carregar as 3 tabelas em paralelo
                 var activeReservationsTask = _apiService.GetActiveReservationsAsync();
                 var completedReservationsTask = _apiService.GetCompletedReservationsAsync();
-                var membersTask = _apiService.GetAllMembersAsync();
+                var historyTask = _apiService.GetAllEvaluationsAsync();
 
-                await Task.WhenAll(activeReservationsTask, completedReservationsTask, membersTask);
+                await Task.WhenAll(activeReservationsTask, completedReservationsTask, historyTask);
 
                 var activeReservations = await activeReservationsTask;
                 var completedReservations = await completedReservationsTask;
-                var members = await membersTask;
+                var history = await historyTask;
 
                 // Preencher tabela de reservas ativas
                 if (activeReservations != null)
                 {
-                    // Mapear o estado para português
-                    foreach (var reservation in activeReservations)
-                    {
-                        reservation.Estado = MapEstadoToPortuguese(reservation.Estado);
-                    }
                     ReservationsDataGrid.ItemsSource = activeReservations;
                 }
                 else
                 {
-                    ReservationsDataGrid.ItemsSource = new List<PhysicalEvaluationReservationResponseDto>();
+                    ReservationsDataGrid.ItemsSource = new List<MemberEvaluationReservationSummaryDto>();
                 }
 
                 // Preencher tabela de reservas completas
@@ -1333,20 +1343,20 @@ namespace FitControlAdmin
                 }
                 else
                 {
-                    CompletedReservationsDataGrid.ItemsSource = new List<PhysicalEvaluationReservationResponseDto>();
+                    CompletedReservationsDataGrid.ItemsSource = new List<MemberEvaluationReservationSummaryDto>();
                 }
 
-                // Preencher tabela de membros (histórico)
-                if (members != null)
+                // Preencher tabela de histórico (avaliações completadas)
+                if (history != null)
                 {
-                    MembersHistoryDataGrid.ItemsSource = members;
+                    MembersHistoryDataGrid.ItemsSource = history;
                 }
                 else
                 {
-                    MembersHistoryDataGrid.ItemsSource = new List<MemberDto>();
+                    MembersHistoryDataGrid.ItemsSource = new List<PhysicalEvaluationHistoryDto>();
                 }
 
-                PhysicalEvaluationStatusText.Text = $"Reservas: {activeReservations?.Count ?? 0} | Completas: {completedReservations?.Count ?? 0} | Membros: {members?.Count ?? 0}";
+                PhysicalEvaluationStatusText.Text = $"Reservas: {activeReservations?.Count ?? 0} | Completas: {completedReservations?.Count ?? 0} | Histórico: {history?.Count ?? 0}";
             }
             catch (Exception ex)
             {
@@ -1363,20 +1373,20 @@ namespace FitControlAdmin
 
         private async void ReserveButton_Click(object sender, RoutedEventArgs e)
         {
-            if (sender is Button button && button.Tag is int idAvaliacao)
+            if (sender is Button button && button.Tag is int idMembroAvaliacao)
             {
                 try
                 {
-                    // Verificar se o utilizador atual é funcionário
-                    if (_userTipo != "Funcionario")
+                    // A API só permite PT nesta ação ([Authorize(Policy = "OnlyPT")]); Admin recebe 403
+                    if (!string.Equals(_userFuncao, "PT", StringComparison.OrdinalIgnoreCase))
                     {
-                        MessageBox.Show("Apenas funcionários podem confirmar reservas.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                        MessageBox.Show("Apenas o PT pode confirmar reservas de avaliação física.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
                         return;
                     }
 
                     // Buscar a reserva
                     var activeReservations = await _apiService.GetActiveReservationsAsync();
-                    var reservation = activeReservations?.FirstOrDefault(r => r.IdAvaliacao == idAvaliacao);
+                    var reservation = activeReservations?.FirstOrDefault(r => r.IdMembroAvaliacao == idMembroAvaliacao);
 
                     if (reservation == null)
                     {
@@ -1384,34 +1394,23 @@ namespace FitControlAdmin
                         return;
                     }
 
-                    // Mapear IdUser para IdFuncionario baseado nos dados conhecidos
-                    var idFuncionario = _userId.Value switch
+                    // Obter IdFuncionario do utilizador atual (endpoint /api/User/me com includeFuncionario)
+                    int? idFuncionario = null;
+                    var currentUser = await _apiService.GetCurrentUserAsync();
+                    if (currentUser?.IdFuncionario != null)
+                        idFuncionario = currentUser.IdFuncionario;
+                    if (!idFuncionario.HasValue || idFuncionario.Value <= 0)
                     {
-                        123 => 61, // Admin
-                        124 => 62, // Receção
-                        125 => 63, // PT
-                        130 => 64, // PT Maria
-                        _ => _userId.Value // Fallback
-                    };
+                        MessageBox.Show("Não foi possível identificar o PT. Faça logout e login novamente.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                        return;
+                    }
 
-                    // Confirmar a reserva (marcar como atendida) - apenas marcar presença por enquanto
-                    System.Diagnostics.Debug.WriteLine($"ReserveButton_Click: Calling MarkAttendanceAsync with IdMembro={reservation.IdMembro}, IdAvaliacao={idAvaliacao}, IdFuncionario={idFuncionario}");
+                    // Confirmar a reserva (apenas muda estado, sem criar avaliação)
+                    System.Diagnostics.Debug.WriteLine($"ReserveButton_Click: Calling ConfirmReservationAsync with IdMembro={reservation.IdMembro}, IdMembroAvaliacao={idMembroAvaliacao}, IdFuncionario={idFuncionario}");
 
-                    var markAttendanceData = new MarkAttendanceDto
-                    {
-                        Presente = true,
-                        IdFuncionario = idFuncionario, // Usar ID correto
-                        Peso = 70, // Valores padrão válidos
-                        Altura = 170,
-                        Imc = 24,
-                        MassaMuscular = 60,
-                        MassaGorda = 15,
-                        Observacoes = "Reserva confirmada - aguardando avaliação completa"
-                    };
+                    var result = await _apiService.ConfirmReservationAsync(reservation.IdMembro, idMembroAvaliacao, idFuncionario.Value);
 
-                    var result = await _apiService.MarkAttendanceAsync(reservation.IdMembro, idAvaliacao, markAttendanceData);
-
-                    System.Diagnostics.Debug.WriteLine($"ReserveButton_Click: MarkAttendanceAsync result - Success={result.Success}, ErrorMessage='{result.ErrorMessage}'");
+                    System.Diagnostics.Debug.WriteLine($"ReserveButton_Click: ConfirmReservationAsync result - Success={result.Success}, ErrorMessage='{result.ErrorMessage}'");
 
                     if (result.Success)
                     {
@@ -1431,50 +1430,58 @@ namespace FitControlAdmin
             }
         }
 
-        private async void ViewMemberHistoryButton_Click(object sender, RoutedEventArgs e)
+        private async void ViewEvaluationDetailsButton_Click(object sender, RoutedEventArgs e)
         {
-            if (sender is Button button && button.Tag is int idMembro)
+            if (sender is Button button && button.Tag is int idAvaliacao)
             {
                 try
                 {
-                    // Buscar informações do membro
-                    var members = await _apiService.GetAllMembersAsync();
-                    var member = members?.FirstOrDefault(m => m.IdMembro == idMembro);
+                    // Buscar a avaliação do histórico
+                    var history = await _apiService.GetAllEvaluationsAsync();
+                    var evaluation = history?.FirstOrDefault(h => h.IdAvaliacao == idAvaliacao);
 
-                    if (member == null)
+                    if (evaluation == null)
                     {
-                        MessageBox.Show("Membro não encontrado.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                        MessageBox.Show("Avaliação não encontrada.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
                         return;
                     }
 
-                    // Abrir janela de histórico
-                    var historyWindow = new MemberEvaluationHistoryWindow(_apiService, member);
-                    historyWindow.Owner = this;
-                    historyWindow.ShowDialog();
+                    // Mostrar detalhes
+                    var details = $"Membro: {evaluation.NomeMembro}\n" +
+                                  $"PT: {evaluation.NomeFuncionario}\n" +
+                                  $"Data: {evaluation.DataAvaliacao:dd/MM/yyyy HH:mm}\n\n" +
+                                  $"Peso: {evaluation.Peso:F1} kg\n" +
+                                  $"Altura: {evaluation.Altura:F2} m\n" +
+                                  $"IMC: {evaluation.Imc:F1}\n" +
+                                  $"Massa Muscular: {evaluation.MassaMuscular:F1} kg\n" +
+                                  $"Massa Gorda: {evaluation.MassaGorda:F1} kg\n\n" +
+                                  $"Observações:\n{evaluation.Observacoes ?? "Sem observações"}";
+
+                    MessageBox.Show(details, "Detalhes da Avaliação Física", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"Erro ao abrir histórico: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show($"Erro ao ver detalhes: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
         }
 
         private async void MakeEvaluationButton_Click(object sender, RoutedEventArgs e)
         {
-            if (sender is Button button && button.Tag is int idAvaliacao)
+            if (sender is Button button && button.Tag is int idMembroAvaliacao)
             {
                 try
                 {
-                    // Verificar se o utilizador atual é funcionário
-                    if (_userTipo != "Funcionario")
+                    // Apenas PT pode criar avaliações físicas (API: OnlyPT)
+                    if (!string.Equals(_userFuncao, "PT", StringComparison.OrdinalIgnoreCase))
                     {
-                        MessageBox.Show("Apenas funcionários podem fazer avaliações.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                        MessageBox.Show("Apenas o PT pode fazer avaliações físicas.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
                         return;
                     }
 
                     // Buscar a reserva completa
                     var completedReservations = await _apiService.GetCompletedReservationsAsync();
-                    var reservation = completedReservations?.FirstOrDefault(r => r.IdAvaliacao == idAvaliacao);
+                    var reservation = completedReservations?.FirstOrDefault(r => r.IdMembroAvaliacao == idMembroAvaliacao);
 
                     if (reservation == null)
                     {
@@ -1482,29 +1489,24 @@ namespace FitControlAdmin
                         return;
                     }
 
-                    // Mapear IdUser para IdFuncionario baseado nos dados conhecidos
-                    var idFuncionario = _userId.Value switch
+                    var currentUser = await _apiService.GetCurrentUserAsync();
+                    if (currentUser?.IdFuncionario == null || currentUser.IdFuncionario.Value <= 0)
                     {
-                        123 => 61, // Admin
-                        124 => 62, // Receção
-                        125 => 63, // PT
-                        130 => 64, // PT Maria
-                        _ => _userId.Value // Fallback
-                    };
+                        MessageBox.Show("Não foi possível identificar o PT. Faça logout e login novamente.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                        return;
+                    }
 
-                    // Criar EmployeeDto com os dados do JWT e IdFuncionario mapeado
                     var employee = new EmployeeDto
                     {
-                        IdUser = _userId.Value,
-                        IdFuncionario = idFuncionario,
-                        Nome = "Funcionário Atual",
-                        Email = "funcionario@fit.local",
-                        Telemovel = "000000000",
-                        Funcao = Enum.Parse<Funcao>(_userFuncao ?? "PT")
+                        IdUser = currentUser.IdUser,
+                        IdFuncionario = currentUser.IdFuncionario.Value,
+                        Nome = currentUser.Nome ?? "PT",
+                        Email = currentUser.Email ?? "",
+                        Telemovel = currentUser.Telemovel ?? "",
+                        Funcao = currentUser.FuncaoFuncionario ?? Enum.Parse<Funcao>(_userFuncao ?? "PT")
                     };
 
-                    // Abrir janela para inserir dados da avaliação física
-                    var createWindow = new CreatePhysicalEvaluationWindow(_apiService, reservation.IdMembro, employee.IdFuncionario, idAvaliacao);
+                    var createWindow = new CreatePhysicalEvaluationWindow(_apiService, reservation.IdMembro, employee.IdFuncionario, idMembroAvaliacao);
                     createWindow.Owner = this;
                     if (createWindow.ShowDialog() == true)
                     {

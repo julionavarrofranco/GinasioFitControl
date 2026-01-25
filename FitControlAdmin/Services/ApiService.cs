@@ -797,6 +797,23 @@ namespace FitControlAdmin.Services
             }
         }
 
+        public async Task<List<PhysicalEvaluationHistoryDto>?> GetAllEvaluationsAsync()
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync("/api/PhysicalEvaluation/all");
+                if (response.IsSuccessStatusCode)
+                {
+                    return await response.Content.ReadFromJsonAsync<List<PhysicalEvaluationHistoryDto>>();
+                }
+                return null;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
         #endregion
 
         #region Physical Evaluation Reservation Methods
@@ -855,6 +872,27 @@ namespace FitControlAdmin.Services
             }
         }
 
+        public async Task<(bool Success, string? ErrorMessage)> ConfirmReservationAsync(int idMembro, int idAvaliacao, int idFuncionario)
+        {
+            try
+            {
+                var confirmDto = new { IdFuncionario = idFuncionario };
+                var response = await _httpClient.PatchAsJsonAsync($"/api/PhysicalEvaluationReservation/confirm-reservation/{idMembro}/{idAvaliacao}", confirmDto);
+                if (response.IsSuccessStatusCode)
+                {
+                    return (true, null);
+                }
+
+                var errorContent = await response.Content.ReadAsStringAsync();
+                var message = ExtractMessage(errorContent);
+                return (false, message ?? $"Erro ao confirmar reserva ({response.StatusCode}).");
+            }
+            catch (Exception ex)
+            {
+                return (false, ex.Message);
+            }
+        }
+
         public async Task<(bool Success, string? ErrorMessage)> MarkAttendanceAsync(int idMembro, int idAvaliacao, MarkAttendanceDto markAttendanceDto)
         {
             try
@@ -875,28 +913,14 @@ namespace FitControlAdmin.Services
             }
         }
 
-        public async Task<List<PhysicalEvaluationReservationResponseDto>?> GetActiveReservationsAsync()
+        public async Task<List<MemberEvaluationReservationSummaryDto>?> GetActiveReservationsAsync()
         {
             try
             {
                 var response = await _httpClient.GetAsync("/api/PhysicalEvaluationReservation/active");
                 if (response.IsSuccessStatusCode)
                 {
-                    // Use the correct DTO from the API
-                    var rawReservations = await response.Content.ReadFromJsonAsync<List<MemberEvaluationReservationSummaryDto>>();
-                    if (rawReservations != null)
-                    {
-                        return rawReservations.Select(r => new PhysicalEvaluationReservationResponseDto
-                        {
-                            IdAvaliacao = r.IdMembroAvaliacao,
-                            IdMembro = r.IdMembro,
-                            IdFuncionario = r.IdFuncionario,
-                            DataAvaliacao = r.DataReserva,
-                            Estado = r.EstadoString,
-                            NomeMembro = r.NomeMembro,
-                            NomeFuncionario = r.NomeFuncionario
-                        }).ToList();
-                    }
+                    return await response.Content.ReadFromJsonAsync<List<MemberEvaluationReservationSummaryDto>>();
                 }
                 return null;
             }
@@ -906,28 +930,14 @@ namespace FitControlAdmin.Services
             }
         }
 
-        public async Task<List<PhysicalEvaluationReservationResponseDto>?> GetCompletedReservationsAsync()
+        public async Task<List<MemberEvaluationReservationSummaryDto>?> GetCompletedReservationsAsync()
         {
             try
             {
                 var response = await _httpClient.GetAsync("/api/PhysicalEvaluationReservation/completed");
                 if (response.IsSuccessStatusCode)
                 {
-                    // Use the correct DTO from the API
-                    var rawReservations = await response.Content.ReadFromJsonAsync<List<MemberEvaluationReservationSummaryDto>>();
-                    if (rawReservations != null)
-                    {
-                        return rawReservations.Select(r => new PhysicalEvaluationReservationResponseDto
-                        {
-                            IdAvaliacao = r.IdMembroAvaliacao,
-                            IdMembro = r.IdMembro,
-                            IdFuncionario = r.IdFuncionario,
-                            DataAvaliacao = r.DataAvaliacao ?? r.DataReserva,
-                            Estado = r.EstadoString,
-                            NomeMembro = r.NomeMembro,
-                            NomeFuncionario = r.NomeFuncionario
-                        }).ToList();
-                    }
+                    return await response.Content.ReadFromJsonAsync<List<MemberEvaluationReservationSummaryDto>>();
                 }
                 return null;
             }
@@ -1044,11 +1054,49 @@ namespace FitControlAdmin.Services
 
         #region Class Management Methods
 
+        /// <summary>
+        /// Obtém aulas por estado (ativo=true ou false). A API expõe apenas GET /api/Class/by-state?ativo= .
+        /// Se a API devolver 500, é provável ser ciclo de serialização (entidade Aula com navegação) — corrigir na API usando DTO.
+        /// </summary>
+        public async Task<List<AulaResponseDto>?> GetClassesByStateAsync(bool ativo)
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync($"/api/Class/by-state?ativo={ativo}");
+                if (response.IsSuccessStatusCode)
+                {
+                    var classes = await response.Content.ReadFromJsonAsync<List<AulaResponseDto>>();
+                    System.Diagnostics.Debug.WriteLine($"GetClassesByStateAsync(ativo={ativo}): Retrieved {classes?.Count ?? 0} classes");
+                    return classes;
+                }
+                var errorContent = await response.Content.ReadAsStringAsync();
+                System.Diagnostics.Debug.WriteLine($"GetClassesByStateAsync(ativo={ativo}): {response.StatusCode} - {errorContent}");
+                return null;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"GetClassesByStateAsync: Exception: {ex.Message}");
+                return null;
+            }
+        }
+
         public async Task<List<AulaResponseDto>?> GetAllClassesAsync()
         {
             try
             {
-                // Try different possible endpoints for getting classes
+                // A API só expõe by-state; tentar primeiro aulas ativas (e depois inativas para lista completa)
+                var activeClasses = await GetClassesByStateAsync(ativo: true);
+                var inactiveClasses = await GetClassesByStateAsync(ativo: false);
+                if (activeClasses != null || inactiveClasses != null)
+                {
+                    var combined = new List<AulaResponseDto>();
+                    if (activeClasses != null) combined.AddRange(activeClasses);
+                    if (inactiveClasses != null) combined.AddRange(inactiveClasses);
+                    System.Diagnostics.Debug.WriteLine($"GetAllClassesAsync: Total {combined.Count} classes (by-state)");
+                    return combined;
+                }
+
+                // Fallback: outros endpoints caso a API ganhe GET all no futuro
                 var endpoints = new[]
                 {
                     "/api/Class",
@@ -1063,28 +1111,11 @@ namespace FitControlAdmin.Services
                 {
                     System.Diagnostics.Debug.WriteLine($"GetAllClassesAsync: Trying endpoint {endpoint}");
                     var response = await _httpClient.GetAsync(endpoint);
-                    System.Diagnostics.Debug.WriteLine($"GetAllClassesAsync: Response status for {endpoint}: {response.StatusCode}");
-
                     if (response.IsSuccessStatusCode)
                     {
                         var classes = await response.Content.ReadFromJsonAsync<List<AulaResponseDto>>();
-                        System.Diagnostics.Debug.WriteLine($"GetAllClassesAsync: Retrieved {classes?.Count ?? 0} classes from API using endpoint {endpoint}");
-
-                        // Log each class for debugging
-                        if (classes != null)
-                        {
-                            foreach (var aula in classes)
-                            {
-                                System.Diagnostics.Debug.WriteLine($"GetAllClassesAsync: Found class - ID: {aula.IdAula}, Nome: {aula.Nome}, Dia: {aula.DiaSemana}");
-                            }
-                        }
-
+                        System.Diagnostics.Debug.WriteLine($"GetAllClassesAsync: Retrieved {classes?.Count ?? 0} classes from {endpoint}");
                         return classes;
-                    }
-                    else
-                    {
-                        var errorContent = await response.Content.ReadAsStringAsync();
-                        System.Diagnostics.Debug.WriteLine($"GetAllClassesAsync: Error response for {endpoint}: {errorContent}");
                     }
                 }
 
@@ -1123,7 +1154,7 @@ namespace FitControlAdmin.Services
         {
             try
             {
-                var response = await _httpClient.PatchAsJsonAsync($"/api/Class/{idAula}", updateDto);
+                var response = await _httpClient.PatchAsJsonAsync($"/api/Class/update/{idAula}", updateDto);
                 if (response.IsSuccessStatusCode)
                 {
                     return (true, null);

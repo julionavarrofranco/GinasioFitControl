@@ -4,22 +4,21 @@
         Title="Completar Avaliação Física"
         Height="600" Width="500"
         WindowStartupLocation="CenterOwner"
-        Background="#1f2937"
+        Background="#313443"
         ResizeMode="NoResize">
 
-    <Grid Margin="30">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <Grid Margin="30">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
 
         <!-- Title -->
         <TextBlock Grid.Row="0"
@@ -106,7 +105,7 @@
         </StackPanel>
 
         <!-- Observações -->
-        <StackPanel Grid.Row="6" Margin="0,0,0,20">
+        <StackPanel Grid.Row="6" Margin="0,0,0,30">
             <TextBlock Text="Observações"
                        Foreground="#e6e6e8"
                        FontSize="14"
@@ -125,21 +124,22 @@
         </StackPanel>
 
         <!-- Buttons -->
-        <StackPanel Grid.Row="9"
+        <StackPanel Grid.Row="7"
                     Orientation="Horizontal"
                     HorizontalAlignment="Right"
-                    Margin="0,20,0,0">
+                    Margin="0,25,0,0">
             <Button x:Name="ConfirmButton"
                     Content="Confirmar"
                     Click="ConfirmButton_Click"
-                    Padding="60,10"
-                    Margin="0,0,70,0"
+                    Padding="20,10"
+                    Margin="0,0,10,0"
+                    Width="120"
                     Background="#27AE60"
                     Foreground="White"
                     BorderThickness="0"
+                    Cursor="Hand"
                     FontSize="14"
-                    FontWeight="SemiBold"
-                    Cursor="Hand">
+                    FontWeight="SemiBold">
                 <Button.Style>
                     <Style TargetType="Button">
                         <Setter Property="Background" Value="#27AE60"/>
@@ -151,27 +151,27 @@
                     </Style>
                 </Button.Style>
             </Button>
-
             <Button Content="Cancelar"
                     Click="CancelButton_Click"
-                    Padding="60,10"
-                    Background="#e74c3c"
+                    Padding="20,10"
+                    Width="120"
+                    Background="#34495E"
                     Foreground="White"
                     BorderThickness="0"
-                    FontSize="14"
-                    FontWeight="SemiBold"
-                    Cursor="Hand">
+                    Cursor="Hand"
+                    FontSize="14">
                 <Button.Style>
                     <Style TargetType="Button">
-                        <Setter Property="Background" Value="#e74c3c"/>
+                        <Setter Property="Background" Value="#34495E"/>
                         <Style.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Background" Value="#c0392b"/>
+                                <Setter Property="Background" Value="#2c3e50"/>
                             </Trigger>
                         </Style.Triggers>
                     </Style>
                 </Button.Style>
             </Button>
         </StackPanel>
-    </Grid>
+        </Grid>
+    </ScrollViewer>
 </Window>
