@@ -1,4 +1,4 @@
-﻿namespace ProjetoFinal.Models.DTOs
+namespace ProjetoFinal.Models.DTOs
 {
     public class MemberEvaluationReservationSummaryDto
     {
@@ -24,5 +24,8 @@
         // Opcional: ID do funcionário que realizou a avaliação
         public int? IdFuncionario { get; set; }
         public string? NomeFuncionario { get; set; }
+        
+        // Indica se já tem avaliação física criada
+        public bool TemAvaliacaoFisica { get; set; }
     }
 }

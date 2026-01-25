@@ -1,4 +1,4 @@
-﻿using ProjetoFinal.Models;
+using ProjetoFinal.Models;
 using ProjetoFinal.Models.DTOs;
 
 namespace ProjetoFinal.Services.Interfaces
@@ -11,8 +11,8 @@ namespace ProjetoFinal.Services.Interfaces
         Task<Aula> AssignPtAsync(int idAula, int idPt);
         Task ChangeActiveStateAsync(int idAula, bool ativo);
         Task<Aula> GetByIdAsync(int idAula);
-        Task<List<Aula>> ListByStateAsync(bool ativo);
-        Task<List<Aula>> ListByDayAsync(DiaSemana dia);
-        Task<List<Aula>> ListByPtAsync(int idFuncionario);
+        Task<List<ClassResponseDto>> ListByStateAsync(bool ativo);
+        Task<List<ClassResponseDto>> ListByDayAsync(DiaSemana dia);
+        Task<List<ClassResponseDto>> ListByPtAsync(int idFuncionario);
     }
 }
