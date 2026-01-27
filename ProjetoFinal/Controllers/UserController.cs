@@ -1,3 +1,4 @@
+﻿using Azure.Core;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ProjetoFinal.Models;
@@ -13,7 +14,7 @@ namespace ProjetoFinal.Controllers
     {
         private readonly IUserService _userService;
 
-        public UserController(IUserService userService)
+        public UserController(IAuthService authService, IUserService userService)
         {
             _userService = userService;
         }
@@ -81,7 +82,7 @@ namespace ProjetoFinal.Controllers
         {
             try
             {
-                var (currentUserId, currentUserTipo, currentUserFuncao) = GetCurrentUserFromClaims();
+                var (currentUserId, currentUserTipo, currentUserFuncao) = GetCurrentUser();
 
                 var targetUser = await _userService.GetUserByIdAsync(request.IdUser);
                 if (targetUser == null)
@@ -112,70 +113,14 @@ namespace ProjetoFinal.Controllers
             }
         }
 
-        // 4. GET CURRENT USER (me)
-        [Authorize]
-        [HttpGet("me")]
-        public async Task<IActionResult> GetCurrentUser()
-        {
-            try
-            {
-                var idUserClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                if (idUserClaim == null)
-                    return Unauthorized(new { message = "Utilizador não autenticado." });
-
-                int idUser = int.Parse(idUserClaim);
-                var user = await _userService.GetUserByIdAsync(idUser, includeFuncionario: true, includeMembro: true);
-
-                if (user == null)
-                    return NotFound(new { message = "Utilizador não encontrado." });
-
-                var response = new UserResponseDto
-                {
-                    IdUser = user.IdUser,
-                    Email = user.Email,
-                    Tipo = user.Tipo.ToString(),
-                    Ativo = user.Ativo
-                };
-
-                // Preencher dados do funcionário se existir
-                if (user.Funcionario != null)
-                {
-                    response.IdFuncionario = user.Funcionario.IdFuncionario;
-                    response.NomeFuncionario = user.Funcionario.Nome;
-                    response.EmailFuncionario = user.Email;
-                    response.TelemovelFuncionario = user.Funcionario.Telemovel;
-                    response.FuncaoFuncionario = user.Funcionario.Funcao;
-                    response.Funcao = user.Funcionario.Funcao.ToString();
-                    response.Nome = user.Funcionario.Nome;
-                    response.Telemovel = user.Funcionario.Telemovel;
-                }
-
-                // Preencher dados do membro se existir
-                if (user.Membro != null)
-                {
-                    response.IdMembro = user.Membro.IdMembro;
-                    response.Nome = user.Membro.Nome;
-                    response.Telemovel = user.Membro.Telemovel;
-                    response.DataNascimento = user.Membro.DataNascimento;
-                    response.IdSubscricao = user.Membro.IdSubscricao;
-                }
-
-                return Ok(response);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = $"Erro interno do servidor: {ex.Message}" });
-            }
-        }
-
-        // 5. CHANGE ACTIVE STATUS
+        // 4. CHANGE ACTIVE STATUS
         [Authorize(Policy = "CanManageUsers")]
         [HttpPatch("change-active-status")]
         public async Task<IActionResult> ChangeUserStatus([FromBody] UserStatusDto request)
         {
             try
             {
-                var (currentUserId, currentUserTipo, currentUserFuncao) = GetCurrentUserFromClaims();
+                var (currentUserId, currentUserTipo, currentUserFuncao) = GetCurrentUser();
 
                 var targetUser = await _userService.GetUserByIdAsync(request.IdUser);
                 if (targetUser == null)
@@ -207,7 +152,7 @@ namespace ProjetoFinal.Controllers
         }
 
         //Métodos auxiliares
-        private (int userId, Tipo tipo, Funcao? funcao) GetCurrentUserFromClaims()
+        private (int userId, Tipo tipo, Funcao? funcao) GetCurrentUser()
         {
             var idUserClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             var userTipoClaim = User.FindFirst("Tipo")?.Value;

@@ -1,4 +1,4 @@
-﻿using Azure.Core;
+using Azure.Core;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ProjetoFinal.Models;
@@ -118,6 +118,16 @@ namespace ProjetoFinal.Controllers
             {
                 return StatusCode(500, new { message = "Erro interno do servidor." });
             }
+        }
+
+        [Authorize(Policy = "OnlyPT")]
+        [HttpGet("{idPlano:int}")]
+        public async Task<IActionResult> GetById(int idPlano)
+        {
+            var detail = await _trainingPlanService.GetDetalheAsync(idPlano);
+            if (detail == null)
+                return NotFound(new { message = "Plano de treino não encontrado." });
+            return Ok(detail);
         }
 
         [Authorize(Policy = "OnlyPT")]

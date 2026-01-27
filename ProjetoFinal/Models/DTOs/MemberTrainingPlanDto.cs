@@ -1,4 +1,4 @@
-﻿namespace ProjetoFinal.Models.DTOs
+namespace ProjetoFinal.Models.DTOs
 {
     public class MemberTrainingPlanDto
     {
@@ -11,6 +11,7 @@
 
     public class TrainingPlanExerciseDto
     {
+        public int IdExercicio { get; set; }
         public string NomeExercicio { get; set; } = null!;
         public GrupoMuscular GrupoMuscular { get; set; }
         public string Descricao { get; set; } = null!;

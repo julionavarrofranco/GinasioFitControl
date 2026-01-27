@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using ProjetoFinal.Models.DTOs;
@@ -59,28 +59,6 @@ namespace ProjetoFinal.Controllers
         }
 
         [Authorize(Policy = "OnlyPT")]
-        [HttpPatch("confirm-reservation/{idMembro}/{idAvaliacao}")]
-        public async Task<IActionResult> ConfirmReservation(int idMembro, int idAvaliacao, [FromBody] ConfirmReservationDto request)
-        {
-            try
-            {
-                var success = await _reservationService.ConfirmReservationAsync(idMembro, idAvaliacao, request.IdFuncionario);
-                if (!success)
-                    return NotFound(new { message = "Reserva não encontrada ou não está em estado reservado." });
-
-                return Ok(new { message = "Reserva confirmada com sucesso." });
-            }
-            catch (InvalidOperationException ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-            catch
-            {
-                return StatusCode(500, new { message = "Erro interno do servidor." });
-            }
-        }
-
-        [Authorize(Policy = "OnlyPT")]
         [HttpPatch("attendance/{idMembro}/{idAvaliacao}")]
         public async Task<IActionResult> MarkAttendance(int idMembro, int idAvaliacao, [FromBody] MarkAttendanceDto request)
         {
@@ -88,7 +66,7 @@ namespace ProjetoFinal.Controllers
             {
                 var success = await _reservationService.MarkAttendanceAsync(idMembro, idAvaliacao, request);
                 if (!success)
-                    return NotFound(new { message = "Reserva não encontrada ou não está em estado Presente." });
+                    return NotFound(new { message = "Reserva não encontrada ou não está em estado reservado." });
 
                 return Ok(new { message = "Presença registrada com sucesso." });
             }

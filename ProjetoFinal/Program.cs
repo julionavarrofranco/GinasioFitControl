@@ -108,7 +108,7 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("OnlyMembers", policy =>
         policy.RequireClaim("Tipo", "Membro"));
 
-    //require assertion para combinar mÃºltiplas claims
+    //require assertion para combinar m�ltiplas claims
     options.AddPolicy("CanViewClasses", policy =>
     policy.RequireAssertion(context =>
         context.User.HasClaim(c =>
@@ -130,7 +130,7 @@ if (app.Environment.IsDevelopment())
     var services = scope.ServiceProvider;
     try
     {
-        // Aplica migrations e faz seed (opcional: jÃ¡ feito dentro do SeedAsync)
+        // Aplica migrations e faz seed (opcional: j� feito dentro do SeedAsync)
         var context = services.GetRequiredService<GinasioDbContext>();
         await context.Database.MigrateAsync();
 

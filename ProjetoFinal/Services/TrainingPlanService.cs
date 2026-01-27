@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using ProjetoFinal.Data;
 using ProjetoFinal.Models;
 using ProjetoFinal.Models.DTOs;
@@ -124,6 +124,10 @@ namespace ProjetoFinal.Services
         public async Task<List<PlanoTreino>> GetPlanosByEstadoAsync(bool ativo)
         {
             return await _context.Planos
+                .AsNoTracking()
+                .Include(p => p.Funcionario)
+                .Include(p => p.PlanosExercicios)
+                    .ThenInclude(pe => pe.Exercicio)
                 .Where(p => ativo ? p.DataDesativacao == null : p.DataDesativacao != null)
                 .OrderByDescending(p => p.DataCriacao)
                 .ToListAsync();
@@ -152,5 +156,43 @@ namespace ProjetoFinal.Services
                 .ToListAsync();
         }
 
+        public async Task<TrainingPlanDetailDto?> GetDetalheAsync(int idPlano)
+        {
+            var plano = await _context.Planos
+                .AsNoTracking()
+                .Include(p => p.Funcionario)
+                .Include(p => p.PlanosExercicios)
+                    .ThenInclude(pe => pe.Exercicio)
+                .FirstOrDefaultAsync(p => p.IdPlano == idPlano);
+
+            if (plano == null)
+                return null;
+
+            return new TrainingPlanDetailDto
+            {
+                IdPlano = plano.IdPlano,
+                IdFuncionario = plano.IdFuncionario,
+                Nome = plano.Nome,
+                DataCriacao = plano.DataCriacao,
+                Observacoes = plano.Observacoes,
+                Ativo = plano.DataDesativacao == null,
+                NomeFuncionario = plano.Funcionario?.Nome,
+                Exercicios = plano.PlanosExercicios
+                    .OrderBy(pe => pe.Ordem)
+                    .Select(pe => new TrainingPlanExerciseDto
+                    {
+                        IdExercicio = pe.IdExercicio,
+                        NomeExercicio = pe.Exercicio.Nome,
+                        GrupoMuscular = pe.Exercicio.GrupoMuscular,
+                        Descricao = pe.Exercicio.Descricao,
+                        FotoUrl = pe.Exercicio.FotoUrl,
+                        Series = pe.Series,
+                        Repeticoes = pe.Repeticoes,
+                        Carga = pe.Carga,
+                        Ordem = pe.Ordem
+                    })
+                    .ToList()
+            };
+        }
     }
 }

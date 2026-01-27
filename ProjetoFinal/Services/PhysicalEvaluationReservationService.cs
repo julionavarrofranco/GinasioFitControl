@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using ProjetoFinal.Data;
 using ProjetoFinal.Models;
 using ProjetoFinal.Models.DTOs;
@@ -66,30 +66,19 @@ namespace ProjetoFinal.Services
             return true;
         }
 
-        public async Task<bool> ConfirmReservationAsync(int idMembro, int idAvaliacao, int idFuncionario)
+        public async Task<bool> MarkAttendanceAsync(int idMembro, int idAvaliacao, MarkAttendanceDto request)
         {
             var reserva = await GetReservationByIdAsync(idMembro, idAvaliacao);
             if (reserva == null || reserva.Estado != EstadoAvaliacao.Reservado)
                 return false;
 
-            // Apenas muda o estado para Presente, sem criar avaliação física
-            reserva.Estado = EstadoAvaliacao.Presente;
-
-            await _context.SaveChangesAsync();
-            return true;
-        }
-
-        public async Task<bool> MarkAttendanceAsync(int idMembro, int idAvaliacao, MarkAttendanceDto request)
-        {
-            var reserva = await GetReservationByIdAsync(idMembro, idAvaliacao);
-            if (reserva == null || reserva.Estado != EstadoAvaliacao.Presente)
-                return false;
-
             if (reserva.AvaliacaoFisica != null)
-                throw new InvalidOperationException("Esta reserva já tem uma avaliação física associada.");
+                throw new InvalidOperationException("Esta reserva já foi processada.");
 
             if (request.Presente)
             {
+                reserva.Estado = EstadoAvaliacao.Presente;
+
                 var avaliacao = await _physicalEvaluationService.CreatePhysicalEvaluationAsync(
                     new PhysicalEvaluationDto
                     {
@@ -105,17 +94,16 @@ namespace ProjetoFinal.Services
                     });
 
                 reserva.IdAvaliacaoFisica = avaliacao.IdAvaliacao;
-                reserva.DataDesativacao = DateTime.UtcNow;
             }
             else
             {
                 reserva.Estado = EstadoAvaliacao.Faltou;
-                reserva.DataDesativacao = DateTime.UtcNow;
                 if (request.Peso != 0 || request.Altura != 0 || request.Imc != 0 || request.MassaMuscular != 0 || request.MassaGorda != 0 || !string.IsNullOrWhiteSpace(request.Observacoes))
                 {
                     throw new InvalidOperationException("Não é permitido enviar dados físicos quando o membro não esteve presente.");
                 }
             }
+            reserva.DataDesativacao = DateTime.UtcNow;
 
             await _context.SaveChangesAsync();
             return true;
@@ -151,7 +139,7 @@ namespace ProjetoFinal.Services
                 .AsNoTracking()
                 .Include(r => r.Membro)
                 .Include(r => r.AvaliacaoFisica)
-                .Where(r => r.Estado == EstadoAvaliacao.Presente && r.IdAvaliacaoFisica == null)
+                .Where(r => r.Estado == EstadoAvaliacao.Presente || r.Estado == EstadoAvaliacao.Faltou)
                 .OrderByDescending(r => r.DataReserva)
                 .Select(r => new MemberEvaluationReservationSummaryDto
                 {
@@ -164,8 +152,7 @@ namespace ProjetoFinal.Services
                         ? r.AvaliacaoFisica.Funcionario.Nome
                         : string.Empty,
                     DataReserva = r.DataReserva,
-                    EstadoString = r.Estado.ToString(),
-                    TemAvaliacaoFisica = r.IdAvaliacaoFisica != null
+                    EstadoString = r.Estado.ToString()
                 })
                 .ToListAsync();
         }
