@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using ProjetoFinal.Data;
 using ProjetoFinal.Models;
 using ProjetoFinal.Models.DTOs;
@@ -254,7 +254,6 @@ namespace ProjetoFinal.Services
                         .OrderBy(pe => pe.Ordem)
                         .Select(pe => new TrainingPlanExerciseDto
                         {
-                            IdExercicio = pe.IdExercicio,
                             NomeExercicio = pe.Exercicio.Nome,
                             GrupoMuscular = pe.Exercicio.GrupoMuscular,
                             Descricao = pe.Exercicio.Descricao,

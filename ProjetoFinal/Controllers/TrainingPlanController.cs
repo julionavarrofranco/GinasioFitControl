@@ -121,16 +121,6 @@ namespace ProjetoFinal.Controllers
         }
 
         [Authorize(Policy = "OnlyPT")]
-        [HttpGet("{idPlano:int}")]
-        public async Task<IActionResult> GetById(int idPlano)
-        {
-            var detail = await _trainingPlanService.GetDetalheAsync(idPlano);
-            if (detail == null)
-                return NotFound(new { message = "Plano de treino não encontrado." });
-            return Ok(detail);
-        }
-
-        [Authorize(Policy = "OnlyPT")]
         [HttpGet("by-state")]
         public async Task<IActionResult> GetByState([FromQuery] bool ativo)
         {

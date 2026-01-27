@@ -1,8 +1,9 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using ProjetoFinal.Data;
 using ProjetoFinal.Models;
 using ProjetoFinal.Models.DTOs;
 using ProjetoFinal.Services.Interfaces;
+using System.Linq;
 
 public class ClassService : IClassService
 {
@@ -17,6 +18,7 @@ public class ClassService : IClassService
     {
         return await _context.Aulas
             .Include(a => a.Funcionario)
+            .ThenInclude(f => f.User)
             .FirstOrDefaultAsync(a => a.IdAula == idAula && a.DataDesativacao == null);
     }
 
@@ -200,35 +202,101 @@ public class ClassService : IClassService
             ?? throw new KeyNotFoundException("Aula não encontrada.");
     }
 
-    public async Task<List<Aula>> ListByStateAsync(bool ativo)
+    public async Task<List<ClassResponseDto>> ListByStateAsync(bool ativo)
     {
-        return await _context.Aulas
+        var aulas = await _context.Aulas
             .AsNoTracking()
             .Where(a => (ativo && a.DataDesativacao == null) || (!ativo && a.DataDesativacao != null))
             .Include(a => a.Funcionario)
+            .ThenInclude(f => f.User)
             .OrderBy(a => a.DiaSemana).ThenBy(a => a.HoraInicio)
             .ToListAsync();
+
+        return aulas.Select(a => new ClassResponseDto
+        {
+            IdAula = a.IdAula,
+            IdFuncionario = a.IdFuncionario,
+            Nome = a.Nome,
+            DiaSemana = a.DiaSemana,
+            HoraInicio = a.HoraInicio,
+            HoraFim = a.HoraFim,
+            Capacidade = a.Capacidade,
+            DataDesativacao = a.DataDesativacao,
+            Funcionario = a.Funcionario != null ? new FuncionarioSimpleDto
+            {
+                IdUser = a.Funcionario.IdUser,
+                IdFuncionario = a.Funcionario.IdFuncionario,
+                Nome = a.Funcionario.Nome,
+                Email = a.Funcionario.User?.Email ?? "",
+                Telemovel = a.Funcionario.Telemovel,
+                Funcao = a.Funcionario.Funcao
+            } : null
+        }).ToList();
     }
 
     // Listar aulas por dia da semana
-    public async Task<List<Aula>> ListByDayAsync(DiaSemana dia)
+    public async Task<List<ClassResponseDto>> ListByDayAsync(DiaSemana dia)
     {
-        return await _context.Aulas
+        var aulas = await _context.Aulas
             .AsNoTracking()
             .Where(a => a.DiaSemana == dia && a.DataDesativacao == null)
             .Include(a => a.Funcionario)
+            .ThenInclude(f => f.User)
             .OrderBy(a => a.HoraInicio)
             .ToListAsync();
+
+        return aulas.Select(a => new ClassResponseDto
+        {
+            IdAula = a.IdAula,
+            IdFuncionario = a.IdFuncionario,
+            Nome = a.Nome,
+            DiaSemana = a.DiaSemana,
+            HoraInicio = a.HoraInicio,
+            HoraFim = a.HoraFim,
+            Capacidade = a.Capacidade,
+            DataDesativacao = a.DataDesativacao,
+            Funcionario = a.Funcionario != null ? new FuncionarioSimpleDto
+            {
+                IdUser = a.Funcionario.IdUser,
+                IdFuncionario = a.Funcionario.IdFuncionario,
+                Nome = a.Funcionario.Nome,
+                Email = a.Funcionario.User?.Email ?? "",
+                Telemovel = a.Funcionario.Telemovel,
+                Funcao = a.Funcionario.Funcao
+            } : null
+        }).ToList();
     }
 
     // Listar aulas por PT
-    public async Task<List<Aula>> ListByPtAsync(int idFuncionario)
+    public async Task<List<ClassResponseDto>> ListByPtAsync(int idFuncionario)
     {
-        return await _context.Aulas
+        var aulas = await _context.Aulas
             .AsNoTracking()
             .Where(a => a.IdFuncionario == idFuncionario && a.DataDesativacao == null)
             .Include(a => a.Funcionario)
+            .ThenInclude(f => f.User)
             .OrderBy(a => a.DiaSemana).ThenBy(a => a.HoraInicio)
             .ToListAsync();
+
+        return aulas.Select(a => new ClassResponseDto
+        {
+            IdAula = a.IdAula,
+            IdFuncionario = a.IdFuncionario,
+            Nome = a.Nome,
+            DiaSemana = a.DiaSemana,
+            HoraInicio = a.HoraInicio,
+            HoraFim = a.HoraFim,
+            Capacidade = a.Capacidade,
+            DataDesativacao = a.DataDesativacao,
+            Funcionario = a.Funcionario != null ? new FuncionarioSimpleDto
+            {
+                IdUser = a.Funcionario.IdUser,
+                IdFuncionario = a.Funcionario.IdFuncionario,
+                Nome = a.Funcionario.Nome,
+                Email = a.Funcionario.User?.Email ?? "",
+                Telemovel = a.Funcionario.Telemovel,
+                Funcao = a.Funcionario.Funcao
+            } : null
+        }).ToList();
     }
 }

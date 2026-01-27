@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using ProjetoFinal.Data;
 using ProjetoFinal.Models;
 using ProjetoFinal.Models.DTOs;
@@ -155,6 +155,35 @@ namespace ProjetoFinal.Services
             }
 
             await _context.SaveChangesAsync();
+        }
+
+        public async Task<List<PhysicalEvaluationHistoryDto>> GetAllEvaluationsAsync()
+        {
+            return await _context.AvaliacoesFisicas
+                .AsNoTracking()
+                .Include(a => a.Membro)
+                .Include(a => a.Funcionario)
+                    .ThenInclude(f => f.User)
+                .Where(a => a.DataDesativacao == null)
+                .OrderByDescending(a => a.DataAvaliacao)
+                .Select(a => new PhysicalEvaluationHistoryDto
+                {
+                    IdAvaliacao = a.IdAvaliacao,
+                    IdMembro = a.IdMembro,
+                    NomeMembro = a.Membro.Nome,
+                    TelemovelMembro = a.Membro.Telemovel,
+                    IdFuncionario = a.IdFuncionario,
+                    NomeFuncionario = a.Funcionario.Nome,
+                    DataAvaliacao = a.DataAvaliacao,
+                    Peso = a.Peso,
+                    Altura = a.Altura,
+                    Imc = a.Imc,
+                    MassaMuscular = a.MassaMuscular,
+                    MassaGorda = a.MassaGorda,
+                    Observacoes = a.Observacoes,
+                    Ativo = a.DataDesativacao == null
+                })
+                .ToListAsync();
         }
 
         public async Task<List<AvaliacaoFisica>> GetAllEvaluationsFromMemberAsync(int idMembro)

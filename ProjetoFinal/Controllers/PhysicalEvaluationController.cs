@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ProjetoFinal.Models.DTOs;
 using ProjetoFinal.Services.Interfaces;
@@ -77,6 +77,21 @@ namespace ProjetoFinal.Controllers
                 await _physicalEvaluationService.ChangePhysicalEvaluationActiveStatusAsync(idAvaliacao, ativo);
 
                 return Ok(new { message = "Estado atualizado com sucesso." });
+            }
+            catch
+            {
+                return StatusCode(500, new { message = "Erro interno do servidor." });
+            }
+        }
+
+        [Authorize(Policy = "OnlyPT")]
+        [HttpGet("all")]
+        public async Task<IActionResult> GetAllEvaluations()
+        {
+            try
+            {
+                var avaliacoes = await _physicalEvaluationService.GetAllEvaluationsAsync();
+                return Ok(avaliacoes);
             }
             catch
             {
