@@ -1,0 +1,238 @@
+@model TTFWebsite.Controllers.HomeViewModel
+
+<!-- Hero Section -->
+<section id="home" class="hero">
+    <div class="container">
+        <div class="hero-content">
+            <h1 class="hero-title">Encontra o Ginásio mais perto de ti</h1>
+            <p class="hero-subtitle">
+                Treina onde e quando quiseres, com equipamentos premium, planos acessíveis e acompanhamento de verdade. 
+                Sem fidelizações e mais de 24 clubes à tua disposição.
+            </p>
+            <div class="hero-actions">
+                <a href="#gyms" class="btn-primary">ESCOLHE UM GINÁSIO PERTO DE TI</a>
+                <a href="@Url.Action("Login", "Account")" class="btn-secondary">ÁREA DE MEMBROS</a>
+                <a href="#plans" class="btn-outline">Quero ver Planos e Preços</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Gym Locations -->
+<section id="gyms" class="gyms-section">
+    <div class="container">
+        <h2 class="section-title">ESCOLHE UM GINÁSIO PERTO DE TI</h2>
+        <div class="gyms-grid">
+            @foreach (var gym in Model.Gyms)
+            {
+                <div class="gym-card">
+                    <h3>@gym.City</h3>
+                </div>
+            }
+        </div>
+        <div class="stats">
+            <div class="stat-item">
+                <span class="stat-number">12</span>
+                <span class="stat-label">anos</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number">24</span>
+                <span class="stat-label">Clubes</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number">365</span>
+                <span class="stat-label">dias por ano</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Benefits Section -->
+<section id="benefits" class="benefits-section">
+    <div class="container">
+        <h2 class="section-title">Benefícios reais para quem quer resultados</h2>
+        <div class="benefits-grid">
+            @foreach (var benefit in Model.Benefits)
+            {
+                <div class="benefit-card">
+                    <div class="benefit-icon">
+                        <span class="@benefit.IconClass"></span>
+                    </div>
+                    <h3>@benefit.Title</h3>
+                    <p>@benefit.Description</p>
+                </div>
+            }
+        </div>
+    </div>
+</section>
+
+<!-- Training Types -->
+<section class="training-types">
+    <div class="container">
+        <h2 class="section-title">Um Ginásio: Várias formas de treinar</h2>
+        <p class="section-subtitle">Seja qual for o teu objetivo, os ginásios FitControl têm o plano certo para ti.</p>
+        <div class="training-grid">
+            <div class="training-card">
+                <h3>Profissionais ocupados</h3>
+                <p>Treina no teu horário. Quando podes e não quando o ginásio manda. Aberto das 6h às 24h, todos os dias. Sem desculpas!</p>
+            </div>
+            <div class="training-card">
+                <h3>Famílias</h3>
+                <p>Planos flexíveis para todos. Um só plano, várias soluções. Treinares com quem mais gostas nunca foi tão fácil. E económico!</p>
+            </div>
+            <div class="training-card">
+                <h3>Mulheres</h3>
+                <p>Treina com conforto e privacidade. Lady Fitness é o teu espaço. Treina com confiança, no teu ritmo, com apoio técnico sempre que precisares.</p>
+            </div>
+            <div class="training-card">
+                <h3>Iniciantes</h3>
+                <p>Começa com apoio e um plano à tua medida. Com acompanhamento e sem pressões. Com estrutura, desde o primeiro dia.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Testimonials -->
+<section class="testimonials-section">
+    <div class="container">
+        <h2 class="section-title">Histórias reais, Resultados reais</h2>
+        <div class="testimonials-grid">
+            @foreach (var testimonial in Model.Testimonials)
+            {
+                <div class="testimonial-card">
+                    <p class="testimonial-text">"@testimonial.Comment"</p>
+                    <p class="testimonial-author">@testimonial.Name</p>
+                </div>
+            }
+        </div>
+    </div>
+</section>
+
+<!-- Plans Section -->
+<section id="plans" class="plans-section">
+    <div class="container">
+        <h2 class="section-title">Planos acessíveis e sem complicações</h2>
+        <p class="section-subtitle">
+            Treina com total liberdade. Sem fidelizações, nem complicações.<br>
+            Escolhe o plano que se adapta ao teu ritmo, à tua vida e aos teus objetivos.
+        </p>
+        <div class="plans-grid">
+            @foreach (var plan in Model.Plans)
+            {
+                <div class="plan-card @(plan.IsPopular ? "popular" : "")">
+                    @if (plan.IsPopular)
+                    {
+                        <div class="popular-badge">Mais Popular</div>
+                    }
+                    <h3>@plan.Name</h3>
+                    <div class="plan-price">
+                        <span class="price-amount">@plan.Price€</span>
+                        <span class="price-period">/PAX</span>
+                    </div>
+                    <p class="plan-description">@plan.Description</p>
+                    <div class="plan-features">
+                        <h4>O que está incluído:</h4>
+                        <ul>
+                            @foreach (var feature in plan.Features)
+                            {
+                                <li>@feature</li>
+                            }
+                        </ul>
+                    </div>
+                    <p class="plan-note">Para te inscreveres, visita-nos presencialmente no ginásio.</p>
+                </div>
+            }
+        </div>
+        <div class="plans-footer">
+            <p>Não sabes qual plano escolher? Visita-nos no ginásio e descobre o que faz mais sentido para ti.</p>
+            <a href="@Url.Action("Login", "Account")" class="btn-outline">Já és membro? Acede à tua área</a>
+        </div>
+    </div>
+</section>
+
+<!-- Contact Section -->
+<section id="contact" class="contact-section">
+    <div class="container">
+        <h2 class="section-title">Contacta-nos</h2>
+        <p class="section-subtitle">Visita-nos presencialmente no ginásio para te inscreveres ou esclareceres dúvidas.</p>
+        <div class="contact-info">
+            <div class="contact-item">
+                <h3>Morada</h3>
+                <p>Rua Cipriano Dourado, 14B<br>1600-428 Lisboa</p>
+            </div>
+            <div class="contact-item">
+                <h3>Email</h3>
+                <p>geral@fitcontrol.pt</p>
+            </div>
+            <div class="contact-item">
+                <h3>Área de Membros</h3>
+                @{
+                    var rawName = User?.Identity?.Name ?? string.Empty;
+                    var friendly = "membro";
+                    var isAuth = User?.Identity?.IsAuthenticated ?? false;
+                    if (!string.IsNullOrEmpty(rawName))
+                    {
+                        var at = rawName.IndexOf('@');
+                        friendly = at > 0 ? rawName.Substring(0, at) : rawName;
+                    }
+                }
+                @if (isAuth)
+                {
+                    <p>Olá, <a href="@Url.Action("Profile", "Member")" class="btn-primary" style="display:inline-block; padding:0.5rem 0.9rem;">@friendly</a></p>
+                }
+                else
+                {
+                    <p>Já és membro? <a href="@Url.Action("Login", "Account")" class="btn-primary">Acede à tua área</a></p>
+                }
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+.plan-note {
+    margin-top: 1rem;
+    padding: 0.75rem;
+    background: rgba(2, 172, 195, 0.1);
+    border-radius: 6px;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    text-align: center;
+}
+
+.contact-section {
+    padding: 4rem 0;
+    background: var(--bg-card);
+}
+
+.contact-info {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+.contact-item {
+    text-align: center;
+    padding: 2rem;
+    background: var(--bg-primary);
+    border-radius: 12px;
+    border: 1px solid var(--border);
+}
+
+.contact-item h3 {
+    color: var(--accent);
+    margin-bottom: 1rem;
+    font-size: 1.2rem;
+}
+
+.contact-item p {
+    color: var(--text-secondary);
+    line-height: 1.8;
+}
+
+.contact-item a {
+    margin-top: 1rem;
+    display: inline-block;
+}
+</style>

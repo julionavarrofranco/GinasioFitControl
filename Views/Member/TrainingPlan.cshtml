@@ -1,0 +1,41 @@
+@model TTFWebsite.Models.TrainingPlanViewModel
+@{
+    ViewData["Title"] = "Plano de Treino - Área de Membros";
+    ViewData["BodyClass"] = "classes-bg"; // use same background as other member pages
+    Layout = "~/Views/Shared/_MemberLayout.cshtml";
+}
+
+<div class="trainingplan-container">
+    <div class="trainingplan-header">
+        <h1>@Model.Name</h1>
+    </div>
+
+    <div class="trainingplan-content">
+        <h2>Exercícios</h2>
+        <div class="exercises-list">
+            @foreach (var ex in Model.Exercises)
+            {
+                <div class="exercise-card">
+                    <div class="exercise-title">
+                        <h3>@ex.Name</h3>
+                        <div class="sets-reps">@ex.Sets x @ex.Reps</div>
+                    </div>
+                    <p class="exercise-desc">@ex.Description</p>
+                    @if (!string.IsNullOrWhiteSpace(ex.Notes))
+                    {
+                        <p class="exercise-notes">Notas: @ex.Notes</p>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<style>
+.trainingplan-container { padding: 2rem; max-width: 900px; margin: 0 auto; }
+.exercise-card { background: var(--bg-card); border-radius: 10px; padding: 1rem; margin-bottom: 1rem; border: 1px solid var(--border); }
+.exercise-title { display: flex; justify-content: space-between; align-items: center; }
+.sets-reps { font-weight: 600; color: var(--text-secondary); }
+.exercise-desc { margin-top: 0.5rem; }
+.exercise-notes { margin-top: 0.5rem; font-style: italic; color: var(--text-secondary); }
+</style>

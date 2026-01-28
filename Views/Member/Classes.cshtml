@@ -1,0 +1,317 @@
+@model TTFWebsite.Models.ClassesViewModel
+@{
+    ViewData["Title"] = "Aulas - Área de Membros";
+    ViewData["BodyClass"] = "classes-bg"; // apply page-specific background via site.css
+    Layout = "~/Views/Shared/_MemberLayout.cshtml";
+}
+
+<div class="classes-container">
+    <div class="classes-header">
+        <h1>Aulas e Reservas</h1>
+        <p>Reserva as tuas aulas favoritas</p>
+    </div>
+
+    <div class="classes-content">
+        <!-- Minhas Reservas -->
+        @if (Model.UserReservations.Any())
+        {
+            <div class="section">
+                <h2>As Minhas Reservas</h2>
+                <div class="reservations-grid">
+                    @foreach (var reservation in Model.UserReservations)
+                    {
+                        <div class="reservation-card">
+                            <div class="reservation-date">
+                                <span class="day">@reservation.ReservationDate.ToString("dd")</span>
+                                <span class="month">@reservation.ReservationDate.ToString("MMM")</span>
+                            </div>
+                            <div class="reservation-info">
+                                @if (reservation.Type == TTFWebsite.Models.ReservationType.Class && reservation.Class != null)
+                                {
+                                    <h3>@reservation.Class.Name</h3>
+                                    <p>@reservation.Class.Instructor • @reservation.Class.Room</p>
+                                    <p>@reservation.ReservationDate.ToString("dddd, dd MMMM yyyy")</p>
+                                    <p class="time">@reservation.ReservationDate.ToString("HH:mm")</p>
+                                }
+                                else if (reservation.Type == TTFWebsite.Models.ReservationType.PhysicalAssessment)
+                                {
+                                    <h3>Avaliação Física</h3>
+                                    <p>@reservation.ReservationDate.ToString("dddd, dd MMMM yyyy")</p>
+                                    <p class="time">@reservation.ReservationDate.ToString("HH:mm")</p>
+                                }
+                                else
+                                {
+                                    <h3>Reserva</h3>
+                                    <p>@reservation.ReservationDate.ToString("dddd, dd MMMM yyyy")</p>
+                                    <p class="time">@reservation.ReservationDate.ToString("HH:mm")</p>
+                                }
+                            </div>
+                            <button class="btn-cancel" onclick="cancelReservation(@reservation.Id)">Cancelar</button>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+
+        <!-- Aulas Disponíveis -->
+        <div class="section">
+            <h2>Aulas Disponíveis</h2>
+            <div class="classes-filters">
+                <button class="filter-btn active" onclick="filterClasses('all', this)">Todas</button>
+                <button class="filter-btn" onclick="filterClasses('today', this)">Hoje</button>
+                <button class="filter-btn" onclick="filterClasses('week', this)">Esta Semana</button>
+            </div>
+
+            <div class="carousel-wrap">
+                <button class="carousel-arrow prev" aria-label="Anterior">‹</button>
+                <div class="classes-grid horizontal-carousel" id="classesCarousel">
+                    @foreach (var classItem in Model.AvailableClasses.OrderBy(c => c.StartTime))
+                    {
+                        var isBooked = Model.UserReservations.Any(r => !r.IsCancelled && r.Type == TTFWebsite.Models.ReservationType.Class && (
+                            (r.ClassId.HasValue && r.ClassId == classItem.Id)
+                            || (r.Class != null && r.Class.Id == classItem.Id)
+                            || (Math.Abs((r.ReservationDate - classItem.StartTime).TotalMinutes) < 1)
+                        ));
+                        var isFull = classItem.CurrentBookings >= classItem.MaxCapacity;
+                        var isPast = classItem.StartTime < DateTime.Now;
+                        
+                        <div class="class-card @(isPast ? "past" : "")" data-id="@classItem.Id" data-start="@classItem.StartTime.ToString("o")">
+                            <div class="class-header">
+                                <div class="class-time-badge">
+                                    <span class="duration">@classItem.StartTime.ToString("HH:mm") - @classItem.EndTime.ToString("HH:mm")</span>
+                                </div>
+                                <span class="class-date">@classItem.StartTime.ToString("dd MMM")</span>
+                            </div>
+                            
+                            <div class="class-body">
+                                <h3>@classItem.Name</h3>
+                                <p class="class-description">@classItem.Description</p>
+                                <div class="class-details">
+                                    <div class="detail">
+                                        <span class="detail-icon">👤</span>
+                                        <span>@classItem.Instructor</span>
+                                    </div>
+                                    <div class="detail">
+                                        <span class="detail-icon">📍</span>
+                                        <span>@classItem.Room</span>
+                                    </div>
+                                    <div class="detail">
+                                        <span class="detail-icon">👥</span>
+                                        <span>@classItem.CurrentBookings/@classItem.MaxCapacity lugares</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="class-footer">
+                                @if (isPast)
+                                {
+                                    <button class="btn-disabled" disabled>Aula já decorreu</button>
+                                }
+                                else if (isBooked)
+                                {
+                                    <button class="btn-booked" disabled>Já reservada</button>
+                                }
+                                else if (isFull)
+                                {
+                                    <button class="btn-full" disabled>Lotada</button>
+                                }
+                                else
+                                {
+                                    <button class="btn-book" onclick="bookClass(@classItem.Id)">Reservar</button>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+                <button class="carousel-arrow next" aria-label="Seguinte">›</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// background fallback: try local then remote if body has classes-bg
+(function ensureClassesBackground(){
+    if (!document.body.classList.contains('classes-bg')) return;
+    const local = '/images/gym-bg.jpg';
+    const remote = 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=2070&q=80';
+    const test = new Image();
+    test.onload = () => { document.body.style.backgroundImage = `linear-gradient(rgba(30,31,41,0.85), rgba(30,31,41,0.75)), url('${local}')`; };
+    test.onerror = () => { document.body.style.backgroundImage = `linear-gradient(rgba(30,31,41,0.85), rgba(30,31,41,0.75)), url('${remote}')`; };
+    test.src = local;
+})();
+
+// carousel controls
+(function(){
+    const carousel = document.getElementById('classesCarousel');
+    if (!carousel) return;
+    const prev = document.querySelector('.carousel-arrow.prev');
+    const next = document.querySelector('.carousel-arrow.next');
+    const scrollBy = () => carousel.clientWidth * 0.7; // scroll amount
+    if (prev) prev.addEventListener('click', () => { carousel.scrollBy({ left: -scrollBy(), behavior: 'smooth' }); });
+    if (next) next.addEventListener('click', () => { carousel.scrollBy({ left: scrollBy(), behavior: 'smooth' }); });
+
+    // keyboard support
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight') carousel.scrollBy({ left: scrollBy(), behavior: 'smooth' });
+        if (e.key === 'ArrowLeft') carousel.scrollBy({ left: -scrollBy(), behavior: 'smooth' });
+    });
+})();
+</script>
+
+<script>
+async function bookClass(classId) {
+    // check client-side that class is at least 1 day in the future
+    const card = document.querySelector(`.class-card[data-id="${classId}"]`);
+    if (card) {
+        const ds = card.getAttribute('data-start');
+        if (ds) {
+            const start = new Date(ds);
+            const now = new Date();
+            const minAllowed = new Date(now.getTime() + 24*60*60*1000);
+            if (start < minAllowed) {
+                alert('Não é possível reservar aulas com menos de 1 dia de antecedência.');
+                return;
+            }
+        }
+    }
+
+    if (!confirm('Tens a certeza que queres reservar esta aula?')) {
+        return;
+    }
+
+    try {
+        const response = await fetch('@Url.Action("BookClass", "Member")', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+            },
+            body: JSON.stringify({ classId: classId })
+        });
+
+        const result = await response.json();
+        if (result.success) {
+            alert(result.message);
+            location.reload();
+        } else {
+            alert(result.message || 'Erro ao reservar aula.');
+        }
+    } catch (error) {
+        alert('Erro ao reservar aula. Tenta novamente.');
+    }
+}
+
+async function cancelReservation(reservationId) {
+    if (!confirm('Tens a certeza que queres cancelar esta reserva?')) {
+        return;
+    }
+
+    try {
+        const response = await fetch('@Url.Action("CancelReservation", "Member")', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+            },
+            body: JSON.stringify({ reservationId: reservationId })
+        });
+
+        const result = await response.json();
+        if (result.success) {
+            alert(result.message);
+            location.reload();
+        } else {
+            alert(result.message || 'Erro ao cancelar reserva.');
+        }
+    } catch (error) {
+        alert('Erro ao cancelar reserva. Tenta novamente.');
+    }
+}
+
+function filterClasses(filter, el) {
+    // update active state
+    const buttons = document.querySelectorAll('.filter-btn');
+    buttons.forEach(b => b.classList.remove('active'));
+    if (el) el.classList.add('active');
+
+    // filter cards by data-start
+    const cards = document.querySelectorAll('#classesCarousel .class-card');
+    const now = new Date();
+    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const endOfToday = new Date(startOfToday.getTime() + 24*60*60*1000);
+    const endOfWeek = new Date(startOfToday.getTime() + 7*24*60*60*1000);
+
+    cards.forEach(card => {
+        const ds = card.getAttribute('data-start');
+        if (!ds) { card.style.display = 'none'; return; }
+        const d = new Date(ds);
+        let show = true;
+        if (filter === 'today') {
+            show = d >= startOfToday && d < endOfToday;
+        } else if (filter === 'week') {
+            show = d >= startOfToday && d < endOfWeek;
+        } else {
+            show = true;
+        }
+        card.style.display = show ? '' : 'none';
+    });
+
+    const carousel = document.getElementById('classesCarousel');
+    if (carousel) carousel.scrollLeft = 0;
+}
+</script>
+
+<style>
+.classes-container {
+    padding: 2rem;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.carousel-wrap { position: relative; display: flex; align-items: center; }
+.carousel-arrow { background: rgba(0,0,0,0.45); color: white; border: none; width: 44px; height: 44px; border-radius: 999px; display: flex; align-items: center; justify-content: center; cursor: pointer; margin: 0 8px; }
+.carousel-arrow:hover { background: rgba(0,0,0,0.6); }
+
+/* ensure cards align in the horizontal carousel */
+.classes-grid.horizontal-carousel { display: flex; gap: 1rem; overflow-x: auto; padding-bottom: 0.5rem; -webkit-overflow-scrolling: touch; align-items: stretch; }
+
+.classes-grid.horizontal-carousel .class-card { display: flex; flex-direction: column; min-width: 340px; flex: 0 0 340px; min-height: 420px; }
+
+.class-card { background: var(--bg-card); border-radius: 12px; border: 1px solid var(--border); overflow: hidden; transition: transform 0.3s; display: flex; flex-direction: column; }
+
+.class-body { padding: 1rem 1.5rem; flex: 1 1 auto; display: flex; flex-direction: column; }
+
+.class-footer { padding: 1rem 1rem; border-top: 1px solid var(--border); background: var(--bg-primary); }
+
+.class-header { padding: 0.75rem 1rem; }
+
+.class-body h3 { font-size: 1.2rem; margin-bottom: 0.5rem; }
+
+.class-description { margin-bottom: 0.75rem; }
+
+.class-details { margin-top: auto; }
+
+.btn-book, .btn-booked, .btn-full, .btn-disabled { width: 100%; padding: 0.7rem; border: none; border-radius: 8px; font-size: 1rem; font-weight: 500; cursor: pointer; transition: all 0.3s; }
+
+.btn-book { background: var(--accent); color: white; }
+.btn-book:hover { background: var(--accent-hover); }
+
+.btn-booked { background: var(--success); color: white; cursor: not-allowed; }
+.btn-full, .btn-disabled { background: var(--bg-card); color: var(--text-secondary); cursor: not-allowed; }
+
+/* touch-friendly horizontal scrollbar styling */
+.classes-grid.horizontal-carousel { scrollbar-width: thin; }
+.classes-grid.horizontal-carousel::-webkit-scrollbar { height: 8px; }
+.classes-grid.horizontal-carousel::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 999px; }
+
+/* reservations grid */
+.reservations-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; margin-bottom: 1.5rem; }
+
+.reservation-card { background: var(--bg-card); border-radius: 12px; padding: 1.5rem; border: 1px solid var(--border); display: flex; gap: 1rem; align-items: center; }
+
+/* make cards stand out a little above background */
+body.classes-bg .class-card, body.classes-bg .reservation-card { background: rgba(28,30,36,0.92); }
+
+</style>
+

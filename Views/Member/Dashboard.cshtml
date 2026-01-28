@@ -1,0 +1,452 @@
+@model TTFWebsite.Models.DashboardViewModel
+@{
+    ViewData["Title"] = "Dashboard - Área de Membros";
+    Layout = "~/Views/Shared/_MemberLayout.cshtml";
+}
+
+<div class="dashboard-container">
+    <div class="dashboard-header">
+        <h1>Bem-vindo, @Model.Profile.Name!</h1>
+        <p class="subtitle">Ginásio: AAAA</p>
+    </div>
+
+    <div class="dashboard-grid">
+        <!-- Próximas Reservas -->
+        <div class="dashboard-card">
+            <div class="card-header">
+                <h2>Próximas Aulas</h2>
+                <a href="@Url.Action("Classes", "Member")" class="btn-link">Ver todas</a>
+            </div>
+            @if (Model.UpcomingReservations.Any())
+            {
+                <div class="reservations-list">
+                    @foreach (var reservation in Model.UpcomingReservations)
+                    {
+                        <div class="reservation-item">
+                            <div class="reservation-time">
+                                <span class="time">@reservation.ReservationDate.ToString("HH:mm")</span>
+                                <span class="date">@reservation.ReservationDate.ToString("dd MMM")</span>
+                            </div>
+                            <div class="reservation-details">
+                                <h3>
+                                    @{
+                                        var title = reservation.Class?.Name;
+                                        if (string.IsNullOrWhiteSpace(title))
+                                        {
+                                            if (reservation.Type == TTFWebsite.Models.ReservationType.PhysicalAssessment)
+                                            {
+                                                title = "Avaliação Física";
+                                            }
+                                            else if (reservation.Type == TTFWebsite.Models.ReservationType.Class)
+                                            {
+                                                title = "Aula";
+                                            }
+                                            else
+                                            {
+                                                title = reservation.Type.ToString();
+                                            }
+                                        }
+                                    }
+                                    @title
+                                </h3>
+                                <p>
+                                    @((!string.IsNullOrWhiteSpace(reservation.Class?.Instructor) ? reservation.Class.Instructor : "—"))
+                                    •
+                                    @((!string.IsNullOrWhiteSpace(reservation.Class?.Room) ? reservation.Class.Room : "—"))
+                                </p>
+                                <p>@reservation.ReservationDate.ToString("dddd, dd MMMM")</p>
+                            </div>
+                        </div>
+                    }
+                </div>
+                <div style="margin-top:1rem; text-align:right;">
+                    <a href="@Url.Action("Classes", "Member")" class="btn-small">Reservar Aulas</a>
+                </div>
+            }
+            else
+            {
+                <p class="empty-state">Não tens aulas reservadas.</p>
+                <a href="@Url.Action("Classes", "Member")" class="btn-primary">Reservar Aula</a>
+            }
+        </div>
+
+        <!-- Avaliação Física Recente -->
+        <div class="dashboard-card">
+            <div class="card-header">
+                <h2>Avaliação Física</h2>
+                <a href="@Url.Action("PhysicalAssessment", "Member")" class="btn-link">Ver histórico</a>
+            </div>
+            @if (Model.RecentAssessment != null)
+            {
+                <div class="assessment-summary">
+                    <div class="assessment-date">
+                        <span>Última avaliação: @Model.RecentAssessment.AssessmentDate.ToString("dd MMM yyyy")</span>
+                    </div>
+                    <div class="assessment-metrics">
+                        <div class="metric">
+                            <span class="metric-label">Peso</span>
+                            <span class="metric-value">@Model.RecentAssessment.Weight kg</span>
+                        </div>
+                        <div class="metric">
+                            <span class="metric-label">Gordura Corporal</span>
+                            <span class="metric-value">@Model.RecentAssessment.BodyFat%</span>
+                        </div>
+                        <div class="metric">
+                            <span class="metric-label">Massa Muscular</span>
+                            <span class="metric-value">@Model.RecentAssessment.MuscleMass kg</span>
+                        </div>
+                        <div class="metric">
+                            <span class="metric-label">IMC</span>
+                            <span class="metric-value">@Model.RecentAssessment.BMI</span>
+                        </div>
+                    </div>
+                    <div class="assessment-trainer">
+                        <p><strong>Personal Trainer:</strong> @Model.RecentAssessment.TrainerName</p>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <p class="empty-state">Ainda não tens avaliações físicas registadas.</p>
+            }
+        </div>
+
+        <!-- Plano de Treino -->
+        <div class="dashboard-card">
+            <div class="card-header">
+                <h2>Plano de Treino</h2>
+                <a href="@Url.Action("TrainingPlan", "Member")" class="btn-link">Ver Plano</a>
+            </div>
+            @if (!string.IsNullOrWhiteSpace(Model.TrainingPlan?.Name))
+            {
+                <div class="plan-summary">
+                    <h3>@Model.TrainingPlan.Name</h3>
+                    <div class="plan-exercises-cards">
+                        @foreach (var ex in Model.TrainingPlan.Exercises.Take(3))
+                        {
+                            <div class="exercise-card small">
+                                <div class="exercise-title">
+                                    <h3>@ex.Name</h3>
+                                    <div class="sets-reps">@ex.Sets x @ex.Reps</div>
+                                </div>
+                                <p class="exercise-desc">@ex.Description</p>
+                                @if (!string.IsNullOrWhiteSpace(ex.Notes))
+                                {
+                                    <p class="exercise-notes">Notas: @ex.Notes</p>
+                                }
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+            else
+            {
+                <p class="empty-state">Ainda não tens um plano de treino atribuído.</p>
+            }
+        </div>
+
+        <!-- Informações do Membro -->
+        <div class="dashboard-card">
+            <div class="card-header">
+                <h2>O Meu Perfil</h2>
+                <a href="@Url.Action("Profile", "Member")" class="btn-link">Editar</a>
+            </div>
+            <div class="profile-summary">
+                <div class="profile-item">
+                    <span class="profile-label">Nome:</span>
+                    <span class="profile-value">@(
+                        !string.IsNullOrWhiteSpace(Model.Profile.Name) && Model.Profile.Name.Contains("@")
+                            ? Model.Profile.Name.Split('@')[0]
+                            : Model.Profile.Name
+                    )</span>
+                </div>
+                <div class="profile-item">
+    <span class="profile-label">Nº Membro:</span>
+    <span class="profile-value">@(Model.Profile.IdMembro > 0 ? Model.Profile.IdMembro.ToString() : "—")</span>
+</div>
+
+                <div class="profile-item">
+                    <span class="profile-label">Plano:</span>
+                    <span class="profile-value">@Model.Profile.Plan</span>
+                </div>
+                <div class="profile-item">
+                    <span class="profile-label">Email:</span>
+                    <span class="profile-value">@Model.Profile.Email</span>
+                </div>
+                <div class="profile-item">
+                    <span class="profile-label">Membro Desde:</span>
+                    <span class="profile-value">@Model.Profile.MembershipStartDate.ToString("dd MMM yyyy")</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.dashboard-container {
+    padding: 2rem;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.dashboard-header {
+    margin-bottom: 2rem;
+}
+
+.dashboard-header h1 {
+    font-size: 2.5rem;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.subtitle {
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+}
+
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+/* ensure cards align vertically at the start so titles line up */
+.dashboard-grid > .dashboard-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+}
+
+.dashboard-card {
+    background: var(--bg-card);
+    border-radius: 12px;
+    padding: 1.5rem;
+    border: 1px solid var(--border);
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.card-header h2 {
+    font-size: 1.3rem;
+    color: var(--text-primary);
+}
+
+.btn-link {
+    color: var(--accent);
+    text-decoration: none;
+    font-size: 0.9rem;
+}
+
+.btn-link:hover {
+    text-decoration: underline;
+}
+
+.empty-state {
+    color: var(--text-secondary);
+    text-align: center;
+    padding: 2rem 0;
+}
+
+.reservations-list, .classes-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.reservation-item, .class-item {
+    display: flex;
+    gap: 1rem;
+    padding: 1rem;
+    background: var(--bg-primary);
+    border-radius: 8px;
+    border: 1px solid var(--border);
+}
+
+.reservation-time {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-width: 60px;
+}
+
+.time {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--accent);
+}
+
+.date {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.reservation-details h3 {
+    font-size: 1rem;
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+}
+
+.reservation-details p {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.assessment-summary {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.assessment-date {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.assessment-metrics {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+}
+
+.metric {
+    display: flex;
+    flex-direction: column;
+    padding: 1rem;
+    background: var(--bg-primary);
+    border-radius: 8px;
+}
+
+.metric-label {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+}
+
+.metric-value {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--accent);
+}
+
+.assessment-trainer {
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.class-item {
+    align-items: center;
+}
+
+.class-time {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: var(--accent);
+    min-width: 60px;
+}
+
+.class-info {
+    flex: 1;
+}
+
+.class-info h3 {
+    font-size: 1rem;
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+}
+
+.class-info p {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.25rem;
+}
+
+.class-availability {
+    font-size: 0.8rem;
+    color: var(--accent);
+}
+
+.btn-small {
+    padding: 0.5rem 1rem;
+    background: var(--accent);
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    white-space: nowrap;
+}
+
+.btn-small:hover {
+    background: var(--accent-hover);
+}
+
+.profile-summary {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.profile-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.profile-item:last-child {
+    border-bottom: none;
+}
+
+.profile-label {
+    color: var(--text-secondary);
+}
+
+.profile-value {
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+/* Small exercise card styles for plan summary in dashboard */
+.plan-exercises-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+}
+.exercise-card.small {
+    background: var(--bg-primary);
+    border-radius: 8px;
+    padding: 0.75rem;
+    border: 1px solid var(--border);
+}
+.exercise-card.small .exercise-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.exercise-card.small .sets-reps {
+    font-weight: 700;
+    color: var(--text-secondary);
+}
+.exercise-card.small .exercise-desc {
+    margin-top: 0.4rem;
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+}
+.exercise-card.small .exercise-notes {
+    margin-top: 0.35rem;
+    font-style: italic;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+</style>
+

@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - FitControl Área de Membros</title>
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body class="@(ViewData["BodyClass"] ?? "")" style="@(ViewData["BodyStyle"] ?? "")">
+    <header>
+        <nav class="navbar member-navbar">
+            <div class="container">
+                <div class="logo">
+                    <a href="@Url.Action("Index", "Home")" style="text-decoration: none; color: inherit;">
+                        <h1>FitControl</h1>
+                    </a>
+                    <span class="member-badge">Área de Membros</span>
+                </div>
+                <ul class="nav-menu">
+                    <li><a href="@Url.Action("Dashboard", "Member")">Dashboard</a></li>
+                    <li><a href="@Url.Action("Classes", "Member")">Aulas</a></li>
+        <li><a href="@Url.Action("TrainingPlan", "Member")">Plano de Treino</a></li>
+                    <li><a href="@Url.Action("PhysicalAssessment", "Member")">Avaliação Física</a></li>
+                    <li><a href="@Url.Action("Profile", "Member")">Perfil</a></li>
+                </ul>
+                <div class="nav-user">
+@{
+    // derive a friendly username: if identity is an email, use the portion before '@'
+    var rawName = User?.Identity?.Name ?? "";
+    var friendly = "user";
+    if (!string.IsNullOrEmpty(rawName)) {
+        var at = rawName.IndexOf('@');
+        friendly = at > 0 ? rawName.Substring(0, at) : rawName;
+    }
+}
+                    <span class="user-name">Olá, @friendly</span>
+                    <form asp-controller="Account" asp-action="Logout" method="post" style="display: inline;">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn-logout">Sair</button>
+                    </form>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        @RenderBody()
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>FitControl</h3>
+                    <p>Área exclusiva para membros</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Contactos</h3>
+                    <p>Rua Cipriano Dourado, 14B,<br>1600-428 Lisboa</p>
+                    <p>geral@fitcontrol.pt</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 FitControl. Todos os direitos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
+
+<style>
+.member-navbar {
+    background: var(--bg-card);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.member-badge {
+    font-size: 0.75rem;
+    color: var(--accent);
+    margin-left: 0.5rem;
+    font-weight: normal;
+}
+
+.nav-user {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.user-name {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.btn-logout {
+    padding: 0.5rem 1rem;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.3s;
+}
+
+.btn-logout:hover {
+    background: var(--error);
+    border-color: var(--error);
+    color: white;
+}
+
+.nav-menu a {
+    color: var(--text-primary);
+    text-decoration: none;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    transition: all 0.3s;
+}
+
+.nav-menu a:hover {
+    background: var(--bg-primary);
+    color: var(--accent);
+}
+</style>
+

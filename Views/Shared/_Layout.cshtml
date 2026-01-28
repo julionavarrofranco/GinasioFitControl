@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FitControl - Treino, Transformação e Foco</title>
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <div class="container">
+                <div class="logo">
+                    <a href="@Url.Action("Index", "Home")" style="text-decoration: none; color: inherit;">
+                        <h1>FitControl</h1>
+                    </a>
+                </div>
+                <ul class="nav-menu">
+                    <li><a href="#home">Início</a></li>
+                    <li><a href="#gyms">Ginásios</a></li>
+                    <li><a href="#benefits">Benefícios</a></li>
+                    <li><a href="#plans">Planos</a></li>
+                    <li><a href="#contact">Contacto</a></li>
+                </ul>
+                <a href="@Url.Action("Login", "Account")" class="btn-primary">Área de Membros</a>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        @RenderBody()
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>O nosso clube</h3>
+                    <ul>
+                        <li><a href="#">Preços</a></li>
+                        <li><a href="#">Descontos</a></li>
+                        <li><a href="#">Personal Trainer</a></li>
+                        <li><a href="#">Nutrição</a></li>
+                        <li><a href="#">Parceiros</a></li>
+                        <li><a href="#">Carreiras</a></li>
+                        <li><a href="#">Plano de Saúde</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>Links</h3>
+                    <ul>
+                        <li><a href="#">Blog</a></li>
+                        <li><a href="#">Termos e Condições</a></li>
+                        <li><a href="#">Política de Privacidade</a></li>
+                        <li><a href="#">Política de Cookies</a></li>
+                        <li><a href="#">Regulamento Interno</a></li>
+                        <li><a href="#">Livro de Reclamações</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>Contactos</h3>
+                    <p>Rua Cipriano Dourado, 14B,<br>1600-428 Lisboa</p>
+                    <p>geral@fitcontrol.pt</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 FitControl. Todos os direitos reservados.</p>
+                <div class="social-links">
+                    <a href="#">Instagram</a>
+                    <a href="#">Facebook</a>
+                    <a href="#">TikTok</a>
+                    <a href="#">Youtube</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
+
