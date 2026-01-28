@@ -24,19 +24,21 @@ namespace FitControlAdmin
 
             if (_isEditMode)
             {
-                TitleText.Text = "Editar Utilizador";
+                Title = "Editar Membro";
+                TitleText.Text = "Editar Membro";
                 LoadUserData();
+                AtivoCheckBox.IsEnabled = true;
             }
-            else if (!string.IsNullOrEmpty(preSelectedTipo))
+            else
             {
-                // Pre-select the tipo when creating a new user
-                if (preSelectedTipo == "Membro")
+                Title = "Criar Membro";
+                TitleText.Text = "Criar Membro";
+                AtivoCheckBox.IsChecked = true;
+                AtivoCheckBox.IsEnabled = false;
+                if (!string.IsNullOrEmpty(preSelectedTipo))
                 {
-                    TipoComboBox.SelectedIndex = 0;
-                }
-                else if (preSelectedTipo == "Funcionario")
-                {
-                    TipoComboBox.SelectedIndex = 1;
+                    if (preSelectedTipo == "Membro") TipoComboBox.SelectedIndex = 0;
+                    else if (preSelectedTipo == "Funcionario") TipoComboBox.SelectedIndex = 1;
                 }
             }
 

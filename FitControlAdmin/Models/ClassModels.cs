@@ -5,6 +5,14 @@ namespace FitControlAdmin.Models
         Segunda, Terca, Quarta, Quinta, Sexta, Sabado, Domingo
     }
 
+    public enum Presenca
+    {
+        Reservado,
+        Presente,
+        Faltou,
+        Cancelado
+    }
+
     public class AulaDto
     {
         public int? IdFuncionario { get; set; }
@@ -84,7 +92,39 @@ namespace FitControlAdmin.Models
     {
         public int IdMembro { get; set; }
         public string NomeMembro { get; set; } = null!;
-        public bool Presente { get; set; }
+        public string Email { get; set; } = null!;
+        public string Telemovel { get; set; } = null!;
+        public Presenca Presenca { get; set; }
+        public bool Presente 
+        { 
+            get => Presenca == Presenca.Presente; 
+            set => Presenca = value ? Presenca.Presente : Presenca.Faltou; 
+        }
         public DateTime? DataReserva { get; set; }
+    }
+
+    public class ScheduleClassDto
+    {
+        public int IdAula { get; set; }
+        public DateTime DataAula { get; set; }
+    }
+
+    public class AulaMarcadaResponseDto
+    {
+        public int IdAulaMarcada { get; set; }
+        public int IdAula { get; set; }
+        public string NomeAula { get; set; } = null!;
+        public DateTime DataAula { get; set; }
+        public TimeSpan HoraInicio { get; set; }
+        public TimeSpan HoraFim { get; set; }
+        public int Capacidade { get; set; }
+        public int TotalReservas { get; set; }
+        public string? NomeInstrutor { get; set; }
+        public DateTime? DataDesativacao { get; set; }
+        
+        // Para UI
+        public string HorarioFormatado => $"{HoraInicio:hh\\:mm} - {HoraFim:hh\\:mm}";
+        public string CapacidadeFormatada => $"{TotalReservas}/{Capacidade}";
+        public bool EstaLotada => TotalReservas >= Capacidade;
     }
 }

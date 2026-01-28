@@ -31,12 +31,18 @@ namespace FitControlAdmin
 
             if (_isEditMode)
             {
+                Title = "Editar Exercício";
                 TitleText.Text = "Editar Exercício";
                 LoadExerciseData();
+                AtivoCheckBox.IsEnabled = true;
             }
             else
             {
+                Title = "Criar Exercício";
+                TitleText.Text = "Criar Exercício";
                 GrupoMuscularComboBox.SelectedIndex = 0;
+                AtivoCheckBox.IsChecked = true;
+                AtivoCheckBox.IsEnabled = false;
             }
 
             // Atualizar preview da imagem quando URL mudar
@@ -127,7 +133,6 @@ namespace FitControlAdmin
                     
                     if (success)
                     {
-                        // Se o estado mudou, atualizar também
                         if (AtivoCheckBox.IsChecked != _existingExercise.Ativo)
                         {
                             await _apiService.ChangeExerciseStatusAsync(_existingExercise.IdExercicio, AtivoCheckBox.IsChecked ?? true);
@@ -159,11 +164,6 @@ namespace FitControlAdmin
                     
                     if (success && exercise != null)
                     {
-                        // Se não estiver marcado como ativo, desativar
-                        if (AtivoCheckBox.IsChecked == false)
-                        {
-                            await _apiService.ChangeExerciseStatusAsync(exercise.IdExercicio, false);
-                        }
 
                         MessageBox.Show("Exercício criado com sucesso!", 
                             "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);

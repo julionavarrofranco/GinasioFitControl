@@ -1,0 +1,1433 @@
+[
+  {
+    "ContainingType": "ProjetoFinal.Controllers.AuthController",
+    "Method": "Login",
+    "RelativePath": "api/Auth/login",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "request",
+        "Type": "ProjetoFinal.Models.DTOs.UserLoginDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ProjetoFinal.Controllers.AuthController",
+    "Method": "Logout",
+    "RelativePath": "api/Auth/logout",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ProjetoFinal.Controllers.AuthController",
+    "Method": "Refresh",
+    "RelativePath": "api/Auth/refresh",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "request",
+        "Type": "ProjetoFinal.Models.DTOs.RefreshTokenRequestDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ProjetoFinal.Controllers.AuthController",
+    "Method": "Register",
+    "RelativePath": "api/Auth/register",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "request",
+        "Type": "ProjetoFinal.Models.DTOs.UserRegisterDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ProjetoFinal.Controllers.ClassController",
+    "Method": "CreateClass",
+    "RelativePath": "api/Class",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "request",
+        "Type": "ProjetoFinal.Models.DTOs.ClassDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ProjetoFinal.Controllers.ClassController",
+    "Method": "AssignPt",
+    "RelativePath": "api/Class/assign-pt/{idAula}",
+    "HttpMethod": "PATCH",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "idAula",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "idPt",
+        "Type": "System.Int32",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ProjetoFinal.Controllers.ClassController",
+    "Method": "ListByDay",
+    "RelativePath": "api/Class/by-day/{dia}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "dia",
+        "Type": "System.String",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ProjetoFinal.Controllers.ClassController",
+    "Method": "ListByPt",
+    "RelativePath": "api/Class/by-pt/{idFuncionario}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "idFuncionario",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ProjetoFinal.Controllers.ClassController",
+    "Method": "ListByState",
+    "RelativePath": "api/Class/by-state",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "ativo",
+        "Type": "System.Boolean",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ProjetoFinal.Controllers.ClassController",
+    "Method": "ChangeActiveStatus",
+    "RelativePath": "api/Class/change-active-status/{idAula}",
+    "HttpMethod": "PATCH",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "idAula",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "ativo",
+        "Type": "System.Boolean",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ProjetoFinal.Controllers.ClassController",
+    "Method": "SwapClasses",
+    "RelativePath": "api/Class/swap/{idAulaA}/{idAulaB}",
+    "HttpMethod": "PATCH",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "idAulaA",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "idAulaB",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ProjetoFinal.Controllers.ClassController",
+    "Method": "UpdateClass",
+    "RelativePath": "api/Class/update/{idAula}",
+    "HttpMethod": "PATCH",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "idAula",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "request",
+        "Type": "ProjetoFinal.Models.DTOs.UpdateClassDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ProjetoFinal.Controllers.DashboardController",
+    "Method": "GetDashboardSummary",
+    "RelativePath": "api/Dashboard/summary",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ProjetoFinal.Controllers.EmployeeController",
+    "Method": "GetAllEmployees",
+    "RelativePath": "api/Employee",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ProjetoFinal.Controllers.EmployeeController",
+    "Method": "UpdateEmployee",
+    "RelativePath": "api/Employee/{idFuncionario}",
+    "HttpMethod": "PATCH",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "idFuncionario",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "request",
+        "Type": "ProjetoFinal.Models.DTOs.UpdateEmployeeDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ProjetoFinal.Controllers.ExerciseController",
+    "Method": "CreateExercise",
+    "RelativePath": "api/Exercise",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "request",
+        "Type": "ProjetoFinal.Models.DTOs.ExerciseDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ProjetoFinal.Controllers.ExerciseController",
+    "Method": "GetExercisesByMuscleGroup",
+    "RelativePath": "api/Exercise/by-muscle-group/{grupo}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "grupo",
+        "Type": "System.String",
+        "IsRequired": true
+      },
+      {
+        "Name": "ordenarAsc",
+        "Type": "System.Boolean",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ProjetoFinal.Controllers.ExerciseController",
+    "Method": "GetExercisesByName",
+    "RelativePath": "api/Exercise/by-name",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "nome",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "ordenarAsc",
+        "Type": "System.Boolean",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ProjetoFinal.Controllers.ExerciseController",
+    "Method": "GetExercisesByState",
+    "RelativePath": "api/Exercise/by-state",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "ativo",
+        "Type": "System.Boolean",
+        "IsRequired": false
+      },
+      {
+        "Name": "ordenarAsc",
+        "Type": "System.Boolean",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ProjetoFinal.Controllers.ExerciseController",
+    "Method": "ChangeExerciseStatus",
+    "RelativePath": "api/Exercise/change-active-status/{idExercicio}",
+    "HttpMethod": "PATCH",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "idExercicio",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "ativo",
+        "Type": "System.Boolean",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ProjetoFinal.Controllers.ExerciseController",
+    "Method": "UpdateExercise",
+    "RelativePath": "api/Exercise/update-exercise/{idExercicio}",
+    "HttpMethod": "PATCH",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "idExercicio",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "request",
+        "Type": "ProjetoFinal.Models.DTOs.UpdateExerciseDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ProjetoFinal.Controllers.ExercisePlanController",
+    "Method": "AddExerciseToPlan",
+    "RelativePath": "api/ExercisePlan/{idPlano}",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "idPlano",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "dto",
+        "Type": "ProjetoFinal.Models.DTOs.ExercisePlanDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ProjetoFinal.Controllers.ExercisePlanController",
+    "Method": "UpdateExerciseInPlan",
+    "RelativePath": "api/ExercisePlan/{idPlano}/{idExercicio}",
+    "HttpMethod": "PATCH",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "idPlano",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "idExercicio",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "dto",
+        "Type": "ProjetoFinal.Models.DTOs.UpdateExercisePlanDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ProjetoFinal.Controllers.ExercisePlanController",
+    "Method": "RemoveExerciseFromPlan",
+    "RelativePath": "api/ExercisePlan/{idPlano}/{idExercicio}",
+    "HttpMethod": "DELETE",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "idPlano",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "idExercicio",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ProjetoFinal.Controllers.MemberController",
+    "Method": "GetAllMembros",
+    "RelativePath": "api/Member",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ProjetoFinal.Controllers.MemberController",
+    "Method": "GetMemberEvaluations",
+    "RelativePath": "api/Member/{idMembro}/evaluations",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "idMembro",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ProjetoFinal.Controllers.MemberController",
+    "Method": "GetMemberProfile",
+    "RelativePath": "api/Member/{idMembro}/profile",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "idMembro",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ProjetoFinal.Controllers.MemberController",
+    "Method": "GetMemberTrainingPlan",
+    "RelativePath": "api/Member/{idMembro}/training-plan",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "idMembro",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ProjetoFinal.Controllers.MemberController",
+    "Method": "CancelMember",
+    "RelativePath": "api/Member/cancel/{idMembro}",
+    "HttpMethod": "PATCH",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "idMembro",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ProjetoFinal.Controllers.MemberController",
+    "Method": "ReactivateMember",
+    "RelativePath": "api/Member/reactivate/{idMembro}",
+    "HttpMethod": "PATCH",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "idMembro",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "metodo",
+        "Type": "System.String",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ProjetoFinal.Controllers.MemberController",
+    "Method": "UpdateMember",
+    "RelativePath": "api/Member/update-member/{idMembro}",
+    "HttpMethod": "PATCH",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "idMembro",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "request",
+        "Type": "ProjetoFinal.Models.DTOs.UpdateMemberDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ProjetoFinal.Controllers.MemberClassController",
+    "Method": "GetClassForAttendance",
+    "RelativePath": "api/MemberClass/attendance/{idAulaMarcada}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "idAulaMarcada",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ProjetoFinal.Controllers.MemberClassController",
+    "Method": "ListReservationsByPt",
+    "RelativePath": "api/MemberClass/by-pt/{idFuncionario}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "idFuncionario",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ProjetoFinal.Controllers.MemberClassController",
+    "Method": "CancelReservation",
+    "RelativePath": "api/MemberClass/cancel",
+    "HttpMethod": "PATCH",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "idMembro",
+        "Type": "System.Int32",
+        "IsRequired": false
+      },
+      {
+        "Name": "idAulaMarcada",
+        "Type": "System.Int32",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ProjetoFinal.Controllers.MemberClassController",
+    "Method": "MarkAttendance",
+    "RelativePath": "api/MemberClass/mark-attendance/{idAulaMarcada}",
+    "HttpMethod": "PATCH",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "idAulaMarcada",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "idsPresentes",
+        "Type": "System.Collections.Generic.List\u00601[[System.Int32, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ProjetoFinal.Controllers.MemberClassController",
+    "Method": "ListMemberReservations",
+    "RelativePath": "api/MemberClass/member-reservations/{idMembro}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "idMembro",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ProjetoFinal.Controllers.MemberClassController",
+    "Method": "ReserveClass",
+    "RelativePath": "api/MemberClass/reserve",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "idMembro",
+        "Type": "System.Int32",
+        "IsRequired": false
+      },
+      {
+        "Name": "idAulaMarcada",
+        "Type": "System.Int32",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ProjetoFinal.Controllers.PaymentController",
+    "Method": "CreatePayment",
+    "RelativePath": "api/Payment",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "request",
+        "Type": "ProjetoFinal.Models.DTOs.PaymentDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ProjetoFinal.Controllers.PaymentController",
+    "Method": "GetPaymentsByDate",
+    "RelativePath": "api/Payment/by-date",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "inicio",
+        "Type": "System.DateTime",
+        "IsRequired": false
+      },
+      {
+        "Name": "fim",
+        "Type": "System.DateTime",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ProjetoFinal.Controllers.PaymentController",
+    "Method": "GetPaymentsByActiveState",
+    "RelativePath": "api/Payment/by-state",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "ativo",
+        "Type": "System.Boolean",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ProjetoFinal.Controllers.PaymentController",
+    "Method": "GetPaymentsByPaymentState",
+    "RelativePath": "api/Payment/by-state-payment",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "estado",
+        "Type": "System.String",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ProjetoFinal.Controllers.PaymentController",
+    "Method": "ChangePaymentState",
+    "RelativePath": "api/Payment/change-active-status/{idPagamento}",
+    "HttpMethod": "PATCH",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "idPagamento",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "ativo",
+        "Type": "System.Boolean",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ProjetoFinal.Controllers.PaymentController",
+    "Method": "GetMonthlyRevenue",
+    "RelativePath": "api/Payment/monthly-revenue",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "ano",
+        "Type": "System.Int32",
+        "IsRequired": false
+      },
+      {
+        "Name": "mes",
+        "Type": "System.Int32",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ProjetoFinal.Controllers.PaymentController",
+    "Method": "UpdatePayment",
+    "RelativePath": "api/Payment/update-payment/{idPagamento}",
+    "HttpMethod": "PATCH",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "idPagamento",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "request",
+        "Type": "ProjetoFinal.Models.DTOs.UpdatePaymentDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ProjetoFinal.Controllers.PhysicalEvaluationController",
+    "Method": "CreateEvaluation",
+    "RelativePath": "api/PhysicalEvaluation",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "request",
+        "Type": "ProjetoFinal.Models.DTOs.PhysicalEvaluationDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ProjetoFinal.Controllers.PhysicalEvaluationController",
+    "Method": "GetAllEvaluations",
+    "RelativePath": "api/PhysicalEvaluation/all",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ProjetoFinal.Controllers.PhysicalEvaluationController",
+    "Method": "ChangePhysicalEvaluationStatus",
+    "RelativePath": "api/PhysicalEvaluation/change-active-status/{idAvaliacao}",
+    "HttpMethod": "PATCH",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "idAvaliacao",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "ativo",
+        "Type": "System.Boolean",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ProjetoFinal.Controllers.PhysicalEvaluationController",
+    "Method": "GetAllEvaluationsForMember",
+    "RelativePath": "api/PhysicalEvaluation/member/evaluations/{idMembro}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "idMembro",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ProjetoFinal.Controllers.PhysicalEvaluationController",
+    "Method": "GetLatestEvaluationForMember",
+    "RelativePath": "api/PhysicalEvaluation/member/latest-evaluation/{idMembro}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "idMembro",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ProjetoFinal.Controllers.PhysicalEvaluationController",
+    "Method": "UpdateEvaluation",
+    "RelativePath": "api/PhysicalEvaluation/update/{idAvaliacao}",
+    "HttpMethod": "PATCH",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "idAvaliacao",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "request",
+        "Type": "ProjetoFinal.Models.DTOs.UpdatePhysicalEvaluationDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ProjetoFinal.Controllers.PhysicalEvaluationReservationController",
+    "Method": "CreateReservation",
+    "RelativePath": "api/PhysicalEvaluationReservation/{idMembro}",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "idMembro",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "dataReserva",
+        "Type": "System.DateTime",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ProjetoFinal.Controllers.PhysicalEvaluationReservationController",
+    "Method": "GetActiveReservations",
+    "RelativePath": "api/PhysicalEvaluationReservation/active",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ProjetoFinal.Controllers.PhysicalEvaluationReservationController",
+    "Method": "MarkAttendance",
+    "RelativePath": "api/PhysicalEvaluationReservation/attendance/{idMembro}/{idAvaliacao}",
+    "HttpMethod": "PATCH",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "idMembro",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "idAvaliacao",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "request",
+        "Type": "ProjetoFinal.Models.DTOs.MarkAttendanceDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ProjetoFinal.Controllers.PhysicalEvaluationReservationController",
+    "Method": "CancelReservation",
+    "RelativePath": "api/PhysicalEvaluationReservation/cancel/{idMembro}/{idAvaliacao}",
+    "HttpMethod": "PATCH",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "idMembro",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "idAvaliacao",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ProjetoFinal.Controllers.PhysicalEvaluationReservationController",
+    "Method": "GetCompletedReservations",
+    "RelativePath": "api/PhysicalEvaluationReservation/completed",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ProjetoFinal.Controllers.PhysicalEvaluationReservationController",
+    "Method": "ConfirmReservation",
+    "RelativePath": "api/PhysicalEvaluationReservation/confirm-reservation/{idMembro}/{idAvaliacao}",
+    "HttpMethod": "PATCH",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "idMembro",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "idAvaliacao",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "request",
+        "Type": "ProjetoFinal.Models.DTOs.ConfirmReservationDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ProjetoFinal.Controllers.ScheduleClassController",
+    "Method": "CancelScheduledClass",
+    "RelativePath": "api/ScheduleClass/cancel/{idAulaMarcada}",
+    "HttpMethod": "PATCH",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "idAulaMarcada",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ProjetoFinal.Controllers.ScheduleClassController",
+    "Method": "CreateScheduledClass",
+    "RelativePath": "api/ScheduleClass/create",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "request",
+        "Type": "ProjetoFinal.Models.DTOs.ScheduleClassDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ProjetoFinal.Controllers.ScheduleClassController",
+    "Method": "GenerateScheduledClassesForPt",
+    "RelativePath": "api/ScheduleClass/generate-for-pt/{idPt}",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "idPt",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ProjetoFinal.Controllers.SubscriptionController",
+    "Method": "CreateSubscription",
+    "RelativePath": "api/Subscription",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "request",
+        "Type": "ProjetoFinal.Models.DTOs.SubscriptionDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ProjetoFinal.Controllers.SubscriptionController",
+    "Method": "GetSubscriptionsByName",
+    "RelativePath": "api/Subscription/by-name",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "nome",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "ordenarNomeAsc",
+        "Type": "System.Boolean",
+        "IsRequired": false
+      },
+      {
+        "Name": "ordenarPrecoAsc",
+        "Type": "System.Nullable\u00601[[System.Boolean, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ProjetoFinal.Controllers.SubscriptionController",
+    "Method": "GetSubscriptionsByState",
+    "RelativePath": "api/Subscription/by-state",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "ativo",
+        "Type": "System.Boolean",
+        "IsRequired": false
+      },
+      {
+        "Name": "ordenarNomeAsc",
+        "Type": "System.Boolean",
+        "IsRequired": false
+      },
+      {
+        "Name": "ordenarPrecoAsc",
+        "Type": "System.Nullable\u00601[[System.Boolean, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ProjetoFinal.Controllers.SubscriptionController",
+    "Method": "GetSubscriptionsByType",
+    "RelativePath": "api/Subscription/by-type/{tipo}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "tipo",
+        "Type": "System.String",
+        "IsRequired": true
+      },
+      {
+        "Name": "ordenarNomeAsc",
+        "Type": "System.Boolean",
+        "IsRequired": false
+      },
+      {
+        "Name": "ordenarPrecoAsc",
+        "Type": "System.Nullable\u00601[[System.Boolean, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ProjetoFinal.Controllers.SubscriptionController",
+    "Method": "ChangeSubscriptionStatus",
+    "RelativePath": "api/Subscription/change-active-status/{idSubscricao}",
+    "HttpMethod": "PATCH",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "idSubscricao",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "ativo",
+        "Type": "System.Boolean",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ProjetoFinal.Controllers.SubscriptionController",
+    "Method": "UpdateSubscription",
+    "RelativePath": "api/Subscription/update-subscription/{idSubscricao}",
+    "HttpMethod": "PATCH",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "idSubscricao",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "request",
+        "Type": "ProjetoFinal.Models.DTOs.UpdateSubscriptionDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ProjetoFinal.Controllers.TrainingPlanController",
+    "Method": "Create",
+    "RelativePath": "api/TrainingPlan",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "idFuncionario",
+        "Type": "System.Int32",
+        "IsRequired": false
+      },
+      {
+        "Name": "dto",
+        "Type": "ProjetoFinal.Models.DTOs.TrainingPlanDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ProjetoFinal.Controllers.TrainingPlanController",
+    "Method": "Update",
+    "RelativePath": "api/TrainingPlan/{idPlano}",
+    "HttpMethod": "PATCH",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "idPlano",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "request",
+        "Type": "ProjetoFinal.Models.DTOs.UpdateTrainingPlanDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ProjetoFinal.Controllers.TrainingPlanController",
+    "Method": "AssignToMember",
+    "RelativePath": "api/TrainingPlan/assign-to-member",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "idMembro",
+        "Type": "System.Int32",
+        "IsRequired": false
+      },
+      {
+        "Name": "idPlano",
+        "Type": "System.Int32",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ProjetoFinal.Controllers.TrainingPlanController",
+    "Method": "GetByState",
+    "RelativePath": "api/TrainingPlan/by-state",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "ativo",
+        "Type": "System.Boolean",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ProjetoFinal.Controllers.TrainingPlanController",
+    "Method": "ChangeActiveState",
+    "RelativePath": "api/TrainingPlan/change-active-state/{idPlano}",
+    "HttpMethod": "PATCH",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "idPlano",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "ativo",
+        "Type": "System.Boolean",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ProjetoFinal.Controllers.TrainingPlanController",
+    "Method": "GetCurrentPlan",
+    "RelativePath": "api/TrainingPlan/current/{idMembro}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "idMembro",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ProjetoFinal.Controllers.TrainingPlanController",
+    "Method": "GetHistory",
+    "RelativePath": "api/TrainingPlan/history/{idMembro}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "idMembro",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ProjetoFinal.Controllers.TrainingPlanController",
+    "Method": "RemoveFromMember",
+    "RelativePath": "api/TrainingPlan/remove-from-member/{idMembro}",
+    "HttpMethod": "DELETE",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "idMembro",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ProjetoFinal.Controllers.TrainingPlanController",
+    "Method": "GetSummary",
+    "RelativePath": "api/TrainingPlan/summary",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "ativo",
+        "Type": "System.Nullable\u00601[[System.Boolean, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ProjetoFinal.Controllers.UserController",
+    "Method": "ChangeUserStatus",
+    "RelativePath": "api/User/change-active-status",
+    "HttpMethod": "PATCH",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "request",
+        "Type": "ProjetoFinal.Models.DTOs.UserStatusDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ProjetoFinal.Controllers.UserController",
+    "Method": "ChangeEmail",
+    "RelativePath": "api/User/change-email",
+    "HttpMethod": "PATCH",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "request",
+        "Type": "ProjetoFinal.Models.DTOs.ChangeEmailDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ProjetoFinal.Controllers.UserController",
+    "Method": "ChangePassword",
+    "RelativePath": "api/User/change-password",
+    "HttpMethod": "PATCH",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "request",
+        "Type": "ProjetoFinal.Models.DTOs.ChangePasswordDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ProjetoFinal.Controllers.UserController",
+    "Method": "GetCurrentUser",
+    "RelativePath": "api/User/me",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ProjetoFinal.Controllers.UserController",
+    "Method": "ResetPassword",
+    "RelativePath": "api/User/reset-password",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "request",
+        "Type": "ProjetoFinal.Models.DTOs.ResetPasswordDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  }
+]

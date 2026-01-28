@@ -136,6 +136,7 @@
                         <TextBlock Text="Dia da Semana *"/>
                         <ComboBox x:Name="DiaSemanaComboBox"
                                   Foreground="Black"
+                                  SelectedValuePath="Tag"
                                   SelectedValue="{Binding SelectedDiaSemana, UpdateSourceTrigger=PropertyChanged}">
                             <ComboBoxItem Content="Segunda" Tag="Segunda"/>
                             <ComboBoxItem Content="Terça" Tag="Terca"/>

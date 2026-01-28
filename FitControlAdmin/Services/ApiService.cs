@@ -698,6 +698,21 @@ namespace FitControlAdmin.Services
             }
         }
 
+        public async Task<DashboardSummaryDto?> GetDashboardSummaryAsync()
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync("/api/Dashboard/summary");
+                if (response.IsSuccessStatusCode)
+                    return await response.Content.ReadFromJsonAsync<DashboardSummaryDto>();
+                return null;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
         #endregion
 
         #region Physical Evaluation Methods
@@ -1170,11 +1185,15 @@ namespace FitControlAdmin.Services
             }
         }
 
+        /// <summary>
+        /// "Elimina" (desativa) uma aula usando soft-delete
+        /// </summary>
         public async Task<(bool Success, string? ErrorMessage)> DeleteClassAsync(int idAula)
         {
             try
             {
-                var response = await _httpClient.DeleteAsync($"/api/Class/{idAula}");
+                // A API usa soft-delete via change-active-status
+                var response = await _httpClient.PatchAsync($"/api/Class/change-active-status/{idAula}?ativo=false", null);
                 if (response.IsSuccessStatusCode)
                 {
                     return (true, null);
@@ -1182,7 +1201,30 @@ namespace FitControlAdmin.Services
 
                 var errorContent = await response.Content.ReadAsStringAsync();
                 var message = ExtractMessage(errorContent);
-                return (false, message ?? $"Erro ao eliminar aula ({response.StatusCode}).");
+                return (false, message ?? $"Erro ao desativar aula ({response.StatusCode}).");
+            }
+            catch (Exception ex)
+            {
+                return (false, ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// Reativa uma aula desativada
+        /// </summary>
+        public async Task<(bool Success, string? ErrorMessage)> ReactivateClassAsync(int idAula)
+        {
+            try
+            {
+                var response = await _httpClient.PatchAsync($"/api/Class/change-active-status/{idAula}?ativo=true", null);
+                if (response.IsSuccessStatusCode)
+                {
+                    return (true, null);
+                }
+
+                var errorContent = await response.Content.ReadAsStringAsync();
+                var message = ExtractMessage(errorContent);
+                return (false, message ?? $"Erro ao reativar aula ({response.StatusCode}).");
             }
             catch (Exception ex)
             {
@@ -1264,6 +1306,451 @@ namespace FitControlAdmin.Services
                 var errorContent = await response.Content.ReadAsStringAsync();
                 var message = ExtractMessage(errorContent);
                 return (false, message ?? $"Erro ao criar agendamento ({response.StatusCode}).");
+            }
+            catch (Exception ex)
+            {
+                return (false, ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// Cria uma aula agendada individual
+        /// </summary>
+        public async Task<(bool Success, string? ErrorMessage, AulaMarcadaDto? Data)> CreateScheduledClassAsync(ScheduleClassDto dto)
+        {
+            try
+            {
+                var response = await _httpClient.PostAsJsonAsync("/api/ScheduleClass/create", dto);
+                if (response.IsSuccessStatusCode)
+                {
+                    var result = await response.Content.ReadFromJsonAsync<AulaMarcadaDto>();
+                    return (true, null, result);
+                }
+
+                var errorContent = await response.Content.ReadAsStringAsync();
+                var message = ExtractMessage(errorContent);
+                return (false, message ?? $"Erro ao criar aula agendada ({response.StatusCode}).", null);
+            }
+            catch (Exception ex)
+            {
+                return (false, ex.Message, null);
+            }
+        }
+
+        /// <summary>
+        /// Gera aulas agendadas automaticamente para um PT (próximas 2 semanas)
+        /// </summary>
+        public async Task<(bool Success, string? ErrorMessage, int AulasGeradas)> GenerateScheduledClassesForPTAsync(int idPt)
+        {
+            try
+            {
+                var response = await _httpClient.PostAsync($"/api/ScheduleClass/generate-for-pt/{idPt}", null);
+                if (response.IsSuccessStatusCode)
+                {
+                    var content = await response.Content.ReadAsStringAsync();
+                    // A API retorna { "message": "X aulas geradas com sucesso." }
+                    // Podemos extrair o número se necessário, ou simplesmente retornar sucesso
+                    return (true, "Aulas geradas com sucesso.", 0);
+                }
+
+                var errorContent = await response.Content.ReadAsStringAsync();
+                var message = ExtractMessage(errorContent);
+                return (false, message ?? $"Erro ao gerar aulas ({response.StatusCode}).", 0);
+            }
+            catch (Exception ex)
+            {
+                return (false, ex.Message, 0);
+            }
+        }
+
+        /// <summary>
+        /// Cancela/elimina uma aula agendada
+        /// </summary>
+        public async Task<(bool Success, string? ErrorMessage)> CancelScheduledClassAsync(int idAulaMarcada)
+        {
+            try
+            {
+                var response = await _httpClient.PatchAsync($"/api/ScheduleClass/cancel/{idAulaMarcada}", null);
+                if (response.IsSuccessStatusCode)
+                {
+                    return (true, null);
+                }
+
+                var errorContent = await response.Content.ReadAsStringAsync();
+                var message = ExtractMessage(errorContent);
+                return (false, message ?? $"Erro ao cancelar aula ({response.StatusCode}).");
+            }
+            catch (Exception ex)
+            {
+                return (false, ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// Obtém aulas agendadas por PT (próximas 2 semanas)
+        /// </summary>
+        public async Task<List<AulaMarcadaResponseDto>?> GetScheduledClassesByPTAsync(int idFuncionario)
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync($"/api/MemberClass/by-pt/{idFuncionario}");
+                if (response.IsSuccessStatusCode)
+                {
+                    // A API retorna List<ClassReservationSummaryDto>, vamos converter para AulaMarcadaResponseDto
+                    var reservations = await response.Content.ReadFromJsonAsync<List<ClassReservationSummaryDto>>();
+                    if (reservations == null) return null;
+
+                    // Converter para o formato esperado
+                    var result = reservations.Select(r => new AulaMarcadaResponseDto
+                    {
+                        IdAulaMarcada = r.IdAulaMarcada,
+                        NomeAula = r.NomeAula,
+                        DataAula = r.DataAula,
+                        HoraInicio = r.HoraInicio,
+                        HoraFim = r.HoraFim,
+                        Capacidade = r.Capacidade,
+                        TotalReservas = r.TotalReservas
+                    }).ToList();
+
+                    return result;
+                }
+                return null;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"GetScheduledClassesByPTAsync: Exception: {ex.Message}");
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Obtém detalhes completos de uma aula agendada para marcar presenças
+        /// </summary>
+        public async Task<ClassAttendanceDto?> GetScheduledClassForAttendanceAsync(int idAulaMarcada)
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync($"/api/MemberClass/attendance/{idAulaMarcada}");
+                if (response.IsSuccessStatusCode)
+                {
+                    return await response.Content.ReadFromJsonAsync<ClassAttendanceDto>();
+                }
+                return null;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"GetScheduledClassForAttendanceAsync: Exception: {ex.Message}");
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Marca presenças numa aula agendada (envia lista de IDs dos membros presentes)
+        /// </summary>
+        public async Task<(bool Success, string? ErrorMessage)> MarkAttendanceAsync(int idAulaMarcada, List<int> idsPresentes)
+        {
+            try
+            {
+                var response = await _httpClient.PatchAsJsonAsync($"/api/MemberClass/mark-attendance/{idAulaMarcada}", idsPresentes);
+                if (response.IsSuccessStatusCode)
+                {
+                    return (true, null);
+                }
+
+                var errorContent = await response.Content.ReadAsStringAsync();
+                var message = ExtractMessage(errorContent);
+                return (false, message ?? $"Erro ao marcar presenças ({response.StatusCode}).");
+            }
+            catch (Exception ex)
+            {
+                return (false, ex.Message);
+            }
+        }
+
+        #endregion
+
+        #region Training Plan Methods
+
+        /// <summary>
+        /// Cria um plano de treino (PT)
+        /// </summary>
+        public async Task<(bool Success, string? ErrorMessage, TrainingPlanSummaryDto? Data)> CreateTrainingPlanAsync(int idFuncionario, TrainingPlanDto dto)
+        {
+            try
+            {
+                var response = await _httpClient.PostAsJsonAsync($"/api/TrainingPlan?idFuncionario={idFuncionario}", dto);
+                if (response.IsSuccessStatusCode)
+                {
+                    // A API retorna PlanoTreino (idPlano, nome, dataCriacao em camelCase)
+                    var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                    var plano = await response.Content.ReadFromJsonAsync<TrainingPlanDetailDto>(options);
+                    if (plano != null)
+                    {
+                        var summary = new TrainingPlanSummaryDto
+                        {
+                            IdPlano = plano.IdPlano,
+                            Nome = plano.Nome,
+                            DataCriacao = plano.DataCriacao,
+                            Ativo = true
+                        };
+                        return (true, null, summary);
+                    }
+                }
+
+                var errorContent = await response.Content.ReadAsStringAsync();
+                var message = ExtractMessage(errorContent);
+                return (false, message ?? $"Erro ao criar plano ({response.StatusCode}).", null);
+            }
+            catch (Exception ex)
+            {
+                return (false, ex.Message, null);
+            }
+        }
+
+        /// <summary>
+        /// Atualiza um plano de treino
+        /// </summary>
+        public async Task<(bool Success, string? ErrorMessage)> UpdateTrainingPlanAsync(int idPlano, UpdateTrainingPlanDto dto)
+        {
+            try
+            {
+                var response = await _httpClient.PatchAsJsonAsync($"/api/TrainingPlan/{idPlano}", dto);
+                if (response.IsSuccessStatusCode)
+                    return (true, null);
+
+                var errorContent = await response.Content.ReadAsStringAsync();
+                var message = ExtractMessage(errorContent);
+                return (false, message ?? $"Erro ao atualizar plano ({response.StatusCode}).");
+            }
+            catch (Exception ex)
+            {
+                return (false, ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// Ativa/desativa um plano de treino
+        /// </summary>
+        public async Task<(bool Success, string? ErrorMessage)> ChangeTrainingPlanStateAsync(int idPlano, bool ativo)
+        {
+            try
+            {
+                var response = await _httpClient.PatchAsync($"/api/TrainingPlan/change-active-state/{idPlano}?ativo={ativo}", null);
+                if (response.IsSuccessStatusCode)
+                    return (true, null);
+
+                var errorContent = await response.Content.ReadAsStringAsync();
+                var message = ExtractMessage(errorContent);
+                return (false, message ?? $"Erro ao alterar estado ({response.StatusCode}).");
+            }
+            catch (Exception ex)
+            {
+                return (false, ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// Lista planos por estado (ativo=true ou false)
+        /// </summary>
+        public async Task<List<TrainingPlanSummaryDto>?> GetTrainingPlansByStateAsync(bool ativo)
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync($"/api/TrainingPlan/summary?ativo={ativo}");
+                if (response.IsSuccessStatusCode)
+                {
+                    return await response.Content.ReadFromJsonAsync<List<TrainingPlanSummaryDto>>();
+                }
+                return null;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"GetTrainingPlansByStateAsync: {ex.Message}");
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Obtém detalhes de um plano (nome, observações, exercícios) via GET /api/TrainingPlan/{idPlano}.
+        /// </summary>
+        public async Task<TrainingPlanDetailDto?> GetTrainingPlanDetailAsync(int idPlano)
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync($"/api/TrainingPlan/{idPlano}");
+                if (response.IsSuccessStatusCode)
+                {
+                    var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                    var detail = await response.Content.ReadFromJsonAsync<TrainingPlanDetailDto>(options);
+                    return detail;
+                }
+                return null;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Atribui plano a um membro
+        /// </summary>
+        public async Task<(bool Success, string? ErrorMessage)> AssignTrainingPlanToMemberAsync(int idMembro, int idPlano)
+        {
+            try
+            {
+                var response = await _httpClient.PostAsync($"/api/TrainingPlan/assign-to-member?idMembro={idMembro}&idPlano={idPlano}", null);
+                if (response.IsSuccessStatusCode)
+                    return (true, null);
+
+                var errorContent = await response.Content.ReadAsStringAsync();
+                var message = ExtractMessage(errorContent);
+                return (false, message ?? $"Erro ao atribuir plano ({response.StatusCode}).");
+            }
+            catch (Exception ex)
+            {
+                return (false, ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// Remove plano do membro
+        /// </summary>
+        public async Task<(bool Success, string? ErrorMessage)> RemoveTrainingPlanFromMemberAsync(int idMembro)
+        {
+            try
+            {
+                var response = await _httpClient.DeleteAsync($"/api/TrainingPlan/remove-from-member/{idMembro}");
+                if (response.IsSuccessStatusCode)
+                    return (true, null);
+
+                var errorContent = await response.Content.ReadAsStringAsync();
+                var message = ExtractMessage(errorContent);
+                return (false, message ?? $"Erro ao remover plano ({response.StatusCode}).");
+            }
+            catch (Exception ex)
+            {
+                return (false, ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// Obtém o plano atual de um membro (com exercícios)
+        /// </summary>
+        public async Task<MemberTrainingPlanDto?> GetCurrentMemberPlanAsync(int idMembro)
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync($"/api/TrainingPlan/current/{idMembro}");
+                if (response.IsSuccessStatusCode)
+                {
+                    // A API retorna PlanoTreino; pode ter estrutura diferente de MemberTrainingPlanDto
+                    var dto = await response.Content.ReadFromJsonAsync<MemberTrainingPlanDto>();
+                    if (dto != null) return dto;
+                    var detail = await response.Content.ReadFromJsonAsync<TrainingPlanDetailDto>();
+                    if (detail != null)
+                    {
+                        return new MemberTrainingPlanDto
+                        {
+                            NomePlano = detail.Nome,
+                            Observacoes = detail.Observacoes,
+                            DataCriacao = detail.DataCriacao,
+                            CriadoPor = detail.NomeFuncionario ?? "",
+                            Exercicios = detail.Exercicios ?? new List<TrainingPlanExerciseDto>()
+                        };
+                    }
+                }
+                return null;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"GetCurrentMemberPlanAsync: {ex.Message}");
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Histórico de planos do membro
+        /// </summary>
+        public async Task<List<TrainingPlanSummaryDto>?> GetMemberPlanHistoryAsync(int idMembro)
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync($"/api/TrainingPlan/history/{idMembro}");
+                if (response.IsSuccessStatusCode)
+                {
+                    var list = await response.Content.ReadFromJsonAsync<List<TrainingPlanSummaryDto>>();
+                    return list ?? new List<TrainingPlanSummaryDto>();
+                }
+                return null;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"GetMemberPlanHistoryAsync: {ex.Message}");
+                return null;
+            }
+        }
+
+        #endregion
+
+        #region Exercise Plan Methods
+
+        /// <summary>
+        /// Adiciona exercício ao plano
+        /// </summary>
+        public async Task<(bool Success, string? ErrorMessage)> AddExerciseToPlanAsync(int idPlano, ExercisePlanDto dto)
+        {
+            try
+            {
+                var response = await _httpClient.PostAsJsonAsync($"/api/ExercisePlan/{idPlano}", dto);
+                if (response.IsSuccessStatusCode)
+                    return (true, null);
+
+                var errorContent = await response.Content.ReadAsStringAsync();
+                var message = ExtractMessage(errorContent);
+                return (false, message ?? $"Erro ao adicionar exercício ({response.StatusCode}).");
+            }
+            catch (Exception ex)
+            {
+                return (false, ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// Atualiza exercício no plano
+        /// </summary>
+        public async Task<(bool Success, string? ErrorMessage)> UpdateExerciseInPlanAsync(int idPlano, int idExercicio, UpdateExercisePlanDto dto)
+        {
+            try
+            {
+                var response = await _httpClient.PatchAsJsonAsync($"/api/ExercisePlan/{idPlano}/{idExercicio}", dto);
+                if (response.IsSuccessStatusCode)
+                    return (true, null);
+
+                var errorContent = await response.Content.ReadAsStringAsync();
+                var message = ExtractMessage(errorContent);
+                return (false, message ?? $"Erro ao atualizar exercício ({response.StatusCode}).");
+            }
+            catch (Exception ex)
+            {
+                return (false, ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// Remove exercício do plano
+        /// </summary>
+        public async Task<(bool Success, string? ErrorMessage)> RemoveExerciseFromPlanAsync(int idPlano, int idExercicio)
+        {
+            try
+            {
+                var response = await _httpClient.DeleteAsync($"/api/ExercisePlan/{idPlano}/{idExercicio}");
+                if (response.IsSuccessStatusCode)
+                    return (true, null);
+
+                var errorContent = await response.Content.ReadAsStringAsync();
+                var message = ExtractMessage(errorContent);
+                return (false, message ?? $"Erro ao remover exercício ({response.StatusCode}).");
             }
             catch (Exception ex)
             {

@@ -19,15 +19,28 @@ namespace FitControlAdmin
             _subscription = subscription;
             _isCreateMode = subscription == null;
 
-            // Adjust window title based on mode
             if (_isCreateMode)
             {
                 Title = "Criar Subscrição";
+                TitleTextBlock.Text = "Criar Subscrição";
                 SaveButton.Content = "Criar";
+            }
+            else
+            {
+                Title = "Editar Subscrição";
+                TitleTextBlock.Text = "Editar Subscrição";
             }
 
             LoadSubscriptionData();
             PopulateTipoComboBox();
+
+            if (_isCreateMode)
+            {
+                AtivoCheckBox.IsChecked = true;
+                AtivoCheckBox.IsEnabled = false;
+            }
+            else
+                AtivoCheckBox.IsEnabled = true;
         }
 
         private void LoadSubscriptionData()
@@ -109,13 +122,12 @@ namespace FitControlAdmin
                     {
                         Nome = NomeTextBox.Text,
                         Tipo = tipo,
-                        Preco = preco,
-                        Ativo = AtivoCheckBox.IsChecked ?? true
+                        Preco = preco
                     };
 
                     var (success, errorMessage, subscription) = await _apiService.CreateSubscriptionAsync(createDto);
 
-                    if (success)
+                        if (success)
                     {
                         MessageBox.Show("Subscrição criada com sucesso!", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
                         DialogResult = true;
@@ -133,14 +145,17 @@ namespace FitControlAdmin
                     {
                         Nome = NomeTextBox.Text,
                         Tipo = tipo,
-                        Preco = preco,
-                        Ativo = AtivoCheckBox.IsChecked
+                        Preco = preco
                     };
 
                     var (success, errorMessage) = await _apiService.UpdateSubscriptionAsync(_subscription.IdSubscricao, updateDto);
 
                     if (success)
                     {
+                        if (AtivoCheckBox.IsChecked != _subscription.Ativo)
+                        {
+                            await _apiService.ChangeSubscriptionStatusAsync(_subscription.IdSubscricao, AtivoCheckBox.IsChecked ?? true);
+                        }
                         MessageBox.Show("Subscrição atualizada com sucesso!", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
                         DialogResult = true;
                         Close();

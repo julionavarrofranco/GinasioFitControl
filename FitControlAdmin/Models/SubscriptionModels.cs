@@ -22,7 +22,7 @@ namespace FitControlAdmin.Models
         public string? Nome { get; set; }
         public TipoSubscricao? Tipo { get; set; }
         public decimal? Preco { get; set; }
-        public bool? Ativo { get; set; }
+
     }
 
     public class CreateSubscriptionDto
@@ -30,6 +30,5 @@ namespace FitControlAdmin.Models
         public string Nome { get; set; } = null!;
         public TipoSubscricao Tipo { get; set; }
         public decimal Preco { get; set; }
-        public bool Ativo { get; set; }
     }
 }

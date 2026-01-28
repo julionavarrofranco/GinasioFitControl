@@ -24,7 +24,8 @@
         </Grid.RowDefinitions>
 
         <!-- Title -->
-        <TextBlock Text="Editar Subscrição"
+        <TextBlock x:Name="TitleTextBlock"
+                   Text="Editar Subscrição"
                    FontSize="24"
                    FontWeight="Bold"
                    Foreground="#e6e6e8"

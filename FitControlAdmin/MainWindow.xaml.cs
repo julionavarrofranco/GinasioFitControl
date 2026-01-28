@@ -21,6 +21,10 @@ namespace FitControlAdmin
         private string? _userFuncao;
         private int? _userId;
 
+        // Data storage for filtering
+        private List<PhysicalEvaluationHistoryDto>? _allHistory;
+        private List<AulaResponseDto>? _allClasses;
+
         public MainWindow(ApiService apiService)
         {
             InitializeComponent();
@@ -33,25 +37,28 @@ namespace FitControlAdmin
 
             InitializeDashboard();
             SetupSidebarHandlers();
-            ShowDashboard();
-            HighlightActiveButton(BtnDashboard);
+
+            var isPt = string.Equals(_userFuncao, "PT", StringComparison.OrdinalIgnoreCase);
+            if (isPt)
+            {
+                ShowTrainingPlans();
+                HighlightActiveButton(BtnPlanosTreino);
+            }
+            else
+            {
+                ShowDashboard();
+                HighlightActiveButton(BtnDashboard);
+            }
         }
 
         #region Dashboard / Sidebar
 
         private void InitializeDashboard()
         {
-            // Valores de exemplo; podes ligar isto a endpoints reais mais tarde
-            TotalMembers.Text = "0";
-            ActiveMembers.Text = "0";
-            MonthlyRevenue.Text = "€0,00";
-
-            var recentActivities = new List<Activity>
-            {
-                new Activity { Date = DateTime.Now.ToString("dd/MM"), Description = "Sistema iniciado" }
-            };
-
-            RecentActivityList.ItemsSource = recentActivities;
+            TotalMembers.Text = "—";
+            ActiveMembers.Text = "—";
+            MonthlyRevenue.Text = "—";
+            RecentActivityList.ItemsSource = new List<Activity> { new Activity { Date = DateTime.Now.ToString("dd/MM"), Description = "A carregar..." } };
         }
 
         private void SetupSidebarHandlers()
@@ -93,6 +100,12 @@ namespace FitControlAdmin
                 ShowClassManagement();
             };
 
+            BtnAulasAgendadas.Click += (s, e) =>
+            {
+                HighlightActiveButton(BtnAulasAgendadas);
+                OpenScheduledClassesWindow();
+            };
+
             BtnExercicios.Click += (s, e) =>
             {
                 HighlightActiveButton(BtnExercicios);
@@ -123,10 +136,42 @@ namespace FitControlAdmin
             };
         }
 
-        private void ShowDashboard()
+        private async void ShowDashboard()
         {
             HideAllPanels();
             DashboardPanel.Visibility = Visibility.Visible;
+            await LoadDashboardDataAsync();
+        }
+
+        private async System.Threading.Tasks.Task LoadDashboardDataAsync()
+        {
+            try
+            {
+                var members = await _apiService.GetAllMembersAsync();
+                var dash = await _apiService.GetDashboardSummaryAsync();
+
+                int total = members?.Count ?? 0;
+                int ativos = dash?.MembrosAtivos ?? 0;
+                decimal receita = dash?.ReceitaMensal ?? 0;
+
+                TotalMembers.Text = total.ToString();
+                ActiveMembers.Text = ativos.ToString();
+                MonthlyRevenue.Text = receita.ToString("C2", System.Globalization.CultureInfo.GetCultureInfo("pt-PT"));
+
+                var activities = new List<Activity>
+                {
+                    new Activity { Date = DateTime.Now.ToString("dd/MM"), Description = "Sistema iniciado" },
+                    new Activity { Date = DateTime.Now.ToString("dd/MM HH:mm"), Description = "Dashboard atualizado" }
+                };
+                RecentActivityList.ItemsSource = activities;
+            }
+            catch
+            {
+                TotalMembers.Text = "—";
+                ActiveMembers.Text = "—";
+                MonthlyRevenue.Text = "—";
+                RecentActivityList.ItemsSource = new List<Activity> { new Activity { Date = DateTime.Now.ToString("dd/MM"), Description = "Erro ao carregar" } };
+            }
         }
 
         private void ShowUserManagement()
@@ -151,9 +196,25 @@ namespace FitControlAdmin
                 var employees = await _apiService.GetAllEmployeesAsync();
                 if (employees != null)
                 {
-                    _allEmployees = employees;
-                    EmployeesDataGrid.ItemsSource = employees;
-                    EmployeeStatusText.Text = $"Total: {employees.Count} funcionários";
+                    var display = new List<EmployeeDisplayDto>();
+                    foreach (var e in employees)
+                    {
+                        var user = await _apiService.GetUserByIdAsync(e.IdUser);
+                        display.Add(new EmployeeDisplayDto
+                        {
+                            IdUser = e.IdUser,
+                            IdFuncionario = e.IdFuncionario,
+                            Nome = e.Nome,
+                            Email = e.Email,
+                            Telemovel = e.Telemovel,
+                            Funcao = e.Funcao,
+                            Ativo = user?.Ativo ?? true,
+                            DataRegisto = null
+                        });
+                    }
+                    _allEmployees = display;
+                    EmployeesDataGrid.ItemsSource = display;
+                    EmployeeStatusText.Text = $"Total: {display.Count} funcionários";
                 }
                 else
                 {
@@ -179,31 +240,29 @@ namespace FitControlAdmin
             LoadEmployees();
         }
 
-        private async void EditEmployeeButton_Click(object sender, RoutedEventArgs e)
+        private void EditEmployeeButton_Click(object sender, RoutedEventArgs e)
         {
             if (sender is Button button)
             {
                 try
                 {
-                    // Get EmployeeDto from DataContext
-                    EmployeeDto? employee = null;
+                    EmployeeDisplayDto? employee = null;
 
-                    // Try to get from DataGridRow
                     var parent = button.Parent;
                     while (parent != null && !(parent is System.Windows.Controls.DataGridRow))
                     {
                         parent = System.Windows.Media.VisualTreeHelper.GetParent(parent);
                     }
 
-                    if (parent is System.Windows.Controls.DataGridRow row && row.Item is EmployeeDto rowEmployee)
+                    if (parent is System.Windows.Controls.DataGridRow row && row.Item is EmployeeDisplayDto rowEmployee)
                     {
                         employee = rowEmployee;
                     }
-                    else if (button.DataContext is EmployeeDto contextEmployee)
+                    else if (button.DataContext is EmployeeDisplayDto contextEmployee)
                     {
                         employee = contextEmployee;
                     }
-                    else if (EmployeesDataGrid.SelectedItem is EmployeeDto selectedEmployee)
+                    else if (EmployeesDataGrid.SelectedItem is EmployeeDisplayDto selectedEmployee)
                     {
                         employee = selectedEmployee;
                     }
@@ -215,19 +274,7 @@ namespace FitControlAdmin
                         return;
                     }
 
-                    // Convert EmployeeDto to UserDto
-                    var user = new UserDto
-                    {
-                        IdUser = employee.IdUser,
-                        Email = employee.Email,
-                        Nome = employee.Nome,
-                        Telemovel = employee.Telemovel,
-                        Tipo = "Funcionario",
-                        Ativo = true, // EmployeeDto doesn't have Ativo property, assume active
-                        Funcao = employee.Funcao.ToString()
-                    };
-
-                    var editWindow = new CreateEditUserWindow(_apiService, user);
+                    var editWindow = new CreateFuncionarioWindow(_apiService, employee);
                     editWindow.Owner = this;
                     if (editWindow.ShowDialog() == true)
                     {
@@ -270,11 +317,26 @@ namespace FitControlAdmin
             LoadClasses();
         }
 
+        private void OpenScheduledClassesWindow()
+        {
+            try
+            {
+                var scheduledClassesWindow = new ScheduledClassesWindow(_apiService);
+                scheduledClassesWindow.Owner = this;
+                scheduledClassesWindow.ShowDialog();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erro ao abrir janela de aulas agendadas: {ex.Message}", "Erro", 
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
         private void ShowTrainingPlans()
         {
             HideAllPanels();
             TrainingPlansPanel.Visibility = Visibility.Visible;
-            // TODO: carregar membros, aulas e avaliações quando a API estiver disponível
+            LoadTrainingPlans();
         }
 
         private void ShowPlaceholder(string text)
@@ -448,10 +510,11 @@ namespace FitControlAdmin
 
         private void CreateFuncionarioButton_Click(object sender, RoutedEventArgs e)
         {
-            var createWindow = new CreateEditUserWindow(_apiService, null, "Funcionario");
+            var createWindow = new CreateFuncionarioWindow(_apiService);
+            createWindow.Owner = this;
             if (createWindow.ShowDialog() == true)
             {
-                LoadUsers();
+                LoadEmployees();
             }
         }
 
@@ -708,29 +771,29 @@ namespace FitControlAdmin
 
         private void ConfigureMenuVisibilityByRole()
         {
-            // Defaults: tudo visível
             BtnFuncionarios.Visibility = Visibility.Visible;
             BtnMembros.Visibility = Visibility.Visible;
             BtnSubscricoes.Visibility = Visibility.Visible;
             BtnPagamentos.Visibility = Visibility.Visible;
             BtnAulas.Visibility = Visibility.Visible;
             BtnExercicios.Visibility = Visibility.Visible;
-            // Avaliações físicas: apenas PT (o Admin não tem acesso; o PT trata das avaliações)
+            BtnDashboard.Visibility = Visibility.Visible;
             if (string.Equals(_userFuncao, "PT", StringComparison.OrdinalIgnoreCase))
             {
                 BtnAvaliacoesFisicas.Visibility = Visibility.Visible;
                 BtnPlanosTreino.Visibility = Visibility.Visible;
+                BtnAulasAgendadas.Visibility = Visibility.Visible;
             }
             else
             {
                 BtnAvaliacoesFisicas.Visibility = Visibility.Collapsed;
                 BtnPlanosTreino.Visibility = Visibility.Collapsed;
+                BtnAulasAgendadas.Visibility = Visibility.Collapsed;
             }
             BtnConfig.Visibility = Visibility.Visible;
 
             if (string.Equals(_userTipo, "Membro", StringComparison.OrdinalIgnoreCase))
             {
-                // Membros veem apenas dashboard e talvez aulas
                 BtnFuncionarios.Visibility = Visibility.Collapsed;
                 BtnMembros.Visibility = Visibility.Collapsed;
                 BtnSubscricoes.Visibility = Visibility.Collapsed;
@@ -743,20 +806,22 @@ namespace FitControlAdmin
             {
                 if (string.Equals(_userFuncao, "Rececao", StringComparison.OrdinalIgnoreCase))
                 {
-                    // Receção tem acesso limitado
-                    // (botões já removidos do menu)
+                    // Receção: acesso limitado
                 }
                 else if (string.Equals(_userFuncao, "PT", StringComparison.OrdinalIgnoreCase))
                 {
-                    // PT: membros, aulas, exercícios, avaliações físicas e planos de treino
+                    // PT: retirar Dashboard, Membros e Exercícios; mostrar Config (dados como Admin)
+                    BtnDashboard.Visibility = Visibility.Collapsed;
+                    BtnMembros.Visibility = Visibility.Collapsed;
+                    BtnExercicios.Visibility = Visibility.Collapsed;
                     BtnFuncionarios.Visibility = Visibility.Collapsed;
                     BtnSubscricoes.Visibility = Visibility.Collapsed;
                     BtnPagamentos.Visibility = Visibility.Collapsed;
                     BtnAvaliacoesFisicas.Visibility = Visibility.Visible;
                     BtnPlanosTreino.Visibility = Visibility.Visible;
-                    BtnConfig.Visibility = Visibility.Collapsed;
+                    BtnAulasAgendadas.Visibility = Visibility.Visible;
+                    BtnConfig.Visibility = Visibility.Visible;
                 }
-                // Admin vê tudo
             }
         }
 
@@ -998,7 +1063,7 @@ namespace FitControlAdmin
 
         #region Employee Management
 
-        private List<EmployeeDto>? _allEmployees = null;
+        private List<EmployeeDisplayDto>? _allEmployees = null;
 
         #endregion
 
@@ -1349,11 +1414,13 @@ namespace FitControlAdmin
                 // Preencher tabela de histórico (avaliações completadas)
                 if (history != null)
                 {
-                    MembersHistoryDataGrid.ItemsSource = history;
+                    _allHistory = history.ToList(); // Guardar cópia para filtro
+                    MembersHistoryDataGrid.ItemsSource = _allHistory;
                 }
                 else
                 {
-                    MembersHistoryDataGrid.ItemsSource = new List<PhysicalEvaluationHistoryDto>();
+                    _allHistory = new List<PhysicalEvaluationHistoryDto>();
+                    MembersHistoryDataGrid.ItemsSource = _allHistory;
                 }
 
                 PhysicalEvaluationStatusText.Text = $"Reservas: {activeReservations?.Count ?? 0} | Completas: {completedReservations?.Count ?? 0} | Histórico: {history?.Count ?? 0}";
@@ -1784,14 +1851,35 @@ namespace FitControlAdmin
 
         #region Class Management
 
+        private async void LoadClassReservations()
+        {
+            try
+            {
+                var reservations = await _apiService.GetClassReservationsAsync();
+                
+                if (reservations != null)
+                {
+                    ClassReservationsDataGrid.ItemsSource = reservations;
+                }
+                else
+                {
+                    ClassReservationsDataGrid.ItemsSource = new List<ClassReservationSummaryDto>();
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erro ao carregar reservas: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
         private async void LoadClasses()
         {
             System.Diagnostics.Debug.WriteLine("LoadClasses: Starting to load classes");
             ClassStatusText.Text = "A carregar aulas...";
             try
             {
-                // Carregar aulas e reservas em paralelo
-                var classesTask = _apiService.GetAllClassesAsync();
+                // Carregar apenas aulas ativas e reservas em paralelo
+                var classesTask = _apiService.GetClassesByStateAsync(ativo: true);
                 var reservationsTask = _apiService.GetClassReservationsAsync();
 
                 await Task.WhenAll(classesTask, reservationsTask);
@@ -1813,11 +1901,13 @@ namespace FitControlAdmin
                 // Preencher tabela de aulas
                 if (classes != null)
                 {
-                    ClassesDataGrid.ItemsSource = classes;
+                    _allClasses = classes.ToList(); // Guardar cópia para filtro
+                    ClassesDataGrid.ItemsSource = _allClasses;
                 }
                 else
                 {
-                    ClassesDataGrid.ItemsSource = new List<AulaResponseDto>();
+                    _allClasses = new List<AulaResponseDto>();
+                    ClassesDataGrid.ItemsSource = _allClasses;
                 }
 
                 // Preencher tabela de reservas de aulas
@@ -1897,12 +1987,74 @@ namespace FitControlAdmin
             }
         }
 
-        private void ScheduleClassButton_Click(object sender, RoutedEventArgs e)
+        private async void ScheduleClassButton_Click(object sender, RoutedEventArgs e)
         {
             if (sender is Button button && button.Tag is int idAula)
             {
-                // TODO: Implement schedule class window
-                MessageBox.Show($"Funcionalidade de agendar aula {idAula} em desenvolvimento.", "Informação", MessageBoxButton.OK, MessageBoxImage.Information);
+                try
+                {
+                    // Obter detalhes da aula
+                    var allClasses = await _apiService.GetAllClassesAsync();
+                    var selectedClass = allClasses?.FirstOrDefault(c => c.IdAula == idAula);
+                    
+                    if (selectedClass == null)
+                    {
+                        MessageBox.Show("Aula não encontrada.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                        return;
+                    }
+
+                    // Criar lista com apenas esta aula para o diálogo
+                    var classList = new List<AulaResponseDto> { selectedClass };
+                    
+                    // Abrir diálogo de criar aula agendada
+                    var dialog = new CreateScheduledClassDialog(classList);
+                    dialog.Owner = this;
+                    
+                    if (dialog.ShowDialog() == true)
+                    {
+                        var scheduleDto = new ScheduleClassDto
+                        {
+                            IdAula = dialog.SelectedClassId,
+                            DataAula = dialog.SelectedDate
+                        };
+
+                        // Validar: mínimo 1 dia de antecedência
+                        if (scheduleDto.DataAula.Date <= DateTime.Today)
+                        {
+                            MessageBox.Show("A aula deve ser agendada com pelo menos 1 dia de antecedência.", "Aviso", 
+                                MessageBoxButton.OK, MessageBoxImage.Warning);
+                            return;
+                        }
+
+                        // Validar: máximo 2 semanas
+                        if (scheduleDto.DataAula.Date > DateTime.Today.AddDays(14))
+                        {
+                            MessageBox.Show("Só é possível agendar aulas até 2 semanas à frente.", "Aviso", 
+                                MessageBoxButton.OK, MessageBoxImage.Warning);
+                            return;
+                        }
+
+                        var (success, errorMessage, data) = await _apiService.CreateScheduledClassAsync(scheduleDto);
+                        
+                        if (success)
+                        {
+                            MessageBox.Show($"Aula '{selectedClass.Nome}' agendada com sucesso para {scheduleDto.DataAula:dd/MM/yyyy}!", 
+                                "Sucesso", 
+                                MessageBoxButton.OK, 
+                                MessageBoxImage.Information);
+                        }
+                        else
+                        {
+                            MessageBox.Show($"Erro ao agendar aula: {errorMessage}", "Erro", 
+                                MessageBoxButton.OK, MessageBoxImage.Error);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Erro: {ex.Message}", "Erro", 
+                        MessageBoxButton.OK, MessageBoxImage.Error);
+                }
             }
         }
 
@@ -1911,8 +2063,8 @@ namespace FitControlAdmin
             if (sender is Button button && button.Tag is int idAula)
             {
                 var result = MessageBox.Show(
-                    "Tem certeza que deseja eliminar esta aula?",
-                    "Confirmar",
+                    "Tem certeza que deseja desativar esta aula?\n\nA aula será marcada como inativa e não aparecerá mais na lista de aulas ativas.",
+                    "Confirmar Desativação",
                     MessageBoxButton.YesNo,
                     MessageBoxImage.Question);
 
@@ -1923,12 +2075,12 @@ namespace FitControlAdmin
                         var (success, errorMessage) = await _apiService.DeleteClassAsync(idAula);
                         if (success)
                         {
-                            MessageBox.Show("Aula eliminada com sucesso!", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
+                            MessageBox.Show("Aula desativada com sucesso!", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
                             LoadClasses();
                         }
                         else
                         {
-                            MessageBox.Show(errorMessage ?? "Erro ao eliminar aula.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                            MessageBox.Show(errorMessage ?? "Erro ao desativar aula.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
                         }
                     }
                     catch (Exception ex)
@@ -1939,27 +2091,24 @@ namespace FitControlAdmin
             }
         }
 
-        private async void MarkClassAttendanceButton_Click(object sender, RoutedEventArgs e)
+        private void MarkClassAttendanceButton_Click(object sender, RoutedEventArgs e)
         {
             if (sender is Button button && button.Tag is int idAulaMarcada)
             {
                 try
                 {
-                    // Buscar detalhes da aula marcada
-                    var attendance = await _apiService.GetClassAttendanceAsync(idAulaMarcada);
-                    if (attendance == null)
-                    {
-                        MessageBox.Show("Detalhes da aula não encontrados.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
-                        return;
-                    }
-
-                    // TODO: Implement attendance marking window
-                    MessageBox.Show($"Funcionalidade de marcar presença para aula {idAulaMarcada} em desenvolvimento.\n\nAula: {attendance.NomeAula}\nData: {attendance.DataAula:dd/MM/yyyy}\nReservas: {attendance.TotalReservas}",
-                        "Informação", MessageBoxButton.OK, MessageBoxImage.Information);
+                    // Abrir janela de marcar presenças
+                    var attendanceWindow = new MarkAttendanceWindow(_apiService, idAulaMarcada);
+                    attendanceWindow.Owner = this;
+                    attendanceWindow.ShowDialog();
+                    
+                    // Recarregar reservas após marcar presenças
+                    LoadClassReservations();
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"Erro ao carregar presença: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show($"Erro ao abrir janela de presenças: {ex.Message}", "Erro", 
+                        MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
         }
@@ -1986,29 +2135,211 @@ namespace FitControlAdmin
             }
         }
 
+        // History search handlers
+        private void HistorySearchTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            ApplyHistorySearchFilter();
+        }
+
+        private void HistorySearchTextBox_GotFocus(object sender, RoutedEventArgs e)
+        {
+            if (HistorySearchTextBox.Text == "Pesquisar por nome do membro...")
+            {
+                HistorySearchTextBox.Text = "";
+            }
+        }
+
+        private void HistorySearchTextBox_LostFocus(object sender, RoutedEventArgs e)
+        {
+            if (string.IsNullOrWhiteSpace(HistorySearchTextBox.Text))
+            {
+                HistorySearchTextBox.Text = "Pesquisar por nome do membro...";
+            }
+        }
+
         private void ApplyClassSearchFilter()
         {
-            if (ClassesDataGrid == null || ClassesDataGrid.ItemsSource == null)
+            if (ClassesDataGrid == null || _allClasses == null)
                 return;
 
-            if (ClassesDataGrid.ItemsSource is IEnumerable<AulaResponseDto> allClasses && allClasses != null)
+            var searchText = ClassSearchTextBox.Text?.Trim().ToLower() ?? string.Empty;
+
+            // Treat placeholder text as empty search
+            if (string.IsNullOrWhiteSpace(searchText) || searchText == "pesquisar por nome...")
             {
-                var searchText = ClassSearchTextBox.Text?.Trim().ToLower() ?? string.Empty;
+                ClassesDataGrid.ItemsSource = _allClasses;
+            }
+            else
+            {
+                var filtered = _allClasses.Where(c =>
+                    c != null && (
+                    (c.Nome?.ToLower().Contains(searchText) ?? false) ||
+                    (c.Funcionario?.Nome?.ToLower().Contains(searchText) ?? false))
+                ).ToList();
 
-                // Treat placeholder text as empty search
-                if (string.IsNullOrWhiteSpace(searchText) || searchText == "pesquisar por nome...")
+                ClassesDataGrid.ItemsSource = filtered;
+            }
+        }
+
+        private void ApplyHistorySearchFilter()
+        {
+            if (MembersHistoryDataGrid == null || _allHistory == null)
+                return;
+
+            var searchText = HistorySearchTextBox.Text?.Trim().ToLower() ?? string.Empty;
+
+            // Treat placeholder text as empty search
+            if (string.IsNullOrWhiteSpace(searchText) || searchText == "pesquisar por nome do membro...")
+            {
+                MembersHistoryDataGrid.ItemsSource = _allHistory;
+            }
+            else
+            {
+                var filtered = _allHistory.Where(h =>
+                    h != null && (h.NomeMembro?.ToLower().Contains(searchText) ?? false)
+                ).ToList();
+
+                MembersHistoryDataGrid.ItemsSource = filtered;
+            }
+        }
+
+        #endregion
+
+        #region Training Plan Management
+
+        private async void LoadTrainingPlans()
+        {
+            if (TrainingPlanStatusText == null) return;
+
+            TrainingPlanStatusText.Text = "A carregar planos...";
+            try
+            {
+                var active = await _apiService.GetTrainingPlansByStateAsync(ativo: true);
+                var inactive = await _apiService.GetTrainingPlansByStateAsync(ativo: false);
+
+                var all = new List<TrainingPlanSummaryDto>();
+                if (active != null) all.AddRange(active);
+                if (inactive != null) all.AddRange(inactive);
+
+                all = all.OrderByDescending(p => p.DataCriacao).ToList();
+
+                TrainingPlansDataGrid.ItemsSource = all;
+                TrainingPlanStatusText.Text = $"Planos: {all.Count} (ativos: {active?.Count ?? 0})";
+            }
+            catch (Exception ex)
+            {
+                TrainingPlanStatusText.Text = "Erro: " + ex.Message;
+                MessageBox.Show($"Erro ao carregar planos: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void RefreshTrainingPlansButton_Click(object sender, RoutedEventArgs e)
+        {
+            LoadTrainingPlans();
+        }
+
+        private async void CreateTrainingPlanButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                var currentUser = await _apiService.GetCurrentUserAsync();
+                var idFunc = currentUser?.IdFuncionario ?? 0;
+                if (idFunc <= 0)
                 {
-                    ClassesDataGrid.ItemsSource = allClasses;
+                    MessageBox.Show("Não foi possível identificar o PT. Faça logout e login novamente.", "Erro", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
                 }
-                else
-                {
-                    var filtered = allClasses.Where(c =>
-                        c != null && (
-                        (c.Nome?.ToLower().Contains(searchText) ?? false) ||
-                        (c.Funcionario?.Nome?.ToLower().Contains(searchText) ?? false))
-                    ).ToList();
+                var win = new CreateEditTrainingPlanWindow(_apiService, idFuncionario: idFunc, idPlano: null);
+                win.Owner = this;
+                if (win.ShowDialog() == true)
+                    LoadTrainingPlans();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erro: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
 
-                    ClassesDataGrid.ItemsSource = filtered;
+        private void ViewTrainingPlanButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button button && button.Tag is int idPlano)
+            {
+                try
+                {
+                    var win = new ViewTrainingPlanWindow(_apiService, idPlano);
+                    win.Owner = this;
+                    win.ShowDialog();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Erro: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+        }
+
+        private async void EditTrainingPlanButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button button && button.Tag is TrainingPlanSummaryDto plan)
+            {
+                try
+                {
+                    var currentUser = await _apiService.GetCurrentUserAsync();
+                    var idFunc = currentUser?.IdFuncionario ?? 0;
+                    var win = new CreateEditTrainingPlanWindow(_apiService, idFuncionario: idFunc, idPlano: plan.IdPlano, planNome: plan.Nome);
+                    win.Owner = this;
+                    if (win.ShowDialog() == true)
+                        LoadTrainingPlans();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Erro: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+        }
+
+        private async void AssignTrainingPlanButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button button && button.Tag is int idPlano)
+            {
+                try
+                {
+                    var members = await _apiService.GetAllMembersAsync();
+                    if (members == null || members.Count == 0)
+                    {
+                        MessageBox.Show("Não há membros disponíveis.", "Aviso", MessageBoxButton.OK, MessageBoxImage.Information);
+                        return;
+                    }
+                    var dlg = new AssignPlanToMemberDialog(members, idPlano, _apiService);
+                    dlg.Owner = this;
+                    if (dlg.ShowDialog() == true)
+                        LoadTrainingPlans();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Erro: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+        }
+
+        private async void ToggleTrainingPlanStateButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button button && button.Tag is TrainingPlanSummaryDto plan)
+            {
+                try
+                {
+                    var newState = !plan.Ativo;
+                    var (success, errorMessage) = await _apiService.ChangeTrainingPlanStateAsync(plan.IdPlano, newState);
+                    if (success)
+                    {
+                        MessageBox.Show(newState ? "Plano ativado." : "Plano desativado.", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
+                        LoadTrainingPlans();
+                    }
+                    else
+                        MessageBox.Show(errorMessage ?? "Erro ao alterar estado.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Erro: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
         }

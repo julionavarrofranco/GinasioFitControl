@@ -36,8 +36,11 @@ namespace FitControlAdmin
 
             if (existingClass != null)
             {
+                Title = "Editar Aula";
                 LoadExistingClass(existingClass);
             }
+            else
+                Title = "Criar Aula";
 
             LoadFuncionariosAsync();
         }

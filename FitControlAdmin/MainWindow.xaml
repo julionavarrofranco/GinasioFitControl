@@ -341,6 +341,14 @@
                         </StackPanel>
                     </Button>
 
+                    <!-- Aulas Agendadas (apenas PT) -->
+                    <Button x:Name="BtnAulasAgendadas" Style="{StaticResource SidebarButtonStyle}">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="📅 " Foreground="#02acc3" FontSize="14"/>
+                            <TextBlock Text="Aulas Agendadas" Foreground="White" FontSize="14"/>
+                        </StackPanel>
+                    </Button>
+
                     <!-- Exercícios -->
                     <Button x:Name="BtnExercicios" Style="{StaticResource SidebarButtonStyle}">
                         <StackPanel Orientation="Horizontal">
@@ -535,25 +543,6 @@
                     <StackPanel Grid.Column="2" Orientation="Horizontal">
                         <Button x:Name="CreateMembroButton" Content="Criar Membro"
                                 Click="CreateMembroButton_Click"
-                                Padding="15,8" Margin="0,0,10,0"
-                                Background="#27AE60"
-                                Foreground="White"
-                                BorderThickness="0"
-                                Cursor="Hand"
-                                FontSize="14">
-                            <Button.Style>
-                                <Style TargetType="Button">
-                                    <Setter Property="Background" Value="#27AE60"/>
-                                    <Style.Triggers>
-                                        <Trigger Property="IsMouseOver" Value="True">
-                                            <Setter Property="Background" Value="#229954"/>
-                                        </Trigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </Button.Style>
-                        </Button>
-                        <Button x:Name="CreateFuncionarioButton" Content="Criar Funcionário"
-                                Click="CreateFuncionarioButton_Click"
                                 Padding="15,8" Margin="0,0,0,0"
                                 Background="#27AE60"
                                 Foreground="White"
@@ -778,7 +767,7 @@
                                 <DataGridTextColumn Header="Email" Binding="{Binding Email}" Width="200"/>
                                 <DataGridTextColumn Header="Telemóvel" Binding="{Binding Telemovel}" Width="120"/>
                                 <DataGridTextColumn Header="Função" Binding="{Binding Funcao, Converter={StaticResource EnumNameConverter}}" Width="120"/>
-                                <DataGridTextColumn Header="Data Registo" Binding="{Binding DataRegisto, StringFormat=dd/MM/yyyy}" Width="120"/>
+                                <DataGridTextColumn Header="Data Registo" Binding="{Binding DataRegistoDisplay}" Width="120"/>
                                 <DataGridCheckBoxColumn Header="Ativo" Binding="{Binding Ativo}" Width="60"/>
                                 <DataGridTemplateColumn Header="Ações" Width="150">
                                     <DataGridTemplateColumn.CellTemplate>
@@ -1173,6 +1162,13 @@
                                                 CornerRadius="0,0,12,12"
                                                 Padding="15">
                                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                                <CheckBox Content="Ativo"
+                                                         IsChecked="{Binding Ativo}"
+                                                         IsHitTestVisible="False"
+                                                         Foreground="#95a5a6"
+                                                         VerticalAlignment="Center"
+                                                         Margin="0,0,12,0"
+                                                         ToolTip="Ativo (apenas consulta)"/>
                                                 <Button Content="✏️" 
                                                         Click="EditExerciseButton_Click"
                                                         Tag="{Binding IdExercicio}"
@@ -1641,6 +1637,51 @@
                                FontWeight="Bold"
                                Foreground="#e6e6e8"
                                Margin="0,0,0,10"/>
+                    
+                    <!-- Filtro de Pesquisa -->
+                    <Border Background="#1f2937" 
+                            BorderBrush="#34495E" 
+                            BorderThickness="1" 
+                            CornerRadius="8" 
+                            Padding="12,8" 
+                            Margin="0,0,0,10">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="🔍"
+                                       Grid.Column="0"
+                                       Foreground="#95a5a6"
+                                       FontSize="14"
+                                       VerticalAlignment="Center"
+                                       Margin="0,0,8,0"/>
+                            <TextBox x:Name="HistorySearchTextBox"
+                                     Grid.Column="1"
+                                     Background="Transparent"
+                                     BorderThickness="0"
+                                     Foreground="#95a5a6"
+                                     FontSize="14"
+                                     VerticalContentAlignment="Center"
+                                     TextChanged="HistorySearchTextBox_TextChanged"
+                                     GotFocus="HistorySearchTextBox_GotFocus"
+                                     LostFocus="HistorySearchTextBox_LostFocus"
+                                     CaretBrush="White"
+                                     Tag="Pesquisar por nome do membro...">
+                                <TextBox.Style>
+                                    <Style TargetType="TextBox">
+                                        <Setter Property="Text" Value="Pesquisar por nome do membro..."/>
+                                        <Style.Triggers>
+                                            <Trigger Property="IsFocused" Value="True">
+                                                <Setter Property="Text" Value=""/>
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBox.Style>
+                            </TextBox>
+                        </Grid>
+                    </Border>
+                    
                     <Border Background="#272936" CornerRadius="10" Padding="20" Margin="0,0,0,30">
                         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
                             <DataGrid x:Name="MembersHistoryDataGrid"
@@ -2123,36 +2164,133 @@
                                FontWeight="Bold"
                                Foreground="#e6e6e8"
                                Margin="0,0,0,20"/>
-                    <TextBlock Text="Selecione um membro e utilize as aulas e avaliações físicas para criar e gerir planos de treino."
-                               Foreground="#95a5a6"
-                               FontSize="14"
-                               TextWrapping="Wrap"
-                               Margin="0,0,0,20"/>
+
+                    <!-- Botões e estado -->
+                    <Grid Margin="0,0,0,15">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Button x:Name="CreateTrainingPlanButton"
+                                Grid.Column="0"
+                                Content="Criar Plano"
+                                Click="CreateTrainingPlanButton_Click"
+                                Padding="15,8" Margin="0,0,10,0"
+                                Background="#02acc3"
+                                Foreground="White"
+                                BorderThickness="0"
+                                Cursor="Hand"
+                                FontSize="14"/>
+                        <Button x:Name="RefreshTrainingPlansButton"
+                                Grid.Column="1"
+                                Content="Atualizar"
+                                Click="RefreshTrainingPlansButton_Click"
+                                Padding="15,8" Margin="0,0,10,0"
+                                Background="#34495E"
+                                Foreground="White"
+                                BorderThickness="0"
+                                Cursor="Hand"
+                                FontSize="14"/>
+                        <TextBlock x:Name="TrainingPlanStatusText"
+                                  Grid.Column="3"
+                                  Text="Planos: 0"
+                                  Foreground="#95a5a6"
+                                  FontSize="14"
+                                  VerticalAlignment="Center"/>
+                    </Grid>
+
+                    <!-- DataGrid de Planos -->
                     <Border Background="#272936" CornerRadius="10" Padding="20" Margin="0,0,0,20">
-                        <StackPanel>
-                            <TextBlock Text="Membros (para atribuir plano)"
-                                       FontSize="18"
-                                       FontWeight="Bold"
-                                       Foreground="#e6e6e8"
-                                       Margin="0,0,0,10"/>
-                            <TextBlock Text="Lista de membros e planos será carregada aqui quando as aulas e avaliações estiverem disponíveis."
-                                       Foreground="#95a5a6"
-                                       FontSize="14"
-                                       TextWrapping="Wrap"/>
-                        </StackPanel>
-                    </Border>
-                    <Border Background="#272936" CornerRadius="10" Padding="20" Margin="0,0,0,20">
-                        <StackPanel>
-                            <TextBlock Text="Aulas e avaliações"
-                                       FontSize="18"
-                                       FontWeight="Bold"
-                                       Foreground="#e6e6e8"
-                                       Margin="0,0,0,10"/>
-                            <TextBlock Text="As aulas e as avaliações físicas funcionais serão utilizadas para construir o plano de treino."
-                                       Foreground="#95a5a6"
-                                       FontSize="14"
-                                       TextWrapping="Wrap"/>
-                        </StackPanel>
+                        <DataGrid x:Name="TrainingPlansDataGrid"
+                                  AutoGenerateColumns="False"
+                                  IsReadOnly="True"
+                                  SelectionMode="Single"
+                                  GridLinesVisibility="Horizontal"
+                                  HeadersVisibility="Column"
+                                  Background="#1f2937"
+                                  Foreground="#e6e6e8"
+                                  RowBackground="#1f2937"
+                                  AlternatingRowBackground="#252f3f"
+                                  BorderThickness="0"
+                                  CanUserAddRows="False"
+                                  CanUserDeleteRows="False"
+                                  MinHeight="200">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="ID" Binding="{Binding IdPlano}" Width="50"/>
+                                <DataGridTextColumn Header="Nome" Binding="{Binding Nome}" Width="*"/>
+                                <DataGridTextColumn Header="Data Criação" Binding="{Binding DataCriacao, StringFormat=dd/MM/yyyy}" Width="100"/>
+                                <DataGridTemplateColumn Header="Estado" Width="70">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock>
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Setter Property="Foreground" Value="#e6e6e8"/>
+                                                        <Setter Property="Text" Value="—"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding Ativo}" Value="True">
+                                                                <Setter Property="Text" Value="Ativo"/>
+                                                                <Setter Property="Foreground" Value="#27ae60"/>
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding Ativo}" Value="False">
+                                                                <Setter Property="Text" Value="Inativo"/>
+                                                                <Setter Property="Foreground" Value="#e74c3c"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTemplateColumn Header="Ações" Width="280">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Orientation="Horizontal">
+                                                <Button Content="Ver"
+                                                        Click="ViewTrainingPlanButton_Click"
+                                                        Tag="{Binding IdPlano}"
+                                                        Padding="8,4" Margin="0,0,4,0"
+                                                        Background="#02acc3"
+                                                        Foreground="White"
+                                                        BorderThickness="0"
+                                                        Cursor="Hand"
+                                                        FontSize="12"/>
+                                                <Button Content="Editar"
+                                                        Click="EditTrainingPlanButton_Click"
+                                                        Tag="{Binding}"
+                                                        Padding="8,4" Margin="0,0,4,0"
+                                                        Background="#34495E"
+                                                        Foreground="White"
+                                                        BorderThickness="0"
+                                                        Cursor="Hand"
+                                                        FontSize="12"/>
+                                                <Button Content="Atribuir"
+                                                        Click="AssignTrainingPlanButton_Click"
+                                                        Tag="{Binding IdPlano}"
+                                                        Padding="8,4" Margin="0,0,4,0"
+                                                        Background="#27ae60"
+                                                        Foreground="White"
+                                                        BorderThickness="0"
+                                                        Cursor="Hand"
+                                                        FontSize="12"/>
+                                                <Button Content="Ativar/Desativar"
+                                                        Click="ToggleTrainingPlanStateButton_Click"
+                                                        Tag="{Binding}"
+                                                        Padding="8,4"
+                                                        Background="#f39c12"
+                                                        Foreground="White"
+                                                        BorderThickness="0"
+                                                        Cursor="Hand"
+                                                        FontSize="12"/>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
                     </Border>
                 </StackPanel>
             </ScrollViewer>
