@@ -132,5 +132,13 @@ namespace ProjetoFinal.Controllers
             }
         }
 
+        [Authorize(Policy = "OnlyMembers")]
+        [HttpGet("active/{idMembro}")]
+        public async Task<IActionResult> GetActiveReservationByMember(int idMembro)
+        {
+            var reserva = await _reservationService.GetActiveReservationByMemberAsync(idMembro);
+            if (reserva == null) return NoContent();
+            return Ok(reserva);
+        }
     }
 }

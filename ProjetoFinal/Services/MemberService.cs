@@ -219,7 +219,7 @@ namespace ProjetoFinal.Services
                 ?? throw new KeyNotFoundException("Membro não encontrado.");
         }
 
-        public async Task<List<MemberPhysicalEvaluationDto>> GetMemberEvaluationsAsync(int idMembro)
+        public async Task<MemberPhysicalEvaluationDto?> GetMemberEvaluationsAsync(int idMembro)
         {
             return await _context.AvaliacoesFisicas
                 .AsNoTracking()
@@ -236,7 +236,7 @@ namespace ProjetoFinal.Services
                     Observacoes = a.Observacoes,
                     Avaliador = a.Funcionario.Nome
                 })
-                .ToListAsync();
+                .FirstOrDefaultAsync();
         }
 
         public async Task<MemberTrainingPlanDto?> GetMemberTrainingPlanAsync(int idMembro)

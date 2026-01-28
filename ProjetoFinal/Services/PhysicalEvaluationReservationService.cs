@@ -170,6 +170,15 @@ namespace ProjetoFinal.Services
                 .ToListAsync();
         }
 
+        public async Task<MembroAvaliacao?> GetActiveReservationByMemberAsync(int idMembro)
+        {
+            return await _context.MembrosAvaliacoes
+                .AsNoTracking()
+                .FirstOrDefaultAsync(r =>
+                    r.IdMembro == idMembro &&
+                    r.Estado == EstadoAvaliacao.Reservado &&
+                    r.DataDesativacao == null);
+        }
 
     }
 }

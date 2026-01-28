@@ -4,8 +4,8 @@
     {
         Reservado,
         Presente,
-        Cancelado,
-        Faltou
+        Faltou,
+        Cancelado
     }
 
     public class MembroAvaliacao
