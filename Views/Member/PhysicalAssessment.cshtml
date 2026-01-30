@@ -176,10 +176,20 @@
                 credentials: 'include'
             });
 
-            if (!response.ok) {
-                const msg = await response.text();
-                throw new Error(msg || "Erro ao agendar.");
+                   if (!response.ok) {
+            let msg = "Erro ao agendar.";
+
+            // tenta ler o corpo como JSON
+            try {
+                const text = await response.text(); // primeiro lê como texto
+                const data = JSON.parse(text);      // depois parse JSON
+                if (data?.message) msg = data.message;
+            } catch {
+                // fallback, se não for JSON, deixa msg padrão
             }
+
+            throw new Error(msg);
+        }
 
             showBookingSuccess("Avaliação agendada com sucesso!");
             setTimeout(() => location.reload(), 1200);

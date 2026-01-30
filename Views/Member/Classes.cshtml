@@ -65,39 +65,40 @@
             <div class="carousel-wrap">
                 <button class="carousel-arrow prev" aria-label="Anterior">‹</button>
                 <div class="classes-grid horizontal-carousel" id="classesCarousel">
-                    @foreach (var classItem in Model.AvailableClasses.OrderBy(c => c.StartTime))
+                    @foreach (var classItem in Model.AvailableClasses.OrderBy(c => c.DataAula + c.HoraInicio))
                     {
+                        var startTime = classItem.DataAula + classItem.HoraInicio;
+                        var endTime = classItem.DataAula + classItem.HoraFim;
                         var isBooked = Model.UserReservations.Any(r => !r.IsCancelled && r.Type == TTFWebsite.Models.ReservationType.Class && (
-                            (r.ClassId.HasValue && r.ClassId == classItem.Id)
-                            || (r.Class != null && r.Class.Id == classItem.Id)
-                            || (Math.Abs((r.ReservationDate - classItem.StartTime).TotalMinutes) < 1)
+                        (r.ClassId.HasValue && r.ClassId == classItem.IdAulaMarcada)
+                        || (r.Class != null && r.Class.Id == classItem.IdAulaMarcada)
+                        || (Math.Abs((r.ReservationDate - startTime).TotalMinutes) < 1)
                         ));
-                        var isFull = classItem.CurrentBookings >= classItem.MaxCapacity;
-                        var isPast = classItem.StartTime < DateTime.Now;
-                        
-                        <div class="class-card @(isPast ? "past" : "")" data-id="@classItem.Id" data-start="@classItem.StartTime.ToString("o")">
+                        var isFull = classItem.Reservas >= classItem.Capacidade;
+                        var isPast = startTime < DateTime.Now;
+
+                        <div class="class-card @(isPast ? "past" : "")" data-id="@classItem.IdAulaMarcada" data-start="@startTime.ToString("o")">
                             <div class="class-header">
                                 <div class="class-time-badge">
-                                    <span class="duration">@classItem.StartTime.ToString("HH:mm") - @classItem.EndTime.ToString("HH:mm")</span>
+                                    <span class="duration">@startTime.ToString("HH:mm") - @endTime.ToString("HH:mm")</span>
                                 </div>
-                                <span class="class-date">@classItem.StartTime.ToString("dd MMM")</span>
+                                <span class="class-date">@startTime.ToString("dd MMM")</span>
                             </div>
-                            
+
                             <div class="class-body">
-                                <h3>@classItem.Name</h3>
-                                <p class="class-description">@classItem.Description</p>
+                                <h3>@classItem.Nome</h3>
                                 <div class="class-details">
                                     <div class="detail">
                                         <span class="detail-icon">👤</span>
-                                        <span>@classItem.Instructor</span>
+                                        <span>@(classItem.NomeFuncionario ?? "")</span>
                                     </div>
                                     <div class="detail">
                                         <span class="detail-icon">📍</span>
-                                        <span>@classItem.Room</span>
+                                        <span>@(classItem.Sala ?? "")</span>
                                     </div>
                                     <div class="detail">
                                         <span class="detail-icon">👥</span>
-                                        <span>@classItem.CurrentBookings/@classItem.MaxCapacity lugares</span>
+                                        <span>@classItem.Reservas/@classItem.Capacidade lugares</span>
                                     </div>
                                 </div>
                             </div>
@@ -117,11 +118,12 @@
                                 }
                                 else
                                 {
-                                    <button class="btn-book" onclick="bookClass(@classItem.Id)">Reservar</button>
+                                    <button class="btn-book" onclick="bookClass(@classItem.IdAulaMarcada)">Reservar</button>
                                 }
                             </div>
                         </div>
                     }
+
                 </div>
                 <button class="carousel-arrow next" aria-label="Seguinte">›</button>
             </div>

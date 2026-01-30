@@ -147,20 +147,18 @@ public class MemberController : Controller
         if (idMembro == null) return Unauthorized();
 
         if (string.IsNullOrWhiteSpace(request.DataReserva))
-            return BadRequest("DataReserva não fornecida.");
+            return BadRequest(new { message = "DataReserva não fornecida." });
 
         if (!DateTime.TryParse(request.DataReserva, null, System.Globalization.DateTimeStyles.AssumeLocal, out var dataReserva))
-            return BadRequest("DataReserva inválida.");
+            return BadRequest(new { message = "DataReserva inválida." });
 
-        var success = await _api.BookPhysicalAssessmentAsync(idMembro.Value, dataReserva);
+        var errorMessage = await _api.BookPhysicalAssessmentAsync(idMembro.Value, dataReserva);
 
-        if (!success)
-            return BadRequest("Não foi possível agendar a avaliação.");
+        if (!string.IsNullOrEmpty(errorMessage))
+            return BadRequest(new { message = errorMessage });
 
         return Ok();
     }
-
-
 
 
 
@@ -172,7 +170,7 @@ public class MemberController : Controller
         var idMembro = await GetIdMembro();
         if (idMembro == null) return Unauthorized();
 
-        await _api.CancelPhysicalAssessmentAsync(idMembro.Value, reservationId);
+        await _api.CancelPhysicalAssessmentAsync(reservationId);
         return RedirectToAction("PhysicalAssessment");
     }
 

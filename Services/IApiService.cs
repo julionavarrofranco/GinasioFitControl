@@ -32,7 +32,7 @@ namespace TTFWebsite.Services
         // RESERVAS / AULAS
         // =========================
         Task<List<Reservation>> GetUserReservationsAsync(int idMembro);
-        Task<List<Class>> GetAvailableClassesAsync();
+        Task<List<ScheduleClassDto>> GetAvailableClassesAsync();
         Task<bool> BookClassAsync(int idMembro, int classId);
         Task<bool> CancelReservationAsync(int reservationId);
 
@@ -40,9 +40,9 @@ namespace TTFWebsite.Services
         // AVALIAÇÕES FÍSICAS
         // =========================
         Task<PhysicalAssessment?> GetLatestPhysicalAssessmentAsync(int idMembro);
-        Task<bool> BookPhysicalAssessmentAsync(int idMembro, DateTime dataReserva);
+        Task<string?> BookPhysicalAssessmentAsync(int idMembro, DateTime dataReserva);
         Task<Reservation?> GetActivePhysicalAssessmentAsync(int memberId);
-        Task<bool> CancelPhysicalAssessmentAsync(int memberId, int assessmentId);
+        Task<bool> CancelPhysicalAssessmentAsync(int assessmentId);
 
         // =========================
         // TREINO

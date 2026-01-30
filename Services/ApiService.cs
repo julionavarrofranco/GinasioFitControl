@@ -195,43 +195,54 @@ namespace TTFWebsite.Services
 
 
 
-
-        public async Task<bool> BookPhysicalAssessmentAsync(int idMembro, DateTime dataReserva)
+        public async Task<string?> BookPhysicalAssessmentAsync(int idMembro, DateTime dataReserva)
         {
             var dataIso = Uri.EscapeDataString(
                 dataReserva.ToString("yyyy-MM-ddTHH:mm:ss"));
 
             using var req = new HttpRequestMessage(
                 HttpMethod.Post,
-                $"/api/PhysicalEvaluationReservation/{idMembro}?dataReserva={dataIso}");
+                $"/api/PhysicalEvaluationReservation/reservation?dataReserva={dataIso}");
 
-            AddAuth(req); // MUITO IMPORTANTE (estavas a falhar isto)
+            AddAuth(req); // importante
 
             var response = await _httpClient.SendAsync(req);
+            var content = await response.Content.ReadAsStringAsync();
 
             if (!response.IsSuccessStatusCode)
             {
-                var error = await response.Content.ReadAsStringAsync();
-                _logger.LogError("Erro ao agendar avaliação: {Error}", error);
-                return false;
+                _logger.LogError("Erro ao agendar avaliação: {Error}", content);
+
+                // tenta extrair message se for JSON
+                try
+                {
+                    var json = System.Text.Json.JsonDocument.Parse(content);
+                    if (json.RootElement.TryGetProperty("message", out var msg))
+                        return msg.GetString();
+                }
+                catch
+                {
+                    // fallback: devolve todo o texto
+                    return content;
+                }
             }
 
-            return true;
+            return null; // null significa sucesso
         }
 
 
 
 
 
-
-        public async Task<bool> CancelPhysicalAssessmentAsync(int idMembro, int idAvaliacao)
+        public async Task<bool> CancelPhysicalAssessmentAsync(int idAvaliacao)
         {
-            using var req = new HttpRequestMessage(HttpMethod.Patch, $"/api/PhysicalEvaluationReservation/cancel/{idMembro}/{idAvaliacao}");
+            using var req = new HttpRequestMessage(HttpMethod.Patch, $"/api/PhysicalEvaluationReservation/cancel/{idAvaliacao}");
             AddAuth(req);
 
             var res = await _httpClient.SendAsync(req);
             return res.IsSuccessStatusCode;
         }
+
 
         public async Task<Reservation?> GetActivePhysicalAssessmentAsync(int idMembro)
         {
@@ -274,15 +285,20 @@ namespace TTFWebsite.Services
         // -------------------------
         // CLASSES / RESERVATIONS
         // -------------------------
-        public async Task<List<Class>> GetAvailableClassesAsync()
+        public async Task<List<ScheduleClassDto>> GetAvailableClassesAsync()
         {
-            using var req = new HttpRequestMessage(HttpMethod.Get, "/api/Class/by-state");
+            using var req = new HttpRequestMessage(HttpMethod.Get, "/api/ScheduleClass/available");
             AddAuth(req);
 
             var res = await _httpClient.SendAsync(req);
-            if (!res.IsSuccessStatusCode) return new List<Class>();
-            return await res.Content.ReadFromJsonAsync<List<Class>>(_jsonOptions) ?? new List<Class>();
+            if (!res.IsSuccessStatusCode) return new List<ScheduleClassDto>();
+
+            var dtoList = await res.Content.ReadFromJsonAsync<List<ScheduleClassDto>>(_jsonOptions);
+            return dtoList ?? new List<ScheduleClassDto>();
         }
+
+
+
 
         public async Task<List<Reservation>> GetUserReservationsAsync(int idMembro)
         {
