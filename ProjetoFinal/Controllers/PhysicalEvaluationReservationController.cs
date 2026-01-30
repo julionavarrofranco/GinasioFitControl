@@ -1,8 +1,10 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using ProjetoFinal.Models;
 using ProjetoFinal.Models.DTOs;
 using ProjetoFinal.Services.Interfaces;
+using System.Security.Claims;
 
 namespace ProjetoFinal.Controllers
 {
@@ -18,13 +20,23 @@ namespace ProjetoFinal.Controllers
         }
 
         [Authorize(Policy = "OnlyMembers")]
-        [HttpPost("{idMembro}")]
-        public async Task<IActionResult> CreateReservation(int idMembro, [FromQuery] DateTime dataReserva)
+        [HttpPost("reservation")]
+        public async Task<IActionResult> CreateReservation([FromQuery] DateTime dataReserva)
         {
             try
             {
-                var reserva = await _reservationService.CreateReservationAsync(idMembro, dataReserva);
-                return Ok(reserva);
+                var idUser = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+
+                var reserva = await _reservationService.CreateReservationAsync(idUser, dataReserva);
+
+                return Ok(new
+                {
+                    reserva.IdMembroAvaliacao,
+                    reserva.IdMembro,
+                    reserva.DataReserva,
+                    reserva.Estado
+                });
+
             }
             catch (InvalidOperationException ex)
             {
@@ -36,13 +48,15 @@ namespace ProjetoFinal.Controllers
             }
         }
 
-        [Authorize(Policy = "OnlyMembers")]
-        [HttpPatch("cancel/{idMembro}/{idAvaliacao}")]
-        public async Task<IActionResult> CancelReservation(int idMembro, int idAvaliacao)
+
+    [Authorize(Policy = "OnlyMembers")]
+        [HttpPatch("cancel/{idAvaliacao}")]
+        public async Task<IActionResult> CancelReservation(int idAvaliacao)
         {
             try
             {
-                var success = await _reservationService.CancelReservationAsync(idMembro, idAvaliacao);
+                var idUser = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+                var success = await _reservationService.CancelReservationAsync(idUser, idAvaliacao);
                 if (!success)
                     return NotFound(new { message = "Reserva não encontrada ou não está ativa." });
 

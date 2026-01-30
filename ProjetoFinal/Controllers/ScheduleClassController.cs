@@ -78,5 +78,21 @@ namespace ProjetoFinal.Controllers
                 return StatusCode(500, new { message = "Erro interno do servidor." });
             }
         }
+
+        [Authorize(Policy = "CanViewClasses")]
+        [HttpGet("available")]
+        public async Task<IActionResult> ListAvailable()
+        {
+            try
+            {
+                var aulas = await _scheduleClassService.ListAvailableAsync();
+                return Ok(aulas);
+            }
+            catch
+            {
+                return StatusCode(500, new { message = "Erro interno do servidor." });
+            }
+        }
+
     }
 }

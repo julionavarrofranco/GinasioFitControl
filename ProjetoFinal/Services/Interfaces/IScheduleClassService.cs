@@ -8,5 +8,6 @@ namespace ProjetoFinal.Services.Interfaces
         Task<AulaMarcada> CreateAsync(ScheduleClassDto dto);
         Task<int> GenerateScheduledClassesForPtAsync(int idPt);
         Task<string> CancelByPtAsync(int idAulaMarcada);
+        Task<List<ScheduledClassResponseDto>> ListAvailableAsync();
     }
 }

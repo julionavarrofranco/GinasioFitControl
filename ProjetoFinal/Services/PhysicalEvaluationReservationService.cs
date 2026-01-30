@@ -11,11 +11,13 @@ namespace ProjetoFinal.Services
         private readonly GinasioDbContext _context;
 
         private readonly IPhysicalEvaluationService _physicalEvaluationService;
+        private readonly IUserService _userService;
 
-        public PhysicalEvaluationReservationService(GinasioDbContext context, IPhysicalEvaluationService physicalEvaluationService)
+        public PhysicalEvaluationReservationService(GinasioDbContext context, IPhysicalEvaluationService physicalEvaluationService, IUserService userService)
         {
             _context = context;
             _physicalEvaluationService = physicalEvaluationService;
+            _userService = userService;
         }
 
         private async Task<MembroAvaliacao?> GetReservationByIdAsync(int idMembro, int idMembroAvaliacao)
@@ -25,16 +27,42 @@ namespace ProjetoFinal.Services
                 .FirstOrDefaultAsync(r => r.IdMembro == idMembro && r.IdMembroAvaliacao == idMembroAvaliacao && r.DataDesativacao == null);
         }
 
-        public async Task<MembroAvaliacao> CreateReservationAsync(int idMembro, DateTime dataReserva)
+        public async Task<MembroAvaliacao> CreateReservationAsync(int idUser, DateTime dataReserva)
         {
+            var user = await _userService.GetUserByIdAsync(
+                idUser,
+                includeMembro: true
+            );
+
+            if (user?.Membro == null)
+                throw new InvalidOperationException("O utilizador não é um membro.");
+
+            var idMembro = user.Membro.IdMembro;
+
             if (dataReserva < DateTime.UtcNow.AddDays(7))
                 throw new InvalidOperationException("A reserva deve ser feita com pelo menos 7 dias de antecedência.");
 
             bool hasActive = await _context.MembrosAvaliacoes
-                .AnyAsync(r => r.IdMembro == idMembro && r.Estado == EstadoAvaliacao.Reservado && r.DataDesativacao == null);
+                .AnyAsync(r =>
+                    r.IdMembro == idMembro &&
+                    r.Estado == EstadoAvaliacao.Reservado &&
+                    r.DataDesativacao == null);
 
             if (hasActive)
                 throw new InvalidOperationException("O membro já possui uma reserva ativa.");
+
+            var inicioJanela = dataReserva.AddMinutes(-30);
+            var fimJanela = dataReserva.AddMinutes(30);
+
+            bool conflitoHorario = await _context.MembrosAvaliacoes
+                .AnyAsync(r =>
+                    r.Estado == EstadoAvaliacao.Reservado &&
+                    r.DataDesativacao == null &&
+                    r.DataReserva >= inicioJanela &&
+                    r.DataReserva <= fimJanela);
+
+            if (conflitoHorario)
+                throw new InvalidOperationException("Já existe uma reserva nesse horário.");
 
             var reserva = new MembroAvaliacao
             {
@@ -49,8 +77,19 @@ namespace ProjetoFinal.Services
             return reserva;
         }
 
-        public async Task<bool> CancelReservationAsync(int idMembro, int idAvaliacao)
+
+        public async Task<bool> CancelReservationAsync(int idUser, int idAvaliacao)
         {
+            var user = await _userService.GetUserByIdAsync(
+                idUser,
+                includeMembro: true
+            );
+
+            if (user?.Membro == null)
+                throw new InvalidOperationException("O utilizador não é um membro.");
+
+            var idMembro = user.Membro.IdMembro;
+
             var reserva = await GetReservationByIdAsync(idMembro, idAvaliacao);
 
             if (reserva == null || reserva.Estado != EstadoAvaliacao.Reservado)

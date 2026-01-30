@@ -14,13 +14,19 @@ public class ClassService : IClassService
         _context = context;
     }
 
-    private async Task<Aula?> GetClassByIdAsync(int idAula)
+    private async Task<Aula?> GetClassByIdAsync(int idAula, bool apenasAtivas = true)
     {
-        return await _context.Aulas
+        var query = _context.Aulas
             .Include(a => a.Funcionario)
             .ThenInclude(f => f.User)
-            .FirstOrDefaultAsync(a => a.IdAula == idAula && a.DataDesativacao == null);
+            .AsQueryable();
+
+        if (apenasAtivas)
+            query = query.Where(a => a.DataDesativacao == null);
+
+        return await query.FirstOrDefaultAsync(a => a.IdAula == idAula);
     }
+
 
     public async Task<Aula> CreateAsync(ClassDto dto)
     {
@@ -61,6 +67,7 @@ public class ClassService : IClassService
         var aula = await GetClassByIdAsync(idAula)
             ?? throw new KeyNotFoundException("Aula não encontrada.");
 
+        // Novos valores considerando possíveis nulos
         var novaDia = dto.DiaSemana ?? aula.DiaSemana;
         var novaHoraInicio = dto.HoraInicio ?? aula.HoraInicio;
         var novaHoraFim = dto.HoraFim ?? aula.HoraFim;
@@ -68,6 +75,7 @@ public class ClassService : IClassService
         if (novaHoraInicio >= novaHoraFim)
             throw new InvalidOperationException("Hora inválida.");
 
+        // Checar conflitos de horário com outras aulas
         var conflito = await _context.Aulas
             .Where(a =>
                 a.IdAula != idAula &&
@@ -85,7 +93,7 @@ public class ClassService : IClassService
 
             if (igual && dto.ForceSwap)
             {
-                await SwapClassSlotsAsync(aula.IdAula, conflito.IdAula);
+                await SwapClassSlotsAsync(aula.IdAula, conflito.IdAula, true);
                 return "Swap realizado com sucesso.";
             }
             else
@@ -96,12 +104,19 @@ public class ClassService : IClassService
 
         bool alterado = false;
 
+        // Atualizações normais
         if (aula.DiaSemana != novaDia) { aula.DiaSemana = novaDia; alterado = true; }
         if (aula.HoraInicio != novaHoraInicio) { aula.HoraInicio = novaHoraInicio; alterado = true; }
         if (aula.HoraFim != novaHoraFim) { aula.HoraFim = novaHoraFim; alterado = true; }
         if (!string.IsNullOrWhiteSpace(dto.Nome) && dto.Nome != aula.Nome) { aula.Nome = dto.Nome; alterado = true; }
         if (dto.Capacidade.HasValue && dto.Capacidade.Value != aula.Capacidade) { aula.Capacidade = dto.Capacidade.Value; alterado = true; }
-        if (dto.IdFuncionario.HasValue && dto.IdFuncionario.Value != aula.IdFuncionario) { aula.IdFuncionario = dto.IdFuncionario.Value; alterado = true; }
+
+        // Alteração de PT via AssignPtAsync
+        if (dto.IdFuncionario.HasValue && dto.IdFuncionario.Value != aula.IdFuncionario)
+        {
+            await AssignPtAsync(aula.IdAula, dto.IdFuncionario.Value);
+            alterado = true;
+        }
 
         if (alterado)
         {
@@ -114,43 +129,41 @@ public class ClassService : IClassService
         }
     }
 
+
     // Swap permanece igual
-    public async Task SwapClassSlotsAsync(int idAulaA, int idAulaB)
+    public async Task SwapClassSlotsAsync(int idAulaA, int idAulaB, bool forceSwap = false)
     {
         if (idAulaA == idAulaB)
             throw new InvalidOperationException("Não é possível trocar a mesma aula.");
 
-        await using var transaction =
-            await _context.Database.BeginTransactionAsync();
-
         var aulas = await _context.Aulas
-            .Where(a =>
-                (a.IdAula == idAulaA || a.IdAula == idAulaB) &&
-                a.DataDesativacao == null)
+            .Where(a => (a.IdAula == idAulaA || a.IdAula == idAulaB) && a.DataDesativacao == null)
             .ToListAsync();
 
         if (aulas.Count != 2)
             throw new InvalidOperationException("Aulas inválidas para troca.");
 
-        var aulaA = aulas.First(a => a.IdAula == idAulaA);
-        var aulaB = aulas.First(a => a.IdAula == idAulaB);
-
-        // 🚫 Bloquear se houver aulas marcadas futuras
+        // Checar aulas marcadas futuras
         bool temMarcadasFuturas = await _context.AulasMarcadas.AnyAsync(am =>
             (am.IdAula == idAulaA || am.IdAula == idAulaB) &&
             am.DataAula > DateTime.UtcNow.Date &&
             am.DataDesativacao == null);
 
         if (temMarcadasFuturas)
-            throw new InvalidOperationException(
-                "Não é possível trocar aulas com marcações futuras.");
+            throw new InvalidOperationException("Não é possível trocar aulas com marcações futuras.");
 
-        // Guardar slot A
+        // Se não for forceSwap, impedir troca
+        if (!forceSwap)
+            throw new InvalidOperationException("Swap não autorizado sem forceSwap.");
+
+        var aulaA = aulas.First(a => a.IdAula == idAulaA);
+        var aulaB = aulas.First(a => a.IdAula == idAulaB);
+
+        // Troca
         var diaTmp = aulaA.DiaSemana;
         var inicioTmp = aulaA.HoraInicio;
         var fimTmp = aulaA.HoraFim;
 
-        // Troca completa do slot
         aulaA.DiaSemana = aulaB.DiaSemana;
         aulaA.HoraInicio = aulaB.HoraInicio;
         aulaA.HoraFim = aulaB.HoraFim;
@@ -159,34 +172,51 @@ public class ClassService : IClassService
         aulaB.HoraInicio = inicioTmp;
         aulaB.HoraFim = fimTmp;
 
-        // Validação defensiva final
-        if (aulaA.HoraInicio >= aulaA.HoraFim ||
-            aulaB.HoraInicio >= aulaB.HoraFim)
-            throw new InvalidOperationException("Slot inválido após a troca.");
-
         await _context.SaveChangesAsync();
-        await transaction.CommitAsync();
     }
 
-    public async Task<Aula> AssignPtAsync(int idAula, int idPt)
+    public async Task<ClassDto> AssignPtAsync(int idAula, int idPt)
     {
         var aula = await GetClassByIdAsync(idAula)
             ?? throw new KeyNotFoundException("Aula não encontrada.");
 
-        // Validar se PT existe no sistema
-        var pt = await _context.Funcionarios.FirstOrDefaultAsync(f => f.IdFuncionario == idPt)
-            ?? throw new InvalidOperationException("PT não encontrado.");
+        // Verifica se já está atribuído o mesmo PT
+        if (aula.IdFuncionario == idPt)
+            throw new InvalidOperationException("Este Personal Trainer já está atribuído a esta aula.");
+
+        // Buscar o funcionário
+        var pt = await _context.Funcionarios
+            .FirstOrDefaultAsync(f => f.IdFuncionario == idPt);
+
+        if (pt == null)
+            throw new KeyNotFoundException("Personal Trainer não encontrado.");
+
+        // Validar se é realmente um PT
+        if (pt.Funcao.ToString() != "PT") // ou Enum Funcao.PT
+            throw new InvalidOperationException("O funcionário selecionado não é um Personal Trainer.");
 
         aula.IdFuncionario = idPt;
         await _context.SaveChangesAsync();
 
-        return aula;
+        return new ClassDto
+        {
+            IdFuncionario = aula.IdFuncionario,
+            Nome = aula.Nome,
+            DiaSemana = aula.DiaSemana,
+            HoraInicio = aula.HoraInicio,
+            HoraFim = aula.HoraFim,
+            Capacidade = aula.Capacidade
+
+        };
+
     }
+
+
 
 
     public async Task ChangeActiveStateAsync(int idAula, bool ativo)
     {
-        var aula = await GetClassByIdAsync(idAula)
+        var aula = await GetClassByIdAsync(idAula, false)
             ?? throw new KeyNotFoundException("Aula não encontrada.");
 
         if ((aula.DataDesativacao == null) != ativo)

@@ -67,11 +67,11 @@ namespace ProjetoFinal.Controllers
 
         [Authorize(Policy = "OnlyAdmin")]
         [HttpPatch("swap/{idAulaA}/{idAulaB}")]
-        public async Task<IActionResult> SwapClasses(int idAulaA, int idAulaB)
+        public async Task<IActionResult> SwapClasses(int idAulaA, int idAulaB, [FromQuery] bool forceSwap = false)
         {
             try
             {
-                await _classService.SwapClassSlotsAsync(idAulaA, idAulaB);
+                await _classService.SwapClassSlotsAsync(idAulaA, idAulaB, forceSwap);
                 return Ok(new { message = "Swap realizado com sucesso." });
             }
             catch (InvalidOperationException ex)

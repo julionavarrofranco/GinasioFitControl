@@ -99,4 +99,33 @@ public class ScheduleClassService : IScheduleClassService
         await _context.SaveChangesAsync();
         return "Aula cancelada manualmente pelo PT.";
     }
+
+    public async Task<List<ScheduledClassResponseDto>> ListAvailableAsync()
+    {
+        var hoje = DateTime.UtcNow.Date;
+
+        return await _context.AulasMarcadas
+            .AsNoTracking()
+            .Include(a => a.Aula)
+                .ThenInclude(a => a.Funcionario)
+            .Where(a =>
+                a.DataDesativacao == null &&
+                a.DataAula >= hoje)
+            .OrderBy(a => a.DataAula)
+            .Select(a => new ScheduledClassResponseDto
+            {
+                IdAulaMarcada = a.Id,
+                IdAula = a.IdAula,
+                Nome = a.Aula.Nome,
+                DataAula = a.DataAula,
+                HoraInicio = a.Aula.HoraInicio,
+                HoraFim = a.Aula.HoraFim,
+                Capacidade = a.Aula.Capacidade,
+                ReservasAtuais = a.MembrosAulas
+                    .Count(m => m.Presenca == Presenca.Reservado),
+                NomeInstrutor = a.Aula.Funcionario.Nome
+            })
+            .ToListAsync();
+    }
+
 }

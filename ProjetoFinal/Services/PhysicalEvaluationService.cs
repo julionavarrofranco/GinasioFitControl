@@ -16,11 +16,16 @@ namespace ProjetoFinal.Services
         }
 
 
-        private async Task<AvaliacaoFisica?> GetPhysicalEvaluationByIdAsync(int idAvaliacao)
+        private async Task<AvaliacaoFisica?> GetPhysicalEvaluationByIdAsync(int idAvaliacao, bool apenasAtivas = true)
         {
-            return await _context.AvaliacoesFisicas
-                .FirstOrDefaultAsync(a => a.IdAvaliacao == idAvaliacao && a.DataDesativacao == null);
+            var query = _context.AvaliacoesFisicas.AsQueryable();
+
+            if (apenasAtivas)
+                query = query.Where(a => a.DataDesativacao == null);
+
+            return await query.FirstOrDefaultAsync(a => a.IdAvaliacao == idAvaliacao);
         }
+
 
         public async Task<AvaliacaoFisica> CreatePhysicalEvaluationAsync(PhysicalEvaluationDto request)
         {
@@ -140,7 +145,7 @@ namespace ProjetoFinal.Services
 
         public async Task ChangePhysicalEvaluationActiveStatusAsync(int idAvaliacao, bool ativo)
         {
-            var avaliacao = await GetPhysicalEvaluationByIdAsync(idAvaliacao);
+            var avaliacao = await GetPhysicalEvaluationByIdAsync(idAvaliacao, false);
 
             if (avaliacao == null)
                 throw new KeyNotFoundException("Avaliação física não encontrada.");
