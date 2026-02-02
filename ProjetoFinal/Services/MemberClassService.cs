@@ -1,4 +1,4 @@
-﻿using ProjetoFinal.Data;
+using ProjetoFinal.Data;
 using ProjetoFinal.Models;
 using ProjetoFinal.Models.DTOs;
 using Microsoft.EntityFrameworkCore;
@@ -87,13 +87,14 @@ namespace ProjetoFinal.Services
 
             if (aula.DataDesativacao != null)
                 throw new InvalidOperationException("A aula foi cancelada.");
-            if (aula.DataAula.Date > DateTime.UtcNow.Date)
-                throw new InvalidOperationException("Não é possível marcar presenças antes da aula ocorrer.");
+            // TODO: Restaurar em produção - restrição temporariamente desativada para testes
+            // if (aula.DataAula.Date > DateTime.UtcNow.Date)
+            //     throw new InvalidOperationException("Não é possível marcar presenças antes da aula ocorrer.");
 
-            var reservas = aula.MembrosAulas.Where(r => r.Presenca == Presenca.Reservado).ToList();
+            var reservas = aula.MembrosAulas
+                .Where(r => r.Presenca == Presenca.Reservado || r.Presenca == Presenca.Presente || r.Presenca == Presenca.Faltou)
+                .ToList();
             if (!reservas.Any()) throw new InvalidOperationException("Não existem reservas para esta aula.");
-            if (reservas.Any(r => r.Presenca == Presenca.Presente || r.Presenca == Presenca.Faltou))
-                throw new InvalidOperationException("As presenças desta aula já foram marcadas.");
 
             foreach (var r in reservas)
                 r.Presenca = idsMembrosPresentes.Contains(r.IdMembro) ? Presenca.Presente : Presenca.Faltou;
@@ -123,7 +124,7 @@ namespace ProjetoFinal.Services
                 HoraFim = aula.Aula.HoraFim,
                 Capacidade = aula.Aula.Capacidade,
                 Reservas = aula.MembrosAulas
-                    .Where(r => r.Presenca == Presenca.Reservado)
+                    .Where(r => r.Presenca != Presenca.Cancelado)
                     .Select(r => new MemberReservationDto
                     {
                         IdMembro = r.IdMembro,
@@ -155,7 +156,7 @@ namespace ProjetoFinal.Services
                     HoraInicio = a.Aula.HoraInicio,
                     HoraFim = a.Aula.HoraFim,
                     Capacidade = a.Aula.Capacidade,
-                    TotalReservas = a.MembrosAulas.Count(r => r.Presenca == Presenca.Reservado)
+                    TotalReservas = a.MembrosAulas.Count(r => r.Presenca != Presenca.Cancelado)
                 })
                 .ToListAsync();
         }

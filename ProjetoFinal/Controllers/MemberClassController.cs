@@ -1,5 +1,6 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using ProjetoFinal.Models.DTOs;
 using ProjetoFinal.Services.Interfaces;
 
 namespace ProjetoFinal.Controllers
@@ -22,7 +23,14 @@ namespace ProjetoFinal.Controllers
             try
             {
                 var reserva = await _memberClassService.ReservarAsync(idMembro, idAulaMarcada);
-                return Ok(reserva);
+                var response = new ReserveClassResponseDto
+                {
+                    IdMembro = reserva.IdMembro,
+                    IdAulaMarcada = reserva.IdAulaMarcada,
+                    DataReserva = reserva.DataReserva,
+                    Presenca = reserva.Presenca.ToString()
+                };
+                return Ok(response);
             }
             catch (KeyNotFoundException ex)
             {

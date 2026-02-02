@@ -27,7 +27,13 @@ namespace ProjetoFinal.Controllers
                     return BadRequest(new { message = "Dados da aula marcada inválidos." });
 
                 var aulaMarcada = await _scheduleClassService.CreateAsync(request);
-                return Ok(aulaMarcada);
+                var response = new CreateScheduleClassResponseDto
+                {
+                    Id = aulaMarcada.Id,
+                    IdAula = aulaMarcada.IdAula,
+                    DataAula = aulaMarcada.DataAula
+                };
+                return Ok(response);
             }
             catch (InvalidOperationException ex)
             {

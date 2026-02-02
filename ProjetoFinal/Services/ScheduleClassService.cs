@@ -1,5 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using ProjetoFinal.Data;
+using ProjetoFinal.Helpers;
 using ProjetoFinal.Models;
 using ProjetoFinal.Models.DTOs;
 using ProjetoFinal.Services.Interfaces;
@@ -26,7 +27,10 @@ public class ScheduleClassService : IScheduleClassService
             .FirstOrDefaultAsync(a => a.IdAula == dto.IdAula && a.DataDesativacao == null)
             ?? throw new InvalidOperationException("Aula inválida ou desativada.");
 
-        if (aula.DiaSemana != (DiaSemana)dto.DataAula.DayOfWeek)
+        // Usar apenas Year/Month/Day para evitar problemas de timezone na deserialização JSON
+        var dataCalendar = new DateTime(dto.DataAula.Year, dto.DataAula.Month, dto.DataAula.Day);
+        var diaDaData = DiaSemanaHelper.FromDayOfWeek(dataCalendar.DayOfWeek);
+        if (aula.DiaSemana != diaDaData)
             throw new InvalidOperationException("A data da aula marcada não coincide com o dia da semana da aula.");
 
         if (await _context.AulasMarcadas.AnyAsync(a =>
@@ -62,7 +66,7 @@ public class ScheduleClassService : IScheduleClassService
             foreach (var aula in aulasDoPt)
             {
                 // Verifica se o dia da semana bate
-                if ((DiaSemana)data.DayOfWeek != aula.DiaSemana)
+                if (DiaSemanaHelper.FromDayOfWeek(data.DayOfWeek) != aula.DiaSemana)
                     continue;
 
                 // Verifica se já existe uma aula marcada
