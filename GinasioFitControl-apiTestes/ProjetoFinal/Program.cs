@@ -90,6 +90,9 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("CanManageUsers", policy =>
         policy.RequireClaim("Funcao", "Admin", "Rececao"));
 
+    options.AddPolicy("CanViewMembers", policy =>
+        policy.RequireClaim("Funcao", "Admin", "Rececao", "PT"));
+
     options.AddPolicy("CanManagePayments", policy =>
         policy.RequireClaim("Funcao", "Admin", "Rececao"));
 

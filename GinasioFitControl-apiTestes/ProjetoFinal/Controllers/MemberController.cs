@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using ProjetoFinal.Models;
@@ -18,7 +18,7 @@ namespace ProjetoFinal.Controllers
             _memberService = memberService;
         }
 
-        [Authorize(Policy = "CanManageUsers")]
+        [Authorize(Policy = "CanViewMembers")]
         [HttpGet]
         public async Task<IActionResult> GetAllMembros()
         {

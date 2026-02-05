@@ -135,5 +135,15 @@ namespace ProjetoFinal.Controllers
             var resumo = await _trainingPlanService.GetPlanosResumoAsync(ativo);
             return Ok(resumo);
         }
+
+        [Authorize(Policy = "OnlyPT")]
+        [HttpGet("{idPlano}")]
+        public async Task<IActionResult> GetDetail(int idPlano)
+        {
+            var detalhe = await _trainingPlanService.GetPlanoDetalheAsync(idPlano);
+            if (detalhe == null)
+                return NotFound(new { message = "Plano de treino não encontrado." });
+            return Ok(detalhe);
+        }
     }
 }

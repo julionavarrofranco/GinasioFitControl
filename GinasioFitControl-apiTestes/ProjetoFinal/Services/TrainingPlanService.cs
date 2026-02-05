@@ -152,5 +152,43 @@ namespace ProjetoFinal.Services
                 .ToListAsync();
         }
 
+        public async Task<TrainingPlanDetailDto?> GetPlanoDetalheAsync(int idPlano)
+        {
+            var plano = await _context.Planos
+                .AsNoTracking()
+                .Include(p => p.PlanosExercicios)
+                    .ThenInclude(pe => pe.Exercicio)
+                .Include(p => p.Funcionario)
+                .FirstOrDefaultAsync(p => p.IdPlano == idPlano);
+
+            if (plano == null)
+                return null;
+
+            return new TrainingPlanDetailDto
+            {
+                IdPlano = plano.IdPlano,
+                IdFuncionario = plano.IdFuncionario,
+                Nome = plano.Nome,
+                DataCriacao = plano.DataCriacao,
+                Observacoes = plano.Observacoes,
+                Ativo = plano.DataDesativacao == null,
+                NomeFuncionario = plano.Funcionario?.Nome,
+                Exercicios = plano.PlanosExercicios
+                    .OrderBy(pe => pe.Ordem)
+                    .Select(pe => new TrainingPlanExerciseDto
+                    {
+                        IdExercicio = pe.IdExercicio,
+                        NomeExercicio = pe.Exercicio.Nome,
+                        GrupoMuscular = pe.Exercicio.GrupoMuscular,
+                        Descricao = pe.Exercicio.Descricao ?? "",
+                        FotoUrl = pe.Exercicio.FotoUrl ?? "",
+                        Series = pe.Series,
+                        Repeticoes = pe.Repeticoes,
+                        Carga = pe.Carga,
+                        Ordem = pe.Ordem
+                    })
+                    .ToList()
+            };
+        }
     }
 }

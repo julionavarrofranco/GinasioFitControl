@@ -14,5 +14,6 @@ namespace ProjetoFinal.Services.Interfaces
         Task<List<PlanoTreino>> GetHistoricoPlanosDoMembroAsync(int idMembro);
         Task<List<PlanoTreino>> GetPlanosByEstadoAsync(bool ativo);
         Task<List<TrainingPlanSummaryDto>> GetPlanosResumoAsync(bool? ativo = null);
+        Task<TrainingPlanDetailDto?> GetPlanoDetalheAsync(int idPlano);
     }
 }
