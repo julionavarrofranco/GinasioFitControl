@@ -139,7 +139,7 @@
 
         <!-- Informação -->
         <TextBlock Grid.Row="4"
-                   Text="⚠ A aula deve ter mínimo 1 dia de antecedência e máximo 2 semanas."
+                   Text="⚠ Para testes: pode selecionar datas passadas. Em produção: mínimo 1 dia de antecedência."
                    Foreground="#f39c12"
                    FontSize="11"
                    TextWrapping="Wrap"/>

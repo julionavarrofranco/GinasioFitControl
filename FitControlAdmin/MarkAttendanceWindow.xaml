@@ -115,7 +115,8 @@
         </Grid.RowDefinitions>
 
         <!-- Título -->
-        <TextBlock Grid.Row="0"
+        <TextBlock x:Name="TitleTextBlock"
+                   Grid.Row="0"
                    Text="Marcar Presenças"
                    FontSize="24"
                    FontWeight="Bold"
@@ -186,11 +187,12 @@
                 </Grid.RowDefinitions>
 
                 <Grid Grid.Row="0">
-                    <TextBlock Text="Lista de Membros (marque quem está presente):"
+                    <TextBlock x:Name="MembersListHeader"
+                               Text="Lista de Membros (marque quem está presente):"
                                FontSize="14"
                                FontWeight="SemiBold"
                                Foreground="#e6e6e8"/>
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <StackPanel x:Name="MarcarDesmarcarPanel" Orientation="Horizontal" HorizontalAlignment="Right">
                         <Button Content="Marcar Todos"
                                 Click="SelectAllButton_Click"
                                 Background="Transparent"
@@ -223,7 +225,6 @@
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="Auto"/>
                                         <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
 
                                     <CheckBox Grid.Column="0"
@@ -231,23 +232,12 @@
                                               VerticalAlignment="Center"
                                               Margin="0,0,15,0"/>
 
-                                    <StackPanel Grid.Column="1">
-                                        <TextBlock Text="{Binding NomeMembro}" 
-                                                   FontSize="14"
-                                                   FontWeight="SemiBold"
-                                                   Foreground="#e6e6e8"/>
-                                        <TextBlock Text="{Binding Email}" 
-                                                   FontSize="11"
-                                                   Foreground="#7f8c8d"
-                                                   Margin="0,3,0,0"/>
-                                    </StackPanel>
-
-                                    <TextBlock Grid.Column="2"
-                                               Text="{Binding Presenca}"
-                                               FontSize="11"
-                                               VerticalAlignment="Center"
-                                               Foreground="#95a5a6"
-                                               Margin="10,0,0,0"/>
+                                    <TextBlock Grid.Column="1"
+                                               Text="{Binding NomeMembro}" 
+                                               FontSize="14"
+                                               FontWeight="SemiBold"
+                                               Foreground="#e6e6e8"
+                                               VerticalAlignment="Center"/>
                                 </Grid>
                             </Border>
                         </DataTemplate>
@@ -257,7 +247,8 @@
         </Border>
 
         <!-- Botões de Ação -->
-        <StackPanel Grid.Row="3" 
+        <StackPanel x:Name="ActionButtonsPanel"
+                    Grid.Row="3" 
                     Orientation="Horizontal" 
                     HorizontalAlignment="Right"
                     Margin="0,20,0,0">

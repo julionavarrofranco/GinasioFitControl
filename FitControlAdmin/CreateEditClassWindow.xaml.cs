@@ -114,13 +114,14 @@ namespace FitControlAdmin
             // Map enum to Tag value used in ComboBox
             SelectedDiaSemana = existingClass.DiaSemana switch
             {
+                DiaSemana.Domingo => "Domingo",
                 DiaSemana.Segunda => "Segunda",
                 DiaSemana.Terca => "Terca",
                 DiaSemana.Quarta => "Quarta",
                 DiaSemana.Quinta => "Quinta",
                 DiaSemana.Sexta => "Sexta",
                 DiaSemana.Sabado => "Sabado",
-                DiaSemana.Domingo => "Domingo",
+                
                 _ => "Segunda"
             };
             HoraInicioText = existingClass.HoraInicio.ToString(@"hh\:mm");
@@ -200,13 +201,13 @@ namespace FitControlAdmin
                         Nome = Nome,
                         DiaSemana = SelectedDiaSemana switch
                         {
+                            "Domingo" => DiaSemana.Domingo,
                             "Segunda" => DiaSemana.Segunda,
                             "Terca" => DiaSemana.Terca,
                             "Quarta" => DiaSemana.Quarta,
                             "Quinta" => DiaSemana.Quinta,
                             "Sexta" => DiaSemana.Sexta,
-                            "Sabado" => DiaSemana.Sabado,
-                            "Domingo" => DiaSemana.Domingo,
+                            "Sabado" => DiaSemana.Sabado,                            
                             _ => DiaSemana.Segunda
                         },
                         HoraInicio = TimeSpan.Parse(HoraInicioText),
@@ -236,13 +237,13 @@ namespace FitControlAdmin
                         Nome = Nome,
                         DiaSemana = SelectedDiaSemana switch
                         {
+                            "Domingo" => DiaSemana.Domingo,
                             "Segunda" => DiaSemana.Segunda,
                             "Terca" => DiaSemana.Terca,
                             "Quarta" => DiaSemana.Quarta,
                             "Quinta" => DiaSemana.Quinta,
                             "Sexta" => DiaSemana.Sexta,
-                            "Sabado" => DiaSemana.Sabado,
-                            "Domingo" => DiaSemana.Domingo,
+                            "Sabado" => DiaSemana.Sabado,                            
                             _ => DiaSemana.Segunda
                         },
                         HoraInicio = TimeSpan.Parse(HoraInicioText),

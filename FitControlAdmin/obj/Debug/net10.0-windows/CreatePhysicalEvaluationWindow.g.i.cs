@@ -108,7 +108,7 @@ namespace FitControlAdmin {
                 return;
             }
             _contentLoaded = true;
-            System.Uri resourceLocater = new System.Uri("/FitControlAdmin;V1.0.0.0;component/createphysicalevaluationwindow.xaml", System.UriKind.Relative);
+            System.Uri resourceLocater = new System.Uri("/FitControlAdmin;component/createphysicalevaluationwindow.xaml", System.UriKind.Relative);
             
             #line 1 "..\..\..\CreatePhysicalEvaluationWindow.xaml"
             System.Windows.Application.LoadComponent(this, resourceLocater);

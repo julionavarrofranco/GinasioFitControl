@@ -11,14 +11,26 @@ namespace FitControlAdmin
     {
         private readonly ApiService _apiService;
         private readonly int _idAulaMarcada;
+        private readonly bool _somenteConsulta;
         private ClassAttendanceDto? _attendanceData;
 
-        public MarkAttendanceWindow(ApiService apiService, int idAulaMarcada)
+        public MarkAttendanceWindow(ApiService apiService, int idAulaMarcada, bool somenteConsulta = false)
         {
             InitializeComponent();
             _apiService = apiService;
             _idAulaMarcada = idAulaMarcada;
-            
+            _somenteConsulta = somenteConsulta;
+
+            if (_somenteConsulta)
+            {
+                Title = "Consultar Presenças";
+                TitleTextBlock.Text = "Consultar Presenças";
+                MarcarDesmarcarPanel.Visibility = Visibility.Collapsed;
+                ActionButtonsPanel.Visibility = Visibility.Collapsed;
+                MembersListHeader.Text = "Lista de Membros (quem esteve presente):";
+                MembersListBox.IsEnabled = false;
+            }
+
             LoadAttendanceData();
         }
 

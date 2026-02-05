@@ -1,5 +1,10 @@
+using System.Text.Json.Serialization;
+
 namespace FitControlAdmin.Models
 {
+    /// <summary>
+    /// Ordem deve coincidir com a API (Segunda=0, ..., Domingo=6) para deserialização correta.
+    /// </summary>
     public enum DiaSemana
     {
         Segunda, Terca, Quarta, Quinta, Sexta, Sabado, Domingo
@@ -91,6 +96,7 @@ namespace FitControlAdmin.Models
     public class MemberReservationDto
     {
         public int IdMembro { get; set; }
+        [JsonPropertyName("Nome")]
         public string NomeMembro { get; set; } = null!;
         public string Email { get; set; } = null!;
         public string Telemovel { get; set; } = null!;

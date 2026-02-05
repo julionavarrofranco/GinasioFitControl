@@ -1070,6 +1070,28 @@ namespace FitControlAdmin.Services
         #region Class Management Methods
 
         /// <summary>
+        /// Obtém aulas do PT (templates/blueprints para agendar). GET /api/Class/by-pt/{idFuncionario}
+        /// </summary>
+        public async Task<List<AulaResponseDto>?> GetClassesByPtAsync(int idFuncionario)
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync($"/api/Class/by-pt/{idFuncionario}");
+                if (response.IsSuccessStatusCode)
+                {
+                    var classes = await response.Content.ReadFromJsonAsync<List<AulaResponseDto>>();
+                    return classes ?? new List<AulaResponseDto>();
+                }
+                return null;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"GetClassesByPtAsync: Exception: {ex.Message}");
+                return null;
+            }
+        }
+
+        /// <summary>
         /// Obtém aulas por estado (ativo=true ou false). A API expõe apenas GET /api/Class/by-state?ativo= .
         /// Se a API devolver 500, é provável ser ciclo de serialização (entidade Aula com navegação) — corrigir na API usando DTO.
         /// </summary>

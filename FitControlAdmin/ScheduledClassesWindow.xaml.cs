@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using FitControlAdmin.Helper;
 using FitControlAdmin.Models;
 using FitControlAdmin.Services;
-using FitControlAdmin.Helper;
 
 namespace FitControlAdmin
 {
@@ -131,11 +131,30 @@ namespace FitControlAdmin
                 var dialog = new CreateScheduledClassDialog(ptClasses);
                 if (dialog.ShowDialog() == true)
                 {
+                    var selectedClass = ptClasses.FirstOrDefault(c => c.IdAula == dialog.SelectedClassId);
+                    if (selectedClass == null)
+                    {
+                        MessageBox.Show("Aula não encontrada.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                        return;
+                    }
+
+                    var dataSelecionada = dialog.SelectedDate;
                     var scheduleDto = new ScheduleClassDto
                     {
                         IdAula = dialog.SelectedClassId,
-                        DataAula = dialog.SelectedDate
+                        DataAula = new DateTime(dataSelecionada.Year, dataSelecionada.Month, dataSelecionada.Day, 0, 0, 0, DateTimeKind.Unspecified)
                     };
+
+                    // Validar: o dia da data deve corresponder ao dia da semana da aula
+                    var diaDaData = DiaSemanaHelper.FromDayOfWeek(scheduleDto.DataAula.DayOfWeek);
+                    if (diaDaData != selectedClass.DiaSemana)
+                    {
+                        var nomeDiaAula = selectedClass.DiaSemana.ToString();
+                        var nomeDiaData = diaDaData.ToString();
+                        MessageBox.Show($"A data selecionada ({scheduleDto.DataAula:dd/MM/yyyy}) é {nomeDiaData}, mas a aula '{selectedClass.Nome}' está agendada para {nomeDiaAula}. Por favor, selecione uma data que corresponda ao dia da aula.", "Dia incorreto", 
+                            MessageBoxButton.OK, MessageBoxImage.Warning);
+                        return;
+                    }
 
                     // Validar: mínimo 1 dia de antecedência
                     if (scheduleDto.DataAula.Date <= DateTime.Today)
@@ -163,6 +182,30 @@ namespace FitControlAdmin
                     }
                     else
                     {
+                        // Se foi erro 500/Internal, verificar se a aula foi criada (workaround para API que cria mas falha na resposta)
+                        var isServerError = errorMessage != null && (errorMessage.Contains("Internal", StringComparison.OrdinalIgnoreCase) || errorMessage.Contains("500"));
+                        if (isServerError)
+                        {
+                            var scheduledClasses = await _apiService.GetScheduledClassesByPTAsync(_currentPtId);
+                            var foiCriada = scheduledClasses?.Any(sc => sc.IdAula == scheduleDto.IdAula && sc.DataAula.Date == scheduleDto.DataAula.Date) == true;
+                            if (foiCriada)
+                            {
+                                MessageBox.Show("Aula agendada com sucesso!", "Sucesso", 
+                                    MessageBoxButton.OK, MessageBoxImage.Information);
+                                LoadScheduledClasses();
+                                return;
+                            }
+                        }
+
+                        // Se "já existe aula" - pode ter sido criada na tentativa anterior
+                        if (errorMessage != null && (errorMessage.Contains("já existe", StringComparison.OrdinalIgnoreCase) || errorMessage.Contains("existe aula")))
+                        {
+                            MessageBox.Show($"{errorMessage}\n\nA aula pode ter sido criada numa tentativa anterior. Verifique a lista de aulas agendadas.", "Aviso", 
+                                MessageBoxButton.OK, MessageBoxImage.Information);
+                            LoadScheduledClasses();
+                            return;
+                        }
+
                         MessageBox.Show($"Erro ao agendar aula: {errorMessage}", "Erro", 
                             MessageBoxButton.OK, MessageBoxImage.Error);
                     }

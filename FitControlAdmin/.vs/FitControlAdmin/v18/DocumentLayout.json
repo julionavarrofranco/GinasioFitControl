@@ -3,6 +3,26 @@
   "WorkspaceRootPath": "C:\\Users\\tiago\\OneDrive\\\u00C1rea de Trabalho\\PF\\nova versao\\FitControlAdmin\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{5073CBDB-9D53-959F-5B9F-F991EBB17886}|FitControlAdmin.csproj|c:\\users\\tiago\\onedrive\\\u00E1rea de trabalho\\pf\\nova versao\\fitcontroladmin\\assignplantomemberdialog.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{5073CBDB-9D53-959F-5B9F-F991EBB17886}|FitControlAdmin.csproj|solutionrelative:assignplantomemberdialog.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5073CBDB-9D53-959F-5B9F-F991EBB17886}|FitControlAdmin.csproj|c:\\users\\tiago\\onedrive\\\u00E1rea de trabalho\\pf\\nova versao\\fitcontroladmin\\models\\classmodels.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5073CBDB-9D53-959F-5B9F-F991EBB17886}|FitControlAdmin.csproj|solutionrelative:models\\classmodels.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5073CBDB-9D53-959F-5B9F-F991EBB17886}|FitControlAdmin.csproj|c:\\users\\tiago\\onedrive\\\u00E1rea de trabalho\\pf\\nova versao\\fitcontroladmin\\mainwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5073CBDB-9D53-959F-5B9F-F991EBB17886}|FitControlAdmin.csproj|solutionrelative:mainwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5073CBDB-9D53-959F-5B9F-F991EBB17886}|FitControlAdmin.csproj|c:\\users\\tiago\\onedrive\\\u00E1rea de trabalho\\pf\\nova versao\\fitcontroladmin\\scheduledclasseswindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5073CBDB-9D53-959F-5B9F-F991EBB17886}|FitControlAdmin.csproj|solutionrelative:scheduledclasseswindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5073CBDB-9D53-959F-5B9F-F991EBB17886}|FitControlAdmin.csproj|c:\\users\\tiago\\onedrive\\\u00E1rea de trabalho\\pf\\nova versao\\fitcontroladmin\\createeditclasswindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5073CBDB-9D53-959F-5B9F-F991EBB17886}|FitControlAdmin.csproj|solutionrelative:createeditclasswindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{5073CBDB-9D53-959F-5B9F-F991EBB17886}|FitControlAdmin.csproj|c:\\users\\tiago\\onedrive\\\u00E1rea de trabalho\\pf\\nova versao\\fitcontroladmin\\editsubscriptionwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{5073CBDB-9D53-959F-5B9F-F991EBB17886}|FitControlAdmin.csproj|solutionrelative:editsubscriptionwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
@@ -21,6 +41,10 @@
     {
       "AbsoluteMoniker": "D:0:0:{5073CBDB-9D53-959F-5B9F-F991EBB17886}|FitControlAdmin.csproj|c:\\users\\tiago\\onedrive\\\u00E1rea de trabalho\\pf\\nova versao\\fitcontroladmin\\models\\subscriptionmodels.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{5073CBDB-9D53-959F-5B9F-F991EBB17886}|FitControlAdmin.csproj|solutionrelative:models\\subscriptionmodels.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5073CBDB-9D53-959F-5B9F-F991EBB17886}|FitControlAdmin.csproj|c:\\users\\tiago\\onedrive\\\u00E1rea de trabalho\\pf\\nova versao\\fitcontroladmin\\helper\\diasemanahelper.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5073CBDB-9D53-959F-5B9F-F991EBB17886}|FitControlAdmin.csproj|solutionrelative:helper\\diasemanahelper.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -30,11 +54,85 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 1,
+          "SelectedChildIndex": 0,
           "Children": [
             {
               "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "AssignPlanToMemberDialog.xaml",
+              "DocumentMoniker": "C:\\Users\\tiago\\OneDrive\\\u00C1rea de Trabalho\\PF\\nova versao\\FitControlAdmin\\AssignPlanToMemberDialog.xaml",
+              "RelativeDocumentMoniker": "AssignPlanToMemberDialog.xaml",
+              "ToolTip": "C:\\Users\\tiago\\OneDrive\\\u00C1rea de Trabalho\\PF\\nova versao\\FitControlAdmin\\AssignPlanToMemberDialog.xaml",
+              "RelativeToolTip": "AssignPlanToMemberDialog.xaml",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2026-02-05T22:56:17.773Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "DiaSemanaHelper.cs",
+              "DocumentMoniker": "C:\\Users\\tiago\\OneDrive\\\u00C1rea de Trabalho\\PF\\nova versao\\FitControlAdmin\\Helper\\DiaSemanaHelper.cs",
+              "RelativeDocumentMoniker": "Helper\\DiaSemanaHelper.cs",
+              "ToolTip": "C:\\Users\\tiago\\OneDrive\\\u00C1rea de Trabalho\\PF\\nova versao\\FitControlAdmin\\Helper\\DiaSemanaHelper.cs",
+              "RelativeToolTip": "Helper\\DiaSemanaHelper.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-30T15:16:48.02Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "CreateEditClassWindow.xaml.cs",
+              "DocumentMoniker": "C:\\Users\\tiago\\OneDrive\\\u00C1rea de Trabalho\\PF\\nova versao\\FitControlAdmin\\CreateEditClassWindow.xaml.cs",
+              "RelativeDocumentMoniker": "CreateEditClassWindow.xaml.cs",
+              "ToolTip": "C:\\Users\\tiago\\OneDrive\\\u00C1rea de Trabalho\\PF\\nova versao\\FitControlAdmin\\CreateEditClassWindow.xaml.cs",
+              "RelativeToolTip": "CreateEditClassWindow.xaml.cs",
+              "ViewState": "AgIAAN4AAAAAAAAAAAAhwO8AAAA7AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-30T15:14:54.033Z"
+            },
+            {
+              "$type": "Document",
               "DocumentIndex": 1,
+              "Title": "ClassModels.cs",
+              "DocumentMoniker": "C:\\Users\\tiago\\OneDrive\\\u00C1rea de Trabalho\\PF\\nova versao\\FitControlAdmin\\Models\\ClassModels.cs",
+              "RelativeDocumentMoniker": "Models\\ClassModels.cs",
+              "ToolTip": "C:\\Users\\tiago\\OneDrive\\\u00C1rea de Trabalho\\PF\\nova versao\\FitControlAdmin\\Models\\ClassModels.cs",
+              "RelativeToolTip": "Models\\ClassModels.cs",
+              "ViewState": "AgIAAA4AAAAAAAAAAAAQwAoAAAAFAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-30T14:56:36.31Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "ScheduledClassesWindow.xaml.cs",
+              "DocumentMoniker": "C:\\Users\\tiago\\OneDrive\\\u00C1rea de Trabalho\\PF\\nova versao\\FitControlAdmin\\ScheduledClassesWindow.xaml.cs",
+              "RelativeDocumentMoniker": "ScheduledClassesWindow.xaml.cs",
+              "ToolTip": "C:\\Users\\tiago\\OneDrive\\\u00C1rea de Trabalho\\PF\\nova versao\\FitControlAdmin\\ScheduledClassesWindow.xaml.cs",
+              "RelativeToolTip": "ScheduledClassesWindow.xaml.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAJkAAACLAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-30T14:52:58.367Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "MainWindow.xaml.cs",
+              "DocumentMoniker": "C:\\Users\\tiago\\OneDrive\\\u00C1rea de Trabalho\\PF\\nova versao\\FitControlAdmin\\MainWindow.xaml.cs",
+              "RelativeDocumentMoniker": "MainWindow.xaml.cs",
+              "ToolTip": "C:\\Users\\tiago\\OneDrive\\\u00C1rea de Trabalho\\PF\\nova versao\\FitControlAdmin\\MainWindow.xaml.cs",
+              "RelativeToolTip": "MainWindow.xaml.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAPYAAABVAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-29T16:16:49.787Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
               "Title": "CreateEditExerciseWindow.xaml.cs",
               "DocumentMoniker": "C:\\Users\\tiago\\OneDrive\\\u00C1rea de Trabalho\\PF\\nova versao\\FitControlAdmin\\CreateEditExerciseWindow.xaml.cs",
               "RelativeDocumentMoniker": "CreateEditExerciseWindow.xaml.cs",
@@ -46,20 +144,19 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 5,
               "Title": "EditSubscriptionWindow.xaml.cs",
               "DocumentMoniker": "C:\\Users\\tiago\\OneDrive\\\u00C1rea de Trabalho\\PF\\nova versao\\FitControlAdmin\\EditSubscriptionWindow.xaml.cs",
               "RelativeDocumentMoniker": "EditSubscriptionWindow.xaml.cs",
               "ToolTip": "C:\\Users\\tiago\\OneDrive\\\u00C1rea de Trabalho\\PF\\nova versao\\FitControlAdmin\\EditSubscriptionWindow.xaml.cs",
               "RelativeToolTip": "EditSubscriptionWindow.xaml.cs",
-              "ViewState": "AgIAAG4AAAAAAAAAAAAnwIEAAAASAAAAAAAAAA==",
+              "ViewState": "AgIAAG4AAAAAAAAAAAAnwHYAAAARAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-01-27T17:24:35.94Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-01-27T17:24:35.94Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 7,
               "Title": "EditSubscriptionWindow.xaml",
               "DocumentMoniker": "C:\\Users\\tiago\\OneDrive\\\u00C1rea de Trabalho\\PF\\nova versao\\FitControlAdmin\\EditSubscriptionWindow.xaml",
               "RelativeDocumentMoniker": "EditSubscriptionWindow.xaml",
@@ -70,7 +167,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 9,
               "Title": "SubscriptionModels.cs",
               "DocumentMoniker": "C:\\Users\\tiago\\OneDrive\\\u00C1rea de Trabalho\\PF\\nova versao\\FitControlAdmin\\Models\\SubscriptionModels.cs",
               "RelativeDocumentMoniker": "Models\\SubscriptionModels.cs",
@@ -82,7 +179,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 8,
               "Title": "ExerciseModels.cs",
               "DocumentMoniker": "C:\\Users\\tiago\\OneDrive\\\u00C1rea de Trabalho\\PF\\nova versao\\FitControlAdmin\\Models\\ExerciseModels.cs",
               "RelativeDocumentMoniker": "Models\\ExerciseModels.cs",

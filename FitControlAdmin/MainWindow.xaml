@@ -1,4 +1,5 @@
 <Window x:Class="FitControlAdmin.MainWindow"
+        x:Name="RootWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:local="clr-namespace:FitControlAdmin"
@@ -10,6 +11,7 @@
     <Window.Resources>
         <converters:EnumNameConverter x:Key="EnumNameConverter"/>
         <converters:TimeSpanToStringConverter x:Key="TimeSpanToStringConverter"/>
+        <converters:InverseBoolToVisibilityConverter x:Key="InverseBoolToVisibilityConverter"/>
         
         <Style TargetType="{x:Type Button}" x:Key="SidebarButtonStyle">
             <Setter Property="Background" Value="Transparent"/>
@@ -338,14 +340,6 @@
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="📚 " Foreground="#02acc3" FontSize="14"/>
                             <TextBlock Text="Aulas" Foreground="White" FontSize="14"/>
-                        </StackPanel>
-                    </Button>
-
-                    <!-- Aulas Agendadas (apenas PT) -->
-                    <Button x:Name="BtnAulasAgendadas" Style="{StaticResource SidebarButtonStyle}">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="📅 " Foreground="#02acc3" FontSize="14"/>
-                            <TextBlock Text="Aulas Agendadas" Foreground="White" FontSize="14"/>
                         </StackPanel>
                     </Button>
 
@@ -1928,7 +1922,7 @@
             <!-- Class Management Panel -->
             <ScrollViewer x:Name="ClassManagementPanel" Margin="20,90,20,20" VerticalAlignment="Top" Visibility="Collapsed" VerticalScrollBarVisibility="Auto">
                 <StackPanel>
-                    <TextBlock Text="Gestão de Aulas"
+                    <TextBlock x:Name="ClassManagementTitle" Text="Gestão de Aulas"
                                FontSize="24"
                                FontWeight="Bold"
                                Foreground="#e6e6e8"
@@ -2043,7 +2037,8 @@
                                                             Foreground="White"
                                                             BorderThickness="0"
                                                             Cursor="Hand"
-                                                            FontSize="12">
+                                                            FontSize="12"
+                                                            Visibility="{Binding IsPtClassView, ElementName=RootWindow, Converter={StaticResource InverseBoolToVisibilityConverter}}">
                                                         <Button.Style>
                                                             <Style TargetType="Button">
                                                                 <Setter Property="Background" Value="#02acc3"/>
@@ -2085,7 +2080,8 @@
                                                             Foreground="White"
                                                             BorderThickness="0"
                                                             Cursor="Hand"
-                                                            FontSize="12">
+                                                            FontSize="12"
+                                                            Visibility="{Binding IsPtClassView, ElementName=RootWindow, Converter={StaticResource InverseBoolToVisibilityConverter}}">
                                                         <Button.Style>
                                                             <Style TargetType="Button">
                                                                 <Setter Property="Background" Value="#e74c3c"/>
@@ -2124,15 +2120,58 @@
                                 <DataGrid.Columns>
                                     <DataGridTextColumn Header="Data" Binding="{Binding DataAula, StringFormat=dd/MM/yyyy}" Width="100"/>
                                     <DataGridTextColumn Header="Aula" Binding="{Binding NomeAula}" Width="200"/>
-                                    <DataGridTextColumn Header="Hora Início" Binding="{Binding HoraInicio, StringFormat=HH\\:mm}" Width="100"/>
-                                    <DataGridTextColumn Header="Hora Fim" Binding="{Binding HoraFim, StringFormat=HH\\:mm}" Width="100"/>
+                                    <DataGridTextColumn Header="Hora Início" Binding="{Binding HoraInicio, Converter={StaticResource TimeSpanToStringConverter}}" Width="100"/>
+                                    <DataGridTextColumn Header="Hora Fim" Binding="{Binding HoraFim, Converter={StaticResource TimeSpanToStringConverter}}" Width="100"/>
                                     <DataGridTextColumn Header="Capacidade" Binding="{Binding Capacidade}" Width="100"/>
                                     <DataGridTextColumn Header="Reservas" Binding="{Binding TotalReservas}" Width="80"/>
                                     <DataGridTemplateColumn Header="Ações" Width="150">
                                         <DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate>
-                                                <Button Content="Marcar Presença"
+                                                <Button Content="Marcar Presenças"
                                                         Click="MarkClassAttendanceButton_Click"
+                                                        Tag="{Binding IdAulaMarcada}"
+                                                        Padding="8,4"
+                                                        Margin="2"
+                                                        Background="#f39c12"
+                                                        Foreground="White"
+                                                        BorderThickness="0"
+                                                        Cursor="Hand"
+                                                        FontSize="12"/>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </ScrollViewer>
+                    </Border>
+
+                    <!-- Aulas Terminadas Section -->
+                    <TextBlock Text="Aulas Terminadas"
+                               FontSize="20"
+                               FontWeight="Bold"
+                               Foreground="#e6e6e8"
+                               Margin="0,20,0,15"/>
+
+                    <Border Background="#272936" CornerRadius="10" Padding="20" Margin="0,0,0,30">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+                            <DataGrid x:Name="FinishedClassesDataGrid"
+                                      AutoGenerateColumns="False"
+                                      IsReadOnly="True"
+                                      SelectionMode="Single"
+                                      GridLinesVisibility="All"
+                                      HeadersVisibility="Column">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Data" Binding="{Binding DataAula, StringFormat=dd/MM/yyyy}" Width="100"/>
+                                    <DataGridTextColumn Header="Aula" Binding="{Binding NomeAula}" Width="200"/>
+                                    <DataGridTextColumn Header="Hora Início" Binding="{Binding HoraInicio, Converter={StaticResource TimeSpanToStringConverter}}" Width="100"/>
+                                    <DataGridTextColumn Header="Hora Fim" Binding="{Binding HoraFim, Converter={StaticResource TimeSpanToStringConverter}}" Width="100"/>
+                                    <DataGridTextColumn Header="Capacidade" Binding="{Binding Capacidade}" Width="100"/>
+                                    <DataGridTextColumn Header="Reservas" Binding="{Binding TotalReservas}" Width="80"/>
+                                    <DataGridTemplateColumn Header="Ações" Width="150">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <Button Content="Consultar Presenças"
+                                                        Click="ViewClassAttendanceButton_Click"
                                                         Tag="{Binding IdAulaMarcada}"
                                                         Padding="8,4"
                                                         Margin="2"
@@ -2289,6 +2328,43 @@
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </Border>
+
+                    <!-- Tabela de membros e planos -->
+                    <TextBlock Text="Membros e planos atuais"
+                               FontSize="16"
+                               FontWeight="Bold"
+                               Foreground="#e6e6e8"
+                               Margin="0,20,0,10"/>
+                    <Border Background="#272936" CornerRadius="10" Padding="20" Margin="0,0,0,20">
+                        <DataGrid x:Name="MembersWithPlansDataGrid"
+                                  AutoGenerateColumns="False"
+                                  IsReadOnly="True"
+                                  SelectionMode="Single"
+                                  GridLinesVisibility="Horizontal"
+                                  HeadersVisibility="Column"
+                                  Background="#1f2937"
+                                  Foreground="#e6e6e8"
+                                  RowBackground="#1f2937"
+                                  AlternatingRowBackground="#252f3f"
+                                  BorderThickness="0"
+                                  CanUserAddRows="False"
+                                  CanUserDeleteRows="False"
+                                  MinHeight="150">
+                            <DataGrid.Resources>
+                                <Style TargetType="DataGridCell">
+                                    <Setter Property="Foreground" Value="#e6e6e8"/>
+                                </Style>
+                                <Style TargetType="DataGridColumnHeader">
+                                    <Setter Property="Background" Value="#e6e6e8"/>
+                                    <Setter Property="Foreground" Value="Black"/>
+                                </Style>
+                            </DataGrid.Resources>
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Membro" Binding="{Binding Nome}" Width="*"/>
+                                <DataGridTextColumn Header="Plano atual" Binding="{Binding PlanoTreino}" Width="*"/>
                             </DataGrid.Columns>
                         </DataGrid>
                     </Border>

@@ -1,3 +1,4 @@
+using FitControlAdmin.Helper;
 using FitControlAdmin.Models;
 using FitControlAdmin.Services;
 using System;
@@ -98,12 +99,6 @@ namespace FitControlAdmin
             {
                 HighlightActiveButton(BtnAulas);
                 ShowClassManagement();
-            };
-
-            BtnAulasAgendadas.Click += (s, e) =>
-            {
-                HighlightActiveButton(BtnAulasAgendadas);
-                OpenScheduledClassesWindow();
             };
 
             BtnExercicios.Click += (s, e) =>
@@ -310,26 +305,19 @@ namespace FitControlAdmin
             LoadPhysicalEvaluations();
         }
 
+        /// <summary>
+        /// True quando o utilizador é PT - esconde Editar/Eliminar, mostra apenas Agendar (templates).
+        /// </summary>
+        public bool IsPtClassView { get; set; }
+
         private void ShowClassManagement()
         {
             HideAllPanels();
+            IsPtClassView = string.Equals(_userFuncao, "PT", StringComparison.OrdinalIgnoreCase);
+            CreateClassButton.Visibility = IsPtClassView ? Visibility.Collapsed : Visibility.Visible;
+            ClassManagementTitle.Text = IsPtClassView ? "Aulas - Agendar" : "Gestão de Aulas";
             ClassManagementPanel.Visibility = Visibility.Visible;
             LoadClasses();
-        }
-
-        private void OpenScheduledClassesWindow()
-        {
-            try
-            {
-                var scheduledClassesWindow = new ScheduledClassesWindow(_apiService);
-                scheduledClassesWindow.Owner = this;
-                scheduledClassesWindow.ShowDialog();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Erro ao abrir janela de aulas agendadas: {ex.Message}", "Erro", 
-                    MessageBoxButton.OK, MessageBoxImage.Error);
-            }
         }
 
         private void ShowTrainingPlans()
@@ -782,13 +770,11 @@ namespace FitControlAdmin
             {
                 BtnAvaliacoesFisicas.Visibility = Visibility.Visible;
                 BtnPlanosTreino.Visibility = Visibility.Visible;
-                BtnAulasAgendadas.Visibility = Visibility.Visible;
             }
             else
             {
                 BtnAvaliacoesFisicas.Visibility = Visibility.Collapsed;
                 BtnPlanosTreino.Visibility = Visibility.Collapsed;
-                BtnAulasAgendadas.Visibility = Visibility.Collapsed;
             }
             BtnConfig.Visibility = Visibility.Visible;
 
@@ -819,7 +805,6 @@ namespace FitControlAdmin
                     BtnPagamentos.Visibility = Visibility.Collapsed;
                     BtnAvaliacoesFisicas.Visibility = Visibility.Visible;
                     BtnPlanosTreino.Visibility = Visibility.Visible;
-                    BtnAulasAgendadas.Visibility = Visibility.Visible;
                     BtnConfig.Visibility = Visibility.Visible;
                 }
             }
@@ -1856,15 +1841,18 @@ namespace FitControlAdmin
             try
             {
                 var reservations = await _apiService.GetClassReservationsAsync();
-                
-                if (reservations != null)
-                {
-                    ClassReservationsDataGrid.ItemsSource = reservations;
-                }
-                else
-                {
-                    ClassReservationsDataGrid.ItemsSource = new List<ClassReservationSummaryDto>();
-                }
+                var today = DateTime.Today;
+                var upcoming = reservations?
+                    .Where(r => r.DataAula.Date >= today)
+                    .OrderBy(r => r.DataAula)
+                    .ToList() ?? new List<ClassReservationSummaryDto>();
+                var finished = reservations?
+                    .Where(r => r.DataAula.Date < today)
+                    .OrderByDescending(r => r.DataAula)
+                    .ToList() ?? new List<ClassReservationSummaryDto>();
+
+                ClassReservationsDataGrid.ItemsSource = upcoming;
+                FinishedClassesDataGrid.ItemsSource = finished;
             }
             catch (Exception ex)
             {
@@ -1878,30 +1866,52 @@ namespace FitControlAdmin
             ClassStatusText.Text = "A carregar aulas...";
             try
             {
-                // Carregar apenas aulas ativas e reservas em paralelo
-                var classesTask = _apiService.GetClassesByStateAsync(ativo: true);
-                var reservationsTask = _apiService.GetClassReservationsAsync();
+                List<AulaResponseDto>? classes = null;
+                List<ClassReservationSummaryDto>? reservations = null;
 
-                await Task.WhenAll(classesTask, reservationsTask);
-
-                var classes = await classesTask;
-                var reservations = await reservationsTask;
+                if (IsPtClassView)
+                {
+                    // PT: carregar apenas as suas aulas (templates) e as suas aulas agendadas
+                    var currentUser = await _apiService.GetCurrentUserAsync();
+                    var idFuncionario = currentUser?.IdFuncionario ?? 0;
+                    if (idFuncionario <= 0)
+                    {
+                        ClassStatusText.Text = "Erro: Não foi possível identificar o PT.";
+                        ClassesDataGrid.ItemsSource = new List<AulaResponseDto>();
+                        ClassReservationsDataGrid.ItemsSource = new List<ClassReservationSummaryDto>();
+                        FinishedClassesDataGrid.ItemsSource = new List<ClassReservationSummaryDto>();
+                        return;
+                    }
+                    classes = await _apiService.GetClassesByPtAsync(idFuncionario);
+                    var ptScheduled = await _apiService.GetScheduledClassesByPTAsync(idFuncionario);
+                    // Converter AulaMarcadaResponseDto para ClassReservationSummaryDto
+                    reservations = ptScheduled?.Select(s => new ClassReservationSummaryDto
+                    {
+                        IdAulaMarcada = s.IdAulaMarcada,
+                        DataAula = s.DataAula,
+                        NomeAula = s.NomeAula,
+                        HoraInicio = s.HoraInicio,
+                        HoraFim = s.HoraFim,
+                        Capacidade = s.Capacidade,
+                        TotalReservas = s.TotalReservas
+                    }).ToList() ?? new List<ClassReservationSummaryDto>();
+                }
+                else
+                {
+                    // Admin: carregar todas as aulas ativas e reservas
+                    var classesTask = _apiService.GetClassesByStateAsync(ativo: true);
+                    var reservationsTask = _apiService.GetClassReservationsAsync();
+                    await Task.WhenAll(classesTask, reservationsTask);
+                    classes = await classesTask;
+                    reservations = await reservationsTask;
+                }
 
                 System.Diagnostics.Debug.WriteLine($"LoadClasses: Retrieved {classes?.Count ?? 0} classes and {reservations?.Count ?? 0} reservations");
-
-                // Debug: Log each class
-                if (classes != null)
-                {
-                    foreach (var aula in classes)
-                    {
-                        System.Diagnostics.Debug.WriteLine($"LoadClasses: Class - ID: {aula.IdAula}, Nome: {aula.Nome}, Dia: {aula.DiaSemana}");
-                    }
-                }
 
                 // Preencher tabela de aulas
                 if (classes != null)
                 {
-                    _allClasses = classes.ToList(); // Guardar cópia para filtro
+                    _allClasses = classes.ToList();
                     ClassesDataGrid.ItemsSource = _allClasses;
                 }
                 else
@@ -1910,20 +1920,25 @@ namespace FitControlAdmin
                     ClassesDataGrid.ItemsSource = _allClasses;
                 }
 
-                // Preencher tabela de reservas de aulas
-                if (reservations != null)
-                {
-                    ClassReservationsDataGrid.ItemsSource = reservations;
-                }
-                else
-                {
-                    ClassReservationsDataGrid.ItemsSource = new List<ClassReservationSummaryDto>();
-                }
+                // Preencher tabela de reservas/aulas agendadas (futuras e em curso)
+                var today = DateTime.Today;
+                var upcomingReservations = reservations?
+                    .Where(r => r.DataAula.Date >= today)
+                    .OrderBy(r => r.DataAula)
+                    .ToList() ?? new List<ClassReservationSummaryDto>();
+                var finishedReservations = reservations?
+                    .Where(r => r.DataAula.Date < today)
+                    .OrderByDescending(r => r.DataAula)
+                    .ToList() ?? new List<ClassReservationSummaryDto>();
 
-                ClassStatusText.Text = $"Aulas: {classes?.Count ?? 0} | Reservas: {reservations?.Count ?? 0}";
+                ClassReservationsDataGrid.ItemsSource = upcomingReservations;
+                FinishedClassesDataGrid.ItemsSource = finishedReservations;
 
-                // Show user-friendly message about API issue
-                if ((classes?.Count ?? 0) == 0)
+                ClassStatusText.Text = IsPtClassView
+                    ? $"As suas aulas (templates): {classes?.Count ?? 0} | Agendadas: {upcomingReservations.Count} | Terminadas: {finishedReservations.Count}"
+                    : $"Aulas: {classes?.Count ?? 0} | Agendadas: {upcomingReservations.Count} | Terminadas: {finishedReservations.Count}";
+
+                if ((classes?.Count ?? 0) == 0 && !IsPtClassView)
                 {
                     ClassStatusText.Text += " ⚠️ API: Endpoint GET '/api/Class' não implementado";
                 }
@@ -2012,19 +2027,33 @@ namespace FitControlAdmin
                     
                     if (dialog.ShowDialog() == true)
                     {
+                        // Usar DateTimeKind.Unspecified para evitar conversão de timezone no JSON
+                        var dataSelecionada = dialog.SelectedDate;
                         var scheduleDto = new ScheduleClassDto
                         {
                             IdAula = dialog.SelectedClassId,
-                            DataAula = dialog.SelectedDate
+                            DataAula = new DateTime(dataSelecionada.Year, dataSelecionada.Month, dataSelecionada.Day, 0, 0, 0, DateTimeKind.Unspecified)
                         };
 
-                        // Validar: mínimo 1 dia de antecedência
-                        if (scheduleDto.DataAula.Date <= DateTime.Today)
+                        // Validar: o dia da data deve corresponder ao dia da semana da aula
+                        var diaDaData = DiaSemanaHelper.FromDayOfWeek(scheduleDto.DataAula.DayOfWeek);
+                        if (diaDaData != selectedClass.DiaSemana)
                         {
-                            MessageBox.Show("A aula deve ser agendada com pelo menos 1 dia de antecedência.", "Aviso", 
+                            var nomeDiaAula = selectedClass.DiaSemana.ToString();
+                            var nomeDiaData = diaDaData.ToString();
+                            MessageBox.Show($"A data selecionada ({scheduleDto.DataAula:dd/MM/yyyy}) é {nomeDiaData}, mas a aula '{selectedClass.Nome}' está agendada para {nomeDiaAula}. Por favor, selecione uma data que corresponda ao dia da aula.", "Dia incorreto", 
                                 MessageBoxButton.OK, MessageBoxImage.Warning);
                             return;
                         }
+
+                        // TODO: Restaurar em produção - restrição desativada para permitir testar "Aulas terminadas"
+                        // Validar: mínimo 1 dia de antecedência
+                        // if (scheduleDto.DataAula.Date <= DateTime.Today)
+                        // {
+                        //     MessageBox.Show("A aula deve ser agendada com pelo menos 1 dia de antecedência.", "Aviso", 
+                        //         MessageBoxButton.OK, MessageBoxImage.Warning);
+                        //     return;
+                        // }
 
                         // Validar: máximo 2 semanas
                         if (scheduleDto.DataAula.Date > DateTime.Today.AddDays(14))
@@ -2045,6 +2074,31 @@ namespace FitControlAdmin
                         }
                         else
                         {
+                            // Se foi erro 500/Internal, verificar se a aula foi criada (workaround para API que cria mas falha na resposta)
+                            var idFuncionario = selectedClass.IdFuncionario ?? 0;
+                            var isServerError = errorMessage != null && (errorMessage.Contains("Internal", StringComparison.OrdinalIgnoreCase) || errorMessage.Contains("500"));
+                            if (isServerError && idFuncionario > 0)
+                            {
+                                var scheduledClasses = await _apiService.GetScheduledClassesByPTAsync(idFuncionario);
+                                var foiCriada = scheduledClasses?.Any(sc => sc.IdAula == scheduleDto.IdAula && sc.DataAula.Date == scheduleDto.DataAula.Date) == true;
+                                if (foiCriada)
+                                {
+                                    MessageBox.Show($"Aula '{selectedClass.Nome}' agendada com sucesso para {scheduleDto.DataAula:dd/MM/yyyy}!", 
+                                        "Sucesso", 
+                                        MessageBoxButton.OK, 
+                                        MessageBoxImage.Information);
+                                    return;
+                                }
+                            }
+
+                            // Se "já existe aula" - pode ter sido criada na tentativa anterior
+                            if (errorMessage != null && (errorMessage.Contains("já existe", StringComparison.OrdinalIgnoreCase) || errorMessage.Contains("existe aula")))
+                            {
+                                MessageBox.Show($"{errorMessage}\n\nA aula pode ter sido criada numa tentativa anterior. Verifique a lista de aulas agendadas.", "Aviso", 
+                                    MessageBoxButton.OK, MessageBoxImage.Information);
+                                return;
+                            }
+
                             MessageBox.Show($"Erro ao agendar aula: {errorMessage}", "Erro", 
                                 MessageBoxButton.OK, MessageBoxImage.Error);
                         }
@@ -2097,13 +2151,28 @@ namespace FitControlAdmin
             {
                 try
                 {
-                    // Abrir janela de marcar presenças
-                    var attendanceWindow = new MarkAttendanceWindow(_apiService, idAulaMarcada);
+                    var attendanceWindow = new MarkAttendanceWindow(_apiService, idAulaMarcada, somenteConsulta: false);
                     attendanceWindow.Owner = this;
                     attendanceWindow.ShowDialog();
-                    
-                    // Recarregar reservas após marcar presenças
-                    LoadClassReservations();
+                    LoadClasses();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Erro ao abrir janela de presenças: {ex.Message}", "Erro", 
+                        MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+        }
+
+        private void ViewClassAttendanceButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button button && button.Tag is int idAulaMarcada)
+            {
+                try
+                {
+                    var attendanceWindow = new MarkAttendanceWindow(_apiService, idAulaMarcada, somenteConsulta: true);
+                    attendanceWindow.Owner = this;
+                    attendanceWindow.ShowDialog();
                 }
                 catch (Exception ex)
                 {
@@ -2225,6 +2294,9 @@ namespace FitControlAdmin
 
                 TrainingPlansDataGrid.ItemsSource = all;
                 TrainingPlanStatusText.Text = $"Planos: {all.Count} (ativos: {active?.Count ?? 0})";
+
+                var members = await _apiService.GetAllMembersAsync();
+                MembersWithPlansDataGrid.ItemsSource = members ?? new List<MemberDto>();
             }
             catch (Exception ex)
             {

@@ -30,8 +30,8 @@ namespace FitControlAdmin
                 InfoTextBlock.Visibility = Visibility.Collapsed;
             }
             
-            // Definir data mínima (amanhã) e máxima (2 semanas)
-            DatePicker.DisplayDateStart = DateTime.Today.AddDays(1);
+            // Definir data mínima e máxima (permite datas passadas para testar "Aulas terminadas")
+            DatePicker.DisplayDateStart = DateTime.Today.AddDays(-30);
             DatePicker.DisplayDateEnd = DateTime.Today.AddDays(14);
             DatePicker.SelectedDate = DateTime.Today.AddDays(1);
         }
