@@ -25,7 +25,8 @@ namespace ProjetoFinal.Services
 
         public async Task<MembroAula> ReservarAsync(int idMembro, int idAulaMarcada)
         {
-            await using var transaction = await _context.Database.BeginTransactionAsync(System.Data.IsolationLevel.RepeatableRead);
+            await using var transaction = await _context.Database
+                .BeginTransactionAsync(System.Data.IsolationLevel.Serializable);
 
             var aula = await _context.AulasMarcadas
                 .Include(a => a.Aula)
@@ -42,12 +43,29 @@ namespace ProjetoFinal.Services
             if (diasAntecedencia > 15)
                 throw new InvalidOperationException("Não é possível reservar com mais de 15 dias de antecedência.");
 
-            if (aula.MembrosAulas.Any(m => m.IdMembro == idMembro && m.Presenca == Presenca.Reservado))
+            bool jaReservado = await _context.MembrosAulas
+                .AnyAsync(m =>
+                    m.IdMembro == idMembro &&
+                    m.IdAulaMarcada == idAulaMarcada &&
+                    m.Presenca == Presenca.Reservado);
+
+            if (jaReservado)
                 throw new InvalidOperationException("O membro já possui reserva nesta aula.");
-            if (aula.MembrosAulas.Count(m => m.Presenca == Presenca.Reservado) >= aula.Aula.Capacidade)
+
+            int reservasAtuais = await _context.MembrosAulas
+                .Where(m => m.IdAulaMarcada == idAulaMarcada && m.Presenca == Presenca.Reservado)
+                .CountAsync();
+
+            if (reservasAtuais >= aula.Aula.Capacidade)
                 throw new InvalidOperationException("Aula cheia.");
 
-            var reserva = new MembroAula { IdMembro = idMembro, IdAulaMarcada = idAulaMarcada, DataReserva = DateTime.UtcNow, Presenca = Presenca.Reservado };
+            var reserva = new MembroAula
+            {
+                IdMembro = idMembro,
+                IdAulaMarcada = idAulaMarcada,
+                DataReserva = DateTime.UtcNow,
+                Presenca = Presenca.Reservado
+            };
 
             _context.MembrosAulas.Add(reserva);
             await _context.SaveChangesAsync();
@@ -56,18 +74,34 @@ namespace ProjetoFinal.Services
             return reserva;
         }
 
+
+
         public async Task<string> CancelarReservaAsync(int idMembro, int idAulaMarcada)
         {
-            var reserva = await GetReservationAsync(idMembro, idAulaMarcada)
+            await using var transaction = await _context.Database
+                .BeginTransactionAsync(System.Data.IsolationLevel.Serializable);
+
+            var reserva = await _context.MembrosAulas
+                .FirstOrDefaultAsync(m => m.IdMembro == idMembro && m.IdAulaMarcada == idAulaMarcada)
                 ?? throw new KeyNotFoundException("Reserva não encontrada.");
+
+            await _context.Entry(reserva)
+                .Reference(r => r.AulaMarcada)
+                .LoadAsync();
 
             if (reserva.AulaMarcada.DataAula.Date <= DateTime.UtcNow.Date)
                 throw new InvalidOperationException("Não é possível cancelar com menos de 1 dia de antecedência.");
 
             reserva.Presenca = Presenca.Cancelado;
+
             await _context.SaveChangesAsync();
+            await transaction.CommitAsync();
+
             return "Reserva cancelada com sucesso.";
         }
+
+
+
 
         public async Task<List<MembroAula>> ListarReservasDoMembroAsync(int idMembro) =>
             await _context.MembrosAulas
@@ -87,14 +121,17 @@ namespace ProjetoFinal.Services
 
             if (aula.DataDesativacao != null)
                 throw new InvalidOperationException("A aula foi cancelada.");
-            // TODO: Restaurar em produção - restrição temporariamente desativada para testes
-            // if (aula.DataAula.Date > DateTime.UtcNow.Date)
-            //     throw new InvalidOperationException("Não é possível marcar presenças antes da aula ocorrer.");
+
+            //para testes desativada esta validação, produção deve manter
+            //if (aula.DataAula.Date > DateTime.UtcNow.Date)
+            //    throw new InvalidOperationException("Não é possível marcar presenças antes da aula ocorrer.");
 
             var reservas = aula.MembrosAulas
                 .Where(r => r.Presenca == Presenca.Reservado || r.Presenca == Presenca.Presente || r.Presenca == Presenca.Faltou)
                 .ToList();
-            if (!reservas.Any()) throw new InvalidOperationException("Não existem reservas para esta aula.");
+
+            if (!reservas.Any())
+                throw new InvalidOperationException("Não existem reservas para esta aula.");
 
             foreach (var r in reservas)
                 r.Presenca = idsMembrosPresentes.Contains(r.IdMembro) ? Presenca.Presente : Presenca.Faltou;
@@ -102,6 +139,7 @@ namespace ProjetoFinal.Services
             await _context.SaveChangesAsync();
             return "Presenças marcadas com sucesso.";
         }
+
 
 
         public async Task<ClassAttendanceDto> ObterAulaParaPresencaAsync(int idAulaMarcada)

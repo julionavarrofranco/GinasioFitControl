@@ -17,7 +17,5 @@
         public Funcionario Funcionario { get; set; } = null!;
 
         public ICollection<PlanoExercicio> PlanosExercicios { get; set; } = new List<PlanoExercicio>();
-
-        public ICollection<Membro> Membros { get; set; } = new List<Membro>();
     }
 }

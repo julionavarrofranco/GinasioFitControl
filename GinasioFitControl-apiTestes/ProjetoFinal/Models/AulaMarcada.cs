@@ -6,6 +6,8 @@
 
         public int IdAula { get; set; }
 
+        public int Sala { get; set; }
+
         public DateTime DataAula { get; set; }
 
         public DateTime? DataDesativacao { get; set; }

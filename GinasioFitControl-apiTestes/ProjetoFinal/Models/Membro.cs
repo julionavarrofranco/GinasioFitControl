@@ -24,8 +24,6 @@
 
         public PlanoTreino? PlanoTreino { get; set; }
 
-        public ICollection<PlanoTreino> Planos { get; set; } = new List<PlanoTreino>();
-
         public ICollection<MembroAula> MembroAulas { get; set; } = new List<MembroAula>();
 
         public ICollection<AvaliacaoFisica> AvaliacoesFisicas { get; set; } = new List<AvaliacaoFisica>();

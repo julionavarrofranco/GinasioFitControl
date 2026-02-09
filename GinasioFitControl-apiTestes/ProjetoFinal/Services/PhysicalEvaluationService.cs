@@ -199,12 +199,28 @@ namespace ProjetoFinal.Services
                 .ToListAsync();
         }
 
-        public async Task<AvaliacaoFisica?> GetLatestEvaluationFromMemberAsync(int idMembro)
+        public async Task<MemberPhysicalEvaluationDto?> GetLatestEvaluationFromMemberAsync(int idMembro)
         {
-            return await _context.AvaliacoesFisicas
+            var avaliacao = await _context.AvaliacoesFisicas
+                .Include(a => a.Funcionario) // traz o personal trainer
                 .Where(a => a.IdMembro == idMembro && a.DataDesativacao == null)
                 .OrderByDescending(a => a.DataAvaliacao)
                 .FirstOrDefaultAsync();
+
+            if (avaliacao == null) return null;
+
+            return new MemberPhysicalEvaluationDto
+            {
+                DataAvaliacao = avaliacao.DataAvaliacao,
+                Peso = avaliacao.Peso,
+                Altura = avaliacao.Altura,
+                Imc = avaliacao.Imc,
+                MassaMuscular = avaliacao.MassaMuscular,
+                MassaGorda = avaliacao.MassaGorda,
+                Observacoes = avaliacao.Observacoes,
+                Avaliador = avaliacao.Funcionario?.Nome ?? "Desconhecido"
+            };
         }
+
     }
 }

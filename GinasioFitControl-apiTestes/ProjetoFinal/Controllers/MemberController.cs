@@ -122,26 +122,5 @@ namespace ProjetoFinal.Controllers
             }
         }
 
-        [Authorize(Policy = "OnlyMembers")]
-        [HttpGet("{idMembro}/evaluations")]
-        public async Task<IActionResult> GetMemberEvaluations(int idMembro)
-        {
-            var result = await _memberService.GetMemberEvaluationsAsync(idMembro);
-            return Ok(result);
-        }
-
-        [Authorize(Policy = "OnlyMembers")]
-        [HttpGet("{idMembro}/training-plan")]
-        public async Task<IActionResult> GetMemberTrainingPlan(int idMembro)
-        {
-            var result = await _memberService.GetMemberTrainingPlanAsync(idMembro);
-
-            if (result == null)
-                return NotFound(new { message = "O membro não tem plano de treino associado." });
-
-            return Ok(result);
-        }
-
-
     }
 }

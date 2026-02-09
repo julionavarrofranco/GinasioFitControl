@@ -5,6 +5,7 @@ using ProjetoFinal.Models;
 using ProjetoFinal.Models.DTOs;
 using ProjetoFinal.Services;
 using ProjetoFinal.Services.Interfaces;
+using System.Security.Claims;
 
 namespace ProjetoFinal.Controllers
 {
@@ -98,26 +99,20 @@ namespace ProjetoFinal.Controllers
         }
 
         [Authorize]
-        [HttpGet("current/{idMembro}")]
-        public async Task<IActionResult> GetCurrentPlan(int idMembro)
-        {
-            var plano = await _trainingPlanService.GetPlanoAtualDoMembroAsync(idMembro);
-            return Ok(plano);
-        }
-
-        [Authorize(Policy = "OnlyPT")]
-        [HttpGet("history/{idMembro}")]
-        public async Task<IActionResult> GetHistory(int idMembro)
+        [HttpGet("current")]
+        public async Task<IActionResult> GetCurrentPlan()
         {
             try
             {
-                var planos = await _trainingPlanService.GetHistoricoPlanosDoMembroAsync(idMembro);
-                return Ok(planos);
+                var idUser = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+                var plano = await _trainingPlanService.GetPlanoAtualDoMembroAsync(idUser);
+                return Ok(plano);
             }
             catch (Exception)
             {
                 return StatusCode(500, new { message = "Erro interno do servidor." });
             }
+
         }
 
         [Authorize(Policy = "OnlyPT")]

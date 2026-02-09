@@ -16,7 +16,5 @@ namespace ProjetoFinal.Services.Interfaces
        Task<string> UpdateMemberAsync(int idMembro, UpdateMemberDto request);
        Task<MemberProfileDto> GetMemberProfileAsync(int idMembro);
 
-       Task<MemberPhysicalEvaluationDto?> GetMemberEvaluationsAsync(int idMembro);
-       Task<MemberTrainingPlanDto?> GetMemberTrainingPlanAsync(int idMembro);
     }
 }

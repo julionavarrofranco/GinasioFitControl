@@ -88,7 +88,7 @@ namespace ProjetoFinal.Data
                       .OnDelete(DeleteBehavior.Restrict);
 
                 entity.HasOne(m => m.PlanoTreino)
-                      .WithMany(p => p.Membros)
+                      .WithMany()
                       .HasForeignKey(m => m.IdPlanoTreino)
                       .OnDelete(DeleteBehavior.Restrict);
             });
@@ -223,6 +223,7 @@ namespace ProjetoFinal.Data
                 entity.ToTable("aulas_marcadas");
                 entity.HasKey(am => am.Id);
                 entity.Property(am => am.DataAula).HasColumnType("date").IsRequired();
+                entity.Property(am => am.Sala).IsRequired();
                 entity.Property(am => am.DataDesativacao);
 
                 entity.HasOne(am => am.Aula)

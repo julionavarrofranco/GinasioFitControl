@@ -10,6 +10,6 @@ namespace ProjetoFinal.Services.Interfaces
         Task ChangePhysicalEvaluationActiveStatusAsync(int idAvaliacao, bool ativo);
         Task<List<PhysicalEvaluationHistoryDto>> GetAllEvaluationsAsync();
         Task<List<AvaliacaoFisica>> GetAllEvaluationsFromMemberAsync(int idMembro);
-        Task<AvaliacaoFisica?> GetLatestEvaluationFromMemberAsync(int idMembro);
+        Task<MemberPhysicalEvaluationDto?> GetLatestEvaluationFromMemberAsync(int idMembro);
     }
 }

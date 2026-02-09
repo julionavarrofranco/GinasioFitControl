@@ -13,6 +13,7 @@
         public TimeSpan HoraFim { get; set; }
 
         public int Capacidade { get; set; }
+        public int Sala { get; set; }
         public int ReservasAtuais { get; set; }
 
         public string? NomeInstrutor { get; set; }

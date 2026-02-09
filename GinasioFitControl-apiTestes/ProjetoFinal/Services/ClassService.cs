@@ -37,14 +37,15 @@ public class ClassService : IClassService
             throw new InvalidOperationException("Hora inválida.");
 
         bool conflitoExiste = await _context.Aulas
-            .AnyAsync(a =>
-                a.DataDesativacao == null &&
-                a.DiaSemana == dto.DiaSemana &&
-                a.HoraInicio < dto.HoraFim &&
-                a.HoraFim > dto.HoraInicio);
+        .AnyAsync(a =>
+            a.DataDesativacao == null &&
+            a.IdFuncionario == dto.IdFuncionario &&
+            a.DiaSemana == dto.DiaSemana &&
+            a.HoraInicio < dto.HoraFim &&
+            a.HoraFim > dto.HoraInicio);
 
         if (conflitoExiste)
-            throw new InvalidOperationException("Já existe uma aula neste horário.");
+            throw new InvalidOperationException("O PT já tem uma aula neste horário.");
 
         var aula = new Aula
         {
@@ -75,15 +76,20 @@ public class ClassService : IClassService
         if (novaHoraInicio >= novaHoraFim)
             throw new InvalidOperationException("Hora inválida.");
 
-        // Checar conflitos de horário com outras aulas
+        // Novo PT a checar
+        var ptParaChecar = dto.IdFuncionario ?? aula.IdFuncionario;
+
         var conflito = await _context.Aulas
             .Where(a =>
                 a.IdAula != idAula &&
                 a.DataDesativacao == null &&
+                a.IdFuncionario == ptParaChecar && // ✅ usa o PT correto
                 a.DiaSemana == novaDia &&
                 a.HoraInicio < novaHoraFim &&
                 a.HoraFim > novaHoraInicio)
             .FirstOrDefaultAsync();
+
+
 
         if (conflito != null)
         {
@@ -192,7 +198,7 @@ public class ClassService : IClassService
             throw new KeyNotFoundException("Personal Trainer não encontrado.");
 
         // Validar se é realmente um PT
-        if (pt.Funcao.ToString() != "PT") // ou Enum Funcao.PT
+        if (pt.Funcao != Funcao.PT) // ou Enum Funcao.PT
             throw new InvalidOperationException("O funcionário selecionado não é um Personal Trainer.");
 
         aula.IdFuncionario = idPt;
@@ -224,12 +230,6 @@ public class ClassService : IClassService
             aula.DataDesativacao = ativo ? null : DateTime.UtcNow;
             await _context.SaveChangesAsync();
         }
-    }
-
-    public async Task<Aula> GetByIdAsync(int idAula)
-    {
-        return await GetClassByIdAsync(idAula)
-            ?? throw new KeyNotFoundException("Aula não encontrada.");
     }
 
     public async Task<List<ClassResponseDto>> ListByStateAsync(bool ativo)

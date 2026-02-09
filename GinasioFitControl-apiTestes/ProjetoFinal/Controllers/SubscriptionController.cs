@@ -82,7 +82,6 @@ namespace ProjetoFinal.Controllers
             }
         }
 
-        [Authorize(Policy = "CanViewSubscriptions")]
         [HttpGet("by-state")]
         public async Task<IActionResult> GetSubscriptionsByState([FromQuery] bool ativo, [FromQuery] bool ordenarNomeAsc = true, [FromQuery] bool? ordenarPrecoAsc = null)
         {

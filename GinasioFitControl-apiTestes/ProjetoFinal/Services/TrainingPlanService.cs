@@ -9,10 +9,12 @@ namespace ProjetoFinal.Services
     public class TrainingPlanService: ITrainingPlanService
     {
         private readonly GinasioDbContext _context;
+        private readonly IUserService _userService;
 
-        public TrainingPlanService(GinasioDbContext context)
+        public TrainingPlanService(GinasioDbContext context, IUserService userService)
         {
             _context = context;
+            _userService = userService;
         }
 
         private async Task<PlanoTreino> GetPlanoAsync(int idPlano)
@@ -102,23 +104,33 @@ namespace ProjetoFinal.Services
             await _context.SaveChangesAsync();
         }
 
-        public async Task<PlanoTreino?> GetPlanoAtualDoMembroAsync(int idMembro)
+        public async Task<TrainingPlanDetailDto?> GetPlanoAtualDoMembroAsync(int idUser)
         {
-            return await _context.Membros
-                .Where(m => m.IdMembro == idMembro && m.IdPlanoTreino != null)
-                .Select(m => m.PlanoTreino!)
-                .Include(p => p.PlanosExercicios)
-                    .ThenInclude(pe => pe.Exercicio)
+            var user = await _userService.GetUserByIdAsync(
+               idUser,
+               includeMembro: true
+           );
+
+
+            if (user?.Membro == null)
+                throw new InvalidOperationException("O utilizador não é um membro.");
+
+            var idMembro = user.Membro.IdMembro;
+
+            var idPlanoAtual = await _context.Membros
+                .Where(m => m.IdMembro == idMembro)
+                .Select(m => m.IdPlanoTreino)
                 .FirstOrDefaultAsync();
-        }
 
+            if (idPlanoAtual == null)
+                return null;
 
-        public async Task<List<PlanoTreino>> GetHistoricoPlanosDoMembroAsync(int idMembro)
-        {
-            return await _context.Planos
-                .Where(p => p.Membros.Any(m => m.IdMembro == idMembro))
-                .OrderByDescending(p => p.DataCriacao)
-                .ToListAsync();
+            var plano = await GetPlanoDetalheAsync(idPlanoAtual.Value);
+
+            if (plano != null && !plano.Ativo)
+                return null;
+
+            return plano;
         }
 
         public async Task<List<PlanoTreino>> GetPlanosByEstadoAsync(bool ativo)
@@ -174,12 +186,12 @@ namespace ProjetoFinal.Services
                 Ativo = plano.DataDesativacao == null,
                 NomeFuncionario = plano.Funcionario?.Nome,
                 Exercicios = plano.PlanosExercicios
-                    .OrderBy(pe => pe.Ordem)
+                    .OrderBy(pe => pe.Ordem) // garante a ordem correta
                     .Select(pe => new TrainingPlanExerciseDto
                     {
                         IdExercicio = pe.IdExercicio,
                         NomeExercicio = pe.Exercicio.Nome,
-                        GrupoMuscular = pe.Exercicio.GrupoMuscular,
+                        GrupoMuscular = pe.Exercicio.GrupoMuscular.ToString(), // converte enum para string
                         Descricao = pe.Exercicio.Descricao ?? "",
                         FotoUrl = pe.Exercicio.FotoUrl ?? "",
                         Series = pe.Series,
@@ -190,5 +202,6 @@ namespace ProjetoFinal.Services
                     .ToList()
             };
         }
+
     }
 }

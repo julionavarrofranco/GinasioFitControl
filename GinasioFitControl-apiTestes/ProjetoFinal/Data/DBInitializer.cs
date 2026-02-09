@@ -185,53 +185,144 @@ public static class DbInitializer
         }
 
         // =============================
-        // AULAS + AULAS MARCADAS
+        // AULAS BASE (TEMPLATES)
         // =============================
         if (!context.Aulas.Any())
         {
-            var aula = new Aula
+            var ptJoao = await context.Funcionarios.FirstAsync(f => f.Nome == "PT João");
+            var ptMaria = await context.Funcionarios.FirstAsync(f => f.Nome == "PT Maria");
+
+            var aulasSeed = new[]
             {
-                Nome = "Yoga",
-                DiaSemana = DiaSemana.Segunda,
-                HoraInicio = new TimeSpan(18, 0, 0),
-                HoraFim = new TimeSpan(19, 0, 0),
-                Capacidade = 15,
-                IdFuncionario = ptPrincipal.IdFuncionario
-            };
+        new Aula
+        {
+            Nome = "Yoga",
+            DiaSemana = DiaSemana.Segunda,
+            HoraInicio = new TimeSpan(18, 0, 0),
+            HoraFim = new TimeSpan(19, 0, 0),
+            Capacidade = 15,
+            IdFuncionario = ptJoao.IdFuncionario
+        },
+        new Aula
+        {
+            Nome = "Pilates",
+            DiaSemana = DiaSemana.Terca,
+            HoraInicio = new TimeSpan(19, 0, 0),
+            HoraFim = new TimeSpan(20, 0, 0),
+            Capacidade = 12,
+            IdFuncionario = ptMaria.IdFuncionario
+        },
+        new Aula
+        {
+            Nome = "Crossfit",
+            DiaSemana = DiaSemana.Quarta,
+            HoraInicio = new TimeSpan(18, 30, 0),
+            HoraFim = new TimeSpan(19, 30, 0),
+            Capacidade = 10,
+            IdFuncionario = ptJoao.IdFuncionario
+        },
+        new Aula
+        {
+            Nome = "Zumba",
+            DiaSemana = DiaSemana.Quinta,
+            HoraInicio = new TimeSpan(17, 30, 0),
+            HoraFim = new TimeSpan(18, 30, 0),
+            Capacidade = 20,
+            IdFuncionario = ptMaria.IdFuncionario
+        }
+    };
 
-            context.Aulas.Add(aula);
-            await context.SaveChangesAsync();
-
-            context.AulasMarcadas.AddRange(
-                new AulaMarcada { IdAula = aula.IdAula, DataAula = DateTime.UtcNow.AddDays(-7) },
-                new AulaMarcada { IdAula = aula.IdAula, DataAula = DateTime.UtcNow },
-                new AulaMarcada { IdAula = aula.IdAula, DataAula = DateTime.UtcNow.AddDays(7) }
-            );
+            foreach (var aula in aulasSeed)
+            {
+                if (!await context.Aulas.AnyAsync(a => a.Nome == aula.Nome && a.DiaSemana == aula.DiaSemana))
+                    context.Aulas.Add(aula);
+            }
 
             await context.SaveChangesAsync();
         }
 
         // =============================
-        // RESERVA AULA
+        // AULAS MARCADAS
+        // =============================
+        if (!context.AulasMarcadas.Any())
+        {
+            var aulas = await context.Aulas.ToListAsync();
+            var hoje = DateTime.UtcNow.Date;
+
+            var marcadasSeed = new List<AulaMarcada>();
+
+            foreach (var aula in aulas)
+            {
+                // Datas: semana passada, hoje, +7 dias
+                marcadasSeed.Add(new AulaMarcada
+                {
+                    IdAula = aula.IdAula,
+                    DataAula = hoje.AddDays(-7),
+                    Sala = 1
+                });
+                marcadasSeed.Add(new AulaMarcada
+                {
+                    IdAula = aula.IdAula,
+                    DataAula = hoje,
+                    Sala = 2
+                });
+                marcadasSeed.Add(new AulaMarcada
+                {
+                    IdAula = aula.IdAula,
+                    DataAula = hoje.AddDays(7),
+                    Sala = 3
+                });
+            }
+
+            foreach (var marcada in marcadasSeed)
+            {
+                bool exists = await context.AulasMarcadas.AnyAsync(a =>
+                    a.IdAula == marcada.IdAula && a.DataAula == marcada.DataAula);
+                if (!exists)
+                    context.AulasMarcadas.Add(marcada);
+            }
+
+            await context.SaveChangesAsync();
+        }
+
+        // =============================
+        // RESERVAS DE AULAS - MEMBROS
         // =============================
         if (!context.MembrosAulas.Any())
         {
-            var aulaMarcada = context.AulasMarcadas
-                .OrderBy(a => a.DataAula)
-                .First();
+            var membro = await context.Membros.FirstAsync();
+            var aulasMarcadas = await context.AulasMarcadas.OrderBy(a => a.DataAula).ToListAsync();
 
-            context.MembrosAulas.Add(
-                new MembroAula
+            var reservas = new[]
+            {
+        new MembroAula
+        {
+            IdMembro = membro.IdMembro,
+            IdAulaMarcada = aulasMarcadas[0].Id,
+            DataReserva = DateTime.UtcNow.AddDays(-8),
+            Presenca = Presenca.Presente
+        },
+        new MembroAula
+        {
+            IdMembro = membro.IdMembro,
+            IdAulaMarcada = aulasMarcadas[1].Id,
+            DataReserva = DateTime.UtcNow,
+            Presenca = Presenca.Reservado
+        }
+    };
+
+            foreach (var r in reservas)
+            {
+                if (!await context.MembrosAulas.AnyAsync(ma =>
+                    ma.IdMembro == r.IdMembro && ma.IdAulaMarcada == r.IdAulaMarcada))
                 {
-                    IdMembro = membroAtivo.IdMembro,
-                    IdAulaMarcada = aulaMarcada.Id,
-                    DataReserva = DateTime.UtcNow.AddDays(-8),
-                    Presenca = Presenca.Presente
+                    context.MembrosAulas.Add(r);
                 }
-            );
+            }
 
             await context.SaveChangesAsync();
         }
+
 
         // =============================
         // AVALIAÇÃO FÍSICA

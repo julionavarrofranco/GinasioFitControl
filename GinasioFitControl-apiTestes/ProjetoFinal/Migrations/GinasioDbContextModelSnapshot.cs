@@ -79,6 +79,9 @@ namespace ProjetoFinal.Migrations
                     b.Property<int>("IdAula")
                         .HasColumnType("int");
 
+                    b.Property<int>("Sala")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.HasIndex("IdAula");
@@ -424,9 +427,6 @@ namespace ProjetoFinal.Migrations
                     b.Property<int>("IdFuncionario")
                         .HasColumnType("int");
 
-                    b.Property<int?>("MembroIdMembro")
-                        .HasColumnType("int");
-
                     b.Property<string>("Nome")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -438,8 +438,6 @@ namespace ProjetoFinal.Migrations
                     b.HasKey("IdPlano");
 
                     b.HasIndex("IdFuncionario");
-
-                    b.HasIndex("MembroIdMembro");
 
                     b.HasIndex("Nome")
                         .IsUnique();
@@ -621,7 +619,7 @@ namespace ProjetoFinal.Migrations
             modelBuilder.Entity("ProjetoFinal.Models.Membro", b =>
                 {
                     b.HasOne("ProjetoFinal.Models.PlanoTreino", "PlanoTreino")
-                        .WithMany("Membros")
+                        .WithMany()
                         .HasForeignKey("IdPlanoTreino")
                         .OnDelete(DeleteBehavior.Restrict);
 
@@ -733,10 +731,6 @@ namespace ProjetoFinal.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("ProjetoFinal.Models.Membro", null)
-                        .WithMany("Planos")
-                        .HasForeignKey("MembroIdMembro");
-
                     b.Navigation("Funcionario");
                 });
 
@@ -786,14 +780,10 @@ namespace ProjetoFinal.Migrations
                     b.Navigation("MembroAvaliacoes");
 
                     b.Navigation("Pagamentos");
-
-                    b.Navigation("Planos");
                 });
 
             modelBuilder.Entity("ProjetoFinal.Models.PlanoTreino", b =>
                 {
-                    b.Navigation("Membros");
-
                     b.Navigation("PlanosExercicios");
                 });
 

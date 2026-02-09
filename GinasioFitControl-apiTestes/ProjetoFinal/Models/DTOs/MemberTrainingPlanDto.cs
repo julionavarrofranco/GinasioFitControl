@@ -13,7 +13,7 @@ namespace ProjetoFinal.Models.DTOs
     {
         public int IdExercicio { get; set; }
         public string NomeExercicio { get; set; } = null!;
-        public GrupoMuscular GrupoMuscular { get; set; }
+        public string GrupoMuscular { get; set; } = null!;
         public string Descricao { get; set; } = null!;
         public string FotoUrl { get; set; } = null!;
         public int Series { get; set; }
