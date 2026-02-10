@@ -11,6 +11,7 @@ namespace ProjetoFinal.Controllers
     {
         private readonly IMemberClassService _memberClassService;
 
+
         public MemberClassController(IMemberClassService memberClassService)
         {
             _memberClassService = memberClassService;

@@ -209,15 +209,26 @@ namespace ProjetoFinal.Services
                 .ToListAsync();
         }
 
-        public async Task<MembroAvaliacao?> GetActiveReservationByMemberAsync(int idMembro)
+        public async Task<PhysicalReservationDto?> GetActiveReservationByMemberAsync(int idMembro)
         {
             return await _context.MembrosAvaliacoes
                 .AsNoTracking()
-                .FirstOrDefaultAsync(r =>
+                .Where(r =>
                     r.IdMembro == idMembro &&
                     r.Estado == EstadoAvaliacao.Reservado &&
-                    r.DataDesativacao == null);
+                    r.DataDesativacao == null)
+                .Select(r => new PhysicalReservationDto
+                {
+                    IdMembroAvaliacao = r.IdMembroAvaliacao,
+                    IdMembro = r.IdMembro,
+                    IdAvaliacaoFisica = r.IdAvaliacaoFisica,
+                    DataReserva = r.DataReserva,
+                    Estado = r.Estado,   // conversão enum → string
+                    DataCancelamento = r.DataCancelamento
+                })
+                .FirstOrDefaultAsync();
         }
+
 
     }
 }

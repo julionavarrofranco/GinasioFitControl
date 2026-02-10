@@ -11,10 +11,12 @@ namespace ProjetoFinal.Controllers
     public class ClassController : ControllerBase
     {
         private readonly IClassService _classService;
+        private readonly IMemberClassService _memberClassService;
 
-        public ClassController(IClassService classService)
+        public ClassController(IClassService classService, IMemberClassService memberClassService)
         {
             _classService = classService;
+            _memberClassService = memberClassService;
         }
 
         [Authorize(Policy = "OnlyAdmin")]
@@ -124,6 +126,21 @@ namespace ProjetoFinal.Controllers
             catch
             {
                 return StatusCode(500, new { message = "Erro interno do servidor." });
+            }
+        }
+
+        [Authorize(Policy = "CanViewClasses")]
+        [HttpGet("reservations")]
+        public async Task<IActionResult> GetReservations()
+        {
+            try
+            {
+                var list = await _memberClassService.ListarTodasReservasAsync();
+                return Ok(list);
+            }
+            catch
+            {
+                return StatusCode(500, new { message = "Erro ao obter reservas." });
             }
         }
 

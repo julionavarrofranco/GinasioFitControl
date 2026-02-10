@@ -177,6 +177,27 @@ namespace ProjetoFinal.Services
             return dto;
         }
 
+        // Listar todas as reservas de aulas (para admin: agendadas + terminadas)
+        public async Task<List<ClassReservationSummaryDto>> ListarTodasReservasAsync()
+        {
+            return await _context.AulasMarcadas
+                .AsNoTracking()
+                .Include(a => a.Aula)
+                .Where(a => a.DataDesativacao == null)
+                .OrderBy(a => a.DataAula)
+                .Select(a => new ClassReservationSummaryDto
+                {
+                    IdAulaMarcada = a.Id,
+                    DataAula = a.DataAula,
+                    Sala = a.Sala,
+                    NomeAula = a.Aula.Nome,
+                    HoraInicio = a.Aula.HoraInicio,
+                    HoraFim = a.Aula.HoraFim,
+                    Capacidade = a.Aula.Capacidade,
+                    TotalReservas = a.MembrosAulas.Count(r => r.Presenca != Presenca.Cancelado)
+                })
+                .ToListAsync();
+        }
 
         // Listar todas as reservas de aulas que um PT vai dar
         public async Task<List<ClassReservationSummaryDto>> ListarReservasPorPtAsync(int idFuncionario)
@@ -191,6 +212,7 @@ namespace ProjetoFinal.Services
                     IdAulaMarcada = a.Id,
                     DataAula = a.DataAula,
                     NomeAula = a.Aula.Nome,
+                    Sala = a.Sala,
                     HoraInicio = a.Aula.HoraInicio,
                     HoraFim = a.Aula.HoraFim,
                     Capacidade = a.Aula.Capacidade,

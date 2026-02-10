@@ -10,6 +10,7 @@ namespace ProjetoFinal.Services.Interfaces
         Task<List<MembroAula>> ListarReservasDoMembroAsync(int idMembro);
         Task<string> MarcarPresencasAsync(int idAulaMarcada, List<int> idsMembrosPresentes);
         Task<ClassAttendanceDto> ObterAulaParaPresencaAsync(int idAulaMarcada);
+        Task<List<ClassReservationSummaryDto>> ListarTodasReservasAsync();
         Task<List<ClassReservationSummaryDto>> ListarReservasPorPtAsync(int idFuncionario);
     }
 }

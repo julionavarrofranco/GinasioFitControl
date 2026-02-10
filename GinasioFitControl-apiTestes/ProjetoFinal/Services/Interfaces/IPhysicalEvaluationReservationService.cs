@@ -11,6 +11,6 @@ namespace ProjetoFinal.Services.Interfaces
         Task<bool> MarkAttendanceAsync(int idMembro, int idAvaliacao, MarkAttendanceDto request);
         Task<List<MemberEvaluationReservationSummaryDto>> GetReservationsAsync();
         Task<List<MemberEvaluationReservationSummaryDto>> GetCompletedReservationsAsync();
-        Task<MembroAvaliacao?> GetActiveReservationByMemberAsync(int idMembro);
+        Task<PhysicalReservationDto?> GetActiveReservationByMemberAsync(int idMembro);
     }
 }
