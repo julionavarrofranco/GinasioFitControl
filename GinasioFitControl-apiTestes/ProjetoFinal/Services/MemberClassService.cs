@@ -103,14 +103,35 @@ namespace ProjetoFinal.Services
 
 
 
-        public async Task<List<MembroAula>> ListarReservasDoMembroAsync(int idMembro) =>
-            await _context.MembrosAulas
+        public async Task<List<ClassReservationDto>> ListarReservasDoMembroAsync(int idMembro)
+        {
+            var reservas = await _context.MembrosAulas
                 .AsNoTracking()
                 .Include(r => r.AulaMarcada)
-                .ThenInclude(a => a.Aula)
+                    .ThenInclude(a => a.Aula)
+                .Include(r => r.Membro)
                 .Where(r => r.IdMembro == idMembro && r.Presenca == Presenca.Reservado)
-                .OrderBy(r => r.AulaMarcada.DataAula)
+                .OrderBy(r => r.AulaMarcada != null ? r.AulaMarcada.DataAula : DateTime.MinValue)
+                .Select(r => new ClassReservationDto
+                {
+                    IdMembro = r.IdMembro,
+                    IdAulaMarcada = r.IdAulaMarcada,
+                    NomeAula = (r.AulaMarcada != null && r.AulaMarcada.Aula != null) ? r.AulaMarcada.Aula.Nome : string.Empty,
+                    NomeMembro = r.Membro != null ? r.Membro.Nome : string.Empty,
+                    Instrutor = (r.AulaMarcada != null && r.AulaMarcada.Aula != null) ? r.AulaMarcada.Aula.Funcionario.Nome : string.Empty,
+                    DataAula = r.AulaMarcada != null ? r.AulaMarcada.DataAula : DateTime.MinValue,
+                    HoraInicio = (r.AulaMarcada != null && r.AulaMarcada.Aula != null) ? r.AulaMarcada.Aula.HoraInicio : TimeSpan.MinValue,
+                    HoraFim = (r.AulaMarcada != null && r.AulaMarcada.Aula != null) ? r.AulaMarcada.Aula.HoraFim : TimeSpan.MinValue,
+
+                    DataReserva = r.DataReserva,
+                    Sala = r.AulaMarcada != null ? r.AulaMarcada.Sala : 0
+                })
                 .ToListAsync();
+
+            return reservas;
+        }
+
+
 
         public async Task<string> MarcarPresencasAsync(int idAulaMarcada, List<int> idsMembrosPresentes)
         {

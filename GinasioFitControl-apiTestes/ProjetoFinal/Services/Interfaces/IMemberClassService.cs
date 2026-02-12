@@ -7,7 +7,7 @@ namespace ProjetoFinal.Services.Interfaces
     {
         Task<MembroAula> ReservarAsync(int idMembro, int idAulaMarcada);
         Task<string> CancelarReservaAsync(int idMembro, int idAulaMarcada);
-        Task<List<MembroAula>> ListarReservasDoMembroAsync(int idMembro);
+        Task<List<ClassReservationDto>> ListarReservasDoMembroAsync(int idMembro);
         Task<string> MarcarPresencasAsync(int idAulaMarcada, List<int> idsMembrosPresentes);
         Task<ClassAttendanceDto> ObterAulaParaPresencaAsync(int idAulaMarcada);
         Task<List<ClassReservationSummaryDto>> ListarTodasReservasAsync();
