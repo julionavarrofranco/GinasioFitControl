@@ -190,7 +190,6 @@ namespace ProjetoFinal.Services
                 .AsNoTracking()
                 .Include(r => r.Membro)
                 .Include(r => r.AvaliacaoFisica)
-                .Where(r => r.Estado == EstadoAvaliacao.Presente && r.IdAvaliacaoFisica == null)
                 .OrderByDescending(r => r.DataReserva)
                 .Select(r => new MemberEvaluationReservationSummaryDto
                 {
