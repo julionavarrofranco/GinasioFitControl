@@ -43,22 +43,30 @@ namespace ProjetoFinal.Services
             if (diasAntecedencia > 15)
                 throw new InvalidOperationException("Não é possível reservar com mais de 15 dias de antecedência.");
 
-            bool jaReservado = await _context.MembrosAulas
-                .AnyAsync(m =>
-                    m.IdMembro == idMembro &&
-                    m.IdAulaMarcada == idAulaMarcada &&
-                    m.Presenca == Presenca.Reservado);
+            // Procura reserva existente
+            var reservaExistente = aula.MembrosAulas
+                .FirstOrDefault(r => r.IdMembro == idMembro);
 
-            if (jaReservado)
-                throw new InvalidOperationException("O membro já possui reserva nesta aula.");
+            if (reservaExistente != null)
+            {
+                if (reservaExistente.Presenca == Presenca.Reservado)
+                    throw new InvalidOperationException("O membro já possui reserva nesta aula.");
 
-            int reservasAtuais = await _context.MembrosAulas
-                .Where(m => m.IdAulaMarcada == idAulaMarcada && m.Presenca == Presenca.Reservado)
-                .CountAsync();
+                // Se estava cancelado, volta para reservado
+                reservaExistente.Presenca = Presenca.Reservado;
+                reservaExistente.DataReserva = DateTime.UtcNow;
 
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+                return reservaExistente;
+            }
+
+            // Verifica se a aula está cheia
+            int reservasAtuais = aula.MembrosAulas.Count(m => m.Presenca == Presenca.Reservado);
             if (reservasAtuais >= aula.Aula.Capacidade)
                 throw new InvalidOperationException("Aula cheia.");
 
+            // Cria nova reserva
             var reserva = new MembroAula
             {
                 IdMembro = idMembro,
@@ -73,6 +81,7 @@ namespace ProjetoFinal.Services
 
             return reserva;
         }
+
 
 
 
