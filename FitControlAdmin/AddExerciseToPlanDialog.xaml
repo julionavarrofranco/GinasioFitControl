@@ -4,7 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        Title="Adicionar Exercício ao Plano" Height="420" Width="450"
+        Title="Adicionar Exercício ao Plano" Height="520" Width="480"
         WindowStartupLocation="CenterOwner"
         Background="#313443"
         Foreground="#e6e6e8"
@@ -69,7 +69,8 @@
             <TextBlock Text="Exercício:"/>
             <ComboBox x:Name="ExerciseComboBox"
                       DisplayMemberPath="Nome"
-                      SelectedValuePath="IdExercicio"/>
+                      SelectedValuePath="IdExercicio"
+                      ItemContainerStyle="{StaticResource DefaultComboBoxItemStyle}"/>
         </StackPanel>
 
         <StackPanel Grid.Row="2">
@@ -92,7 +93,7 @@
             <TextBox x:Name="OrdemTextBox" Text=""/>
         </StackPanel>
 
-        <StackPanel Grid.Row="9" Orientation="Horizontal" HorizontalAlignment="Right">
+        <StackPanel Grid.Row="9" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,15">
             <Button Content="Cancelar" Style="{StaticResource BtnSecondary}" Click="CancelButton_Click" Margin="0,0,10,0"/>
             <Button x:Name="AddButton" Content="Adicionar" Style="{StaticResource BtnPrimary}" Click="AddButton_Click"/>
         </StackPanel>

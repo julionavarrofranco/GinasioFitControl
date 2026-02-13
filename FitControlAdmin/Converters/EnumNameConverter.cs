@@ -16,7 +16,11 @@ namespace FitControlAdmin.Converters
             // Casos especiais
             if (enumName == "MBWay") return "MBWay";
             if (enumName == "Bracos") return "Braços";
-            
+            // Função (evitar "P T" e mostrar "Receção")
+            if (enumName == "Rececao") return "Receção";
+            if (enumName == "PT") return "PT";
+            if (enumName == "Admin") return "Admin";
+
             // Dias da semana
             if (enumName == "Segunda") return "Segunda";
             if (enumName == "Terca") return "Terça";

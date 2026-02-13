@@ -10,6 +10,11 @@ namespace FitControlAdmin
         private readonly ApiService _apiService;
         private readonly EmployeeDisplayDto? _existing;
 
+        /// <summary>Após guardar em modo edição, IdUser do funcionário editado (para o pai atualizar a lista).</summary>
+        public int? SavedIdUser { get; private set; }
+        /// <summary>Após guardar em modo edição, novo estado Ativo (para o pai atualizar a lista).</summary>
+        public bool? SavedAtivo { get; private set; }
+
         public CreateFuncionarioWindow(ApiService apiService, EmployeeDisplayDto? existing = null)
         {
             InitializeComponent();
@@ -23,7 +28,7 @@ namespace FitControlAdmin
                 EmailTextBox.Text = _existing.Email;
                 EmailTextBox.IsReadOnly = true;
                 NomeTextBox.Text = _existing.Nome;
-                TelemovelTextBox.Text = _existing.Telemovel;
+                ParseAndSetTelemovel(_existing.Telemovel);
                 AtivoCheckBox.IsChecked = _existing.Ativo;
                 AtivoCheckBox.IsEnabled = true;
                 SetFuncaoSelection(_existing.Funcao.ToString());
@@ -33,9 +38,50 @@ namespace FitControlAdmin
                 Title = "Criar Funcionário";
                 TitleTextBlock.Text = "Criar Funcionário";
                 FuncaoComboBox.SelectedIndex = 0;
+                TelemovelCountryCodeComboBox.SelectedIndex = 0; // +351 Portugal
                 AtivoCheckBox.IsChecked = true;
                 AtivoCheckBox.IsEnabled = false;
             }
+        }
+
+        private void ParseAndSetTelemovel(string? telemovel)
+        {
+            if (string.IsNullOrWhiteSpace(telemovel))
+            {
+                TelemovelCountryCodeComboBox.SelectedIndex = 0;
+                TelemovelTextBox.Text = "";
+                return;
+            }
+            var t = telemovel.Trim();
+            if (t.StartsWith("+351", StringComparison.Ordinal))
+            {
+                TelemovelCountryCodeComboBox.SelectedIndex = 0;
+                TelemovelTextBox.Text = t.Length > 4 ? t.Substring(4).Trim() : "";
+            }
+            else if (t.StartsWith("+34", StringComparison.Ordinal))
+            {
+                TelemovelCountryCodeComboBox.SelectedIndex = 1;
+                TelemovelTextBox.Text = t.Length > 3 ? t.Substring(3).Trim() : "";
+            }
+            else if (t.StartsWith("+44", StringComparison.Ordinal))
+            {
+                TelemovelCountryCodeComboBox.SelectedIndex = 2;
+                TelemovelTextBox.Text = t.Length > 3 ? t.Substring(3).Trim() : "";
+            }
+            else
+            {
+                TelemovelCountryCodeComboBox.SelectedIndex = 0;
+                TelemovelTextBox.Text = t;
+            }
+        }
+
+        private string GetFullTelemovel()
+        {
+            var code = "+351";
+            if (TelemovelCountryCodeComboBox.SelectedItem is System.Windows.Controls.ComboBoxItem item && item.Tag != null)
+                code = item.Tag.ToString() ?? "+351";
+            var number = (TelemovelTextBox.Text ?? "").Trim().Replace(" ", "");
+            return string.IsNullOrEmpty(number) ? "" : code + number;
         }
 
         private void SetFuncaoSelection(string funcao)
@@ -43,7 +89,7 @@ namespace FitControlAdmin
             for (int i = 0; i < FuncaoComboBox.Items.Count; i++)
             {
                 if (FuncaoComboBox.Items[i] is ComboBoxItem item &&
-                    string.Equals(item.Content?.ToString(), funcao, System.StringComparison.OrdinalIgnoreCase))
+                    string.Equals(item.Tag?.ToString(), funcao, System.StringComparison.OrdinalIgnoreCase))
                 {
                     FuncaoComboBox.SelectedIndex = i;
                     return;
@@ -54,16 +100,15 @@ namespace FitControlAdmin
         private async void SaveButton_Click(object sender, RoutedEventArgs e)
         {
             if (string.IsNullOrWhiteSpace(EmailTextBox.Text) ||
-                string.IsNullOrWhiteSpace(NomeTextBox.Text) ||
-                string.IsNullOrWhiteSpace(TelemovelTextBox.Text))
+                string.IsNullOrWhiteSpace(NomeTextBox.Text))
             {
-                MessageBox.Show("Por favor, preencha todos os campos obrigatórios (Email, Nome, Telemóvel).",
+                MessageBox.Show("Por favor, preencha todos os campos obrigatórios (Email, Nome).",
                     "Validação", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
             if (FuncaoComboBox.SelectedItem is not ComboBoxItem selectedItem ||
-                string.IsNullOrWhiteSpace(selectedItem.Content?.ToString()))
+                string.IsNullOrWhiteSpace(selectedItem.Tag?.ToString()))
             {
                 MessageBox.Show("Por favor, selecione uma função.",
                     "Validação", MessageBoxButton.OK, MessageBoxImage.Warning);
@@ -72,13 +117,14 @@ namespace FitControlAdmin
 
             try
             {
+                var funcaoValue = selectedItem.Tag.ToString();
                 if (_existing != null)
                 {
                     var updateDto = new UpdateEmployeeDto
                     {
                         Nome = NomeTextBox.Text.Trim(),
-                        Telemovel = TelemovelTextBox.Text.Trim(),
-                        Funcao = selectedItem.Content.ToString()
+                        Telemovel = GetFullTelemovel(),
+                        Funcao = funcaoValue
                     };
                     var (ok, err) = await _apiService.UpdateEmployeeAsync(_existing.IdFuncionario, updateDto);
                     if (!ok)
@@ -87,10 +133,15 @@ namespace FitControlAdmin
                         return;
                     }
                     var ativo = AtivoCheckBox.IsChecked ?? true;
-                    if (ativo != _existing.Ativo)
+                    // Sempre enviar o estado Ativo à API (a lista pode mostrar errado porque GET User/{id} não existe)
+                    var (statusOk, statusErr) = await _apiService.ChangeUserActiveStatusAsync(_existing.IdUser, ativo);
+                    if (!statusOk)
                     {
-                        await _apiService.ChangeUserActiveStatusAsync(_existing.IdUser, ativo);
+                        MessageBox.Show(statusErr ?? "Erro ao alterar estado ativo do funcionário.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                        return;
                     }
+                    SavedIdUser = _existing.IdUser;
+                    SavedAtivo = ativo;
                     MessageBox.Show("Funcionário atualizado com sucesso.", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
                 else
@@ -100,8 +151,8 @@ namespace FitControlAdmin
                         Email = EmailTextBox.Text.Trim(),
                         Tipo = "Funcionario",
                         Nome = NomeTextBox.Text.Trim(),
-                        Telemovel = TelemovelTextBox.Text.Trim(),
-                        Funcao = selectedItem.Content.ToString()
+                        Telemovel = GetFullTelemovel(),
+                        Funcao = funcaoValue
                     };
                     var result = await _apiService.RegisterUserAsync(registerDto);
                     if (result.Success)

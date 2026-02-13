@@ -142,6 +142,7 @@ namespace FitControlAdmin
                     var scheduleDto = new ScheduleClassDto
                     {
                         IdAula = dialog.SelectedClassId,
+                        Sala = dialog.SelectedSala,
                         DataAula = new DateTime(dataSelecionada.Year, dataSelecionada.Month, dataSelecionada.Day, 0, 0, 0, DateTimeKind.Unspecified)
                     };
 

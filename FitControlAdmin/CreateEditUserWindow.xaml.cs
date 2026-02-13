@@ -33,6 +33,7 @@ namespace FitControlAdmin
             {
                 Title = "Criar Membro";
                 TitleText.Text = "Criar Membro";
+                TelemovelCountryCodeComboBox.SelectedIndex = 0; // +351 Portugal
                 AtivoCheckBox.IsChecked = true;
                 AtivoCheckBox.IsEnabled = false;
                 if (!string.IsNullOrEmpty(preSelectedTipo))
@@ -74,7 +75,7 @@ namespace FitControlAdmin
             EmailTextBox.Text = _existingUser.Email;
             EmailTextBox.IsReadOnly = true;
             NomeTextBox.Text = _existingUser.Nome;
-            TelemovelTextBox.Text = _existingUser.Telemovel;
+            ParseAndSetTelemovel(_existingUser.Telemovel);
             AtivoCheckBox.IsChecked = _existingUser.Ativo;
 
             if (_existingUser.Tipo == "Membro")
@@ -154,7 +155,7 @@ namespace FitControlAdmin
                     for (int i = 0; i < FuncaoComboBox.Items.Count; i++)
                     {
                         if (FuncaoComboBox.Items[i] is ComboBoxItem item &&
-                            item.Content.ToString() == _existingUser.Funcao)
+                            string.Equals(item.Tag?.ToString(), _existingUser.Funcao, StringComparison.OrdinalIgnoreCase))
                         {
                             FuncaoComboBox.SelectedIndex = i;
                             break;
@@ -162,6 +163,46 @@ namespace FitControlAdmin
                     }
                 }
             }
+        }
+
+        private void ParseAndSetTelemovel(string? telemovel)
+        {
+            if (string.IsNullOrWhiteSpace(telemovel))
+            {
+                TelemovelCountryCodeComboBox.SelectedIndex = 0;
+                TelemovelTextBox.Text = "";
+                return;
+            }
+            var t = telemovel.Trim();
+            if (t.StartsWith("+351", StringComparison.Ordinal))
+            {
+                TelemovelCountryCodeComboBox.SelectedIndex = 0;
+                TelemovelTextBox.Text = t.Length > 4 ? t.Substring(4).Trim() : "";
+            }
+            else if (t.StartsWith("+34", StringComparison.Ordinal))
+            {
+                TelemovelCountryCodeComboBox.SelectedIndex = 1;
+                TelemovelTextBox.Text = t.Length > 3 ? t.Substring(3).Trim() : "";
+            }
+            else if (t.StartsWith("+44", StringComparison.Ordinal))
+            {
+                TelemovelCountryCodeComboBox.SelectedIndex = 2;
+                TelemovelTextBox.Text = t.Length > 3 ? t.Substring(3).Trim() : "";
+            }
+            else
+            {
+                TelemovelCountryCodeComboBox.SelectedIndex = 0;
+                TelemovelTextBox.Text = t;
+            }
+        }
+
+        private string GetFullTelemovel()
+        {
+            var code = "+351";
+            if (TelemovelCountryCodeComboBox.SelectedItem is ComboBoxItem item && item.Tag != null)
+                code = item.Tag.ToString() ?? "+351";
+            var number = (TelemovelTextBox.Text ?? "").Trim().Replace(" ", "");
+            return string.IsNullOrEmpty(number) ? "" : code + number;
         }
 
         private async void TipoComboBox_SelectionChanged(object? sender, SelectionChangedEventArgs? e)
@@ -217,8 +258,7 @@ namespace FitControlAdmin
         private async void SaveButton_Click(object sender, RoutedEventArgs e)
         {
             if (string.IsNullOrWhiteSpace(EmailTextBox.Text) ||
-                string.IsNullOrWhiteSpace(NomeTextBox.Text) ||
-                string.IsNullOrWhiteSpace(TelemovelTextBox.Text))
+                string.IsNullOrWhiteSpace(NomeTextBox.Text))
             {
                 MessageBox.Show("Por favor, preencha todos os campos obrigatórios.", 
                     "Validação", MessageBoxButton.OK, MessageBoxImage.Warning);
@@ -259,7 +299,7 @@ namespace FitControlAdmin
                         var updateDto = new UpdateMemberDto
                         {
                             Nome = NomeTextBox.Text,
-                            Telemovel = TelemovelTextBox.Text
+                            Telemovel = GetFullTelemovel()
                         };
 
                         if (DataNascimentoDatePicker.SelectedDate.HasValue)
@@ -436,10 +476,10 @@ namespace FitControlAdmin
                         // Update active status separately
                         if (success && AtivoCheckBox.IsChecked != _existingUser.Ativo)
                         {
-                            var statusSuccess = await _apiService.ChangeUserActiveStatusAsync(_existingUser.IdUser, AtivoCheckBox.IsChecked ?? true);
+                            var (statusSuccess, statusErr) = await _apiService.ChangeUserActiveStatusAsync(_existingUser.IdUser, AtivoCheckBox.IsChecked ?? true);
                             if (!statusSuccess)
                             {
-                                MessageBox.Show("Dados atualizados, mas houve um erro ao alterar o estado do utilizador.",
+                                MessageBox.Show(statusErr ?? "Dados atualizados, mas houve um erro ao alterar o estado do utilizador.",
                                     "Aviso", MessageBoxButton.OK, MessageBoxImage.Warning);
                             }
                         }
@@ -451,18 +491,18 @@ namespace FitControlAdmin
                         var updateDto = new UpdateEmployeeDto
                         {
                             Nome = NomeTextBox.Text,
-                            Telemovel = TelemovelTextBox.Text
+                            Telemovel = GetFullTelemovel()
                         };
 
                         if (FuncaoComboBox.SelectedItem is ComboBoxItem selectedItem)
-                            updateDto.Funcao = selectedItem.Content.ToString();
+                            updateDto.Funcao = selectedItem.Tag?.ToString() ?? selectedItem.Content?.ToString();
 
                         // TODO: Get IdFuncionario from employee list
                         // For now, try using UserUpdateDto approach if available
                         var userUpdateDto = new UserUpdateDto
                         {
                             Nome = NomeTextBox.Text,
-                            Telemovel = TelemovelTextBox.Text,
+                            Telemovel = GetFullTelemovel(),
                             Ativo = AtivoCheckBox.IsChecked,
                             Funcao = updateDto.Funcao
                         };
@@ -496,7 +536,7 @@ namespace FitControlAdmin
                         Email = EmailTextBox.Text,
                         Tipo = TipoComboBox.SelectedIndex == 0 ? "Membro" : "Funcionario",
                         Nome = NomeTextBox.Text,
-                        Telemovel = TelemovelTextBox.Text
+                        Telemovel = GetFullTelemovel()
                     };
 
                     if (TipoComboBox.SelectedIndex == 0) // Membro
@@ -511,7 +551,7 @@ namespace FitControlAdmin
                     else // Funcionario
                     {
                         if (FuncaoComboBox.SelectedItem is System.Windows.Controls.ComboBoxItem selectedItem)
-                            registerDto.Funcao = selectedItem.Content.ToString();
+                            registerDto.Funcao = selectedItem.Tag?.ToString() ?? selectedItem.Content?.ToString();
                     }
 
                     var registerResult = await _apiService.RegisterUserAsync(registerDto);

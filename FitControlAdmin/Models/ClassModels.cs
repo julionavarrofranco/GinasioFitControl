@@ -54,6 +54,7 @@ namespace FitControlAdmin.Models
         public int IdAulaMarcada { get; set; }
         public DateTime DataAula { get; set; }
         public string NomeAula { get; set; } = null!;
+        public int Sala { get; set; }
         public TimeSpan HoraInicio { get; set; }
         public TimeSpan HoraFim { get; set; }
         public int Capacidade { get; set; }
@@ -112,6 +113,7 @@ namespace FitControlAdmin.Models
     public class ScheduleClassDto
     {
         public int IdAula { get; set; }
+        public int Sala { get; set; } // 1-5 (sala de aula)
         public DateTime DataAula { get; set; }
     }
 
@@ -121,6 +123,7 @@ namespace FitControlAdmin.Models
         public int IdAula { get; set; }
         public string NomeAula { get; set; } = null!;
         public DateTime DataAula { get; set; }
+        public int Sala { get; set; }
         public TimeSpan HoraInicio { get; set; }
         public TimeSpan HoraFim { get; set; }
         public int Capacidade { get; set; }

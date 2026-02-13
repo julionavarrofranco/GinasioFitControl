@@ -4,6 +4,7 @@ using System.Net.Http.Json;
 using System.Net.Http.Headers;
 using FitControlAdmin.Models;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using FitControlAdmin.Helper;
 using System.Security.Claims;
 using System.IdentityModel.Tokens.Jwt;
@@ -251,7 +252,7 @@ namespace FitControlAdmin.Services
             }
         }
 
-        public async Task<bool> ChangeUserActiveStatusAsync(int idUser, bool isActive)
+        public async Task<(bool Success, string? ErrorMessage)> ChangeUserActiveStatusAsync(int idUser, bool isActive)
         {
             try
             {
@@ -261,11 +262,21 @@ namespace FitControlAdmin.Services
                     IsActive = isActive
                 };
                 var response = await _httpClient.PatchAsJsonAsync("/api/User/change-active-status", statusDto);
-                return response.IsSuccessStatusCode;
+                if (response.IsSuccessStatusCode)
+                    return (true, null);
+                var errorContent = await response.Content.ReadAsStringAsync();
+                try
+                {
+                    var json = System.Text.Json.JsonDocument.Parse(errorContent);
+                    if (json.RootElement.TryGetProperty("message", out var msg))
+                        return (false, msg.GetString());
+                }
+                catch { }
+                return (false, errorContent ?? $"Erro ({response.StatusCode})");
             }
-            catch
+            catch (Exception ex)
             {
-                return false;
+                return (false, ex.Message);
             }
         }
 
@@ -1428,6 +1439,7 @@ namespace FitControlAdmin.Services
                         IdAulaMarcada = r.IdAulaMarcada,
                         NomeAula = r.NomeAula,
                         DataAula = r.DataAula,
+                        Sala = r.Sala,
                         HoraInicio = r.HoraInicio,
                         HoraFim = r.HoraFim,
                         Capacidade = r.Capacidade,
@@ -1581,7 +1593,8 @@ namespace FitControlAdmin.Services
                 var response = await _httpClient.GetAsync($"/api/TrainingPlan/summary?ativo={ativo}");
                 if (response.IsSuccessStatusCode)
                 {
-                    return await response.Content.ReadFromJsonAsync<List<TrainingPlanSummaryDto>>();
+                    var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                    return await response.Content.ReadFromJsonAsync<List<TrainingPlanSummaryDto>>(options);
                 }
                 return null;
             }
@@ -1603,6 +1616,7 @@ namespace FitControlAdmin.Services
                 if (response.IsSuccessStatusCode)
                 {
                     var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                    options.Converters.Add(new JsonStringEnumConverter());
                     var detail = await response.Content.ReadFromJsonAsync<TrainingPlanDetailDto>(options);
                     return detail;
                 }
@@ -1701,7 +1715,8 @@ namespace FitControlAdmin.Services
                 var response = await _httpClient.GetAsync($"/api/TrainingPlan/history/{idMembro}");
                 if (response.IsSuccessStatusCode)
                 {
-                    var list = await response.Content.ReadFromJsonAsync<List<TrainingPlanSummaryDto>>();
+                    var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                    var list = await response.Content.ReadFromJsonAsync<List<TrainingPlanSummaryDto>>(options);
                     return list ?? new List<TrainingPlanSummaryDto>();
                 }
                 return null;

@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:FitControlAdmin"
         mc:Ignorable="d"
-        Title="Criar Aula Agendada" Height="360" Width="450"
+        Title="Criar Aula Agendada" Height="500" Width="450"
         WindowStartupLocation="CenterOwner"
         Background="#313443"
         Foreground="#e6e6e8"
@@ -21,14 +21,39 @@
         </Style>
 
         <Style TargetType="ComboBox">
-            <Setter Property="Background" Value="#1f2937"/>
-            <Setter Property="Foreground" Value="#e6e6e8"/>
+            <Setter Property="Background" Value="#e6e6e8"/>
+            <Setter Property="Foreground" Value="Black"/>
             <Setter Property="BorderBrush" Value="#34495E"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="Padding" Value="10,8"/>
             <Setter Property="FontSize" Value="14"/>
             <Setter Property="Height" Value="35"/>
             <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="ItemContainerStyle">
+                <Setter.Value>
+                    <Style TargetType="ComboBoxItem">
+                        <Setter Property="Background" Value="#272936"/>
+                        <Setter Property="Foreground" Value="#e6e6e8"/>
+                        <Setter Property="BorderThickness" Value="0"/>
+                        <Setter Property="Padding" Value="12,8"/>
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#1f2937"/>
+                                <Setter Property="Foreground" Value="White"/>
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter Property="Background" Value="#02acc3"/>
+                                <Setter Property="Foreground" Value="White"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="BorderBrush" Value="#02acc3"/>
+                </Trigger>
+            </Style.Triggers>
         </Style>
 
         <Style TargetType="DatePicker">
@@ -94,14 +119,14 @@
         </Style>
     </Window.Resources>
 
-    <Grid Margin="30">
+    <Grid Margin="30,30,30,40">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="20"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="20"/>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="30"/>
+            <RowDefinition Height="20"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
@@ -110,7 +135,8 @@
             <TextBlock Text="Aula:"/>
             <ComboBox x:Name="ClassComboBox"
                       DisplayMemberPath="Nome"
-                      SelectedValuePath="IdAula">
+                      SelectedValuePath="IdAula"
+                      ItemContainerStyle="{StaticResource DefaultComboBoxItemStyle}">
                 <ComboBox.Style>
                     <Style TargetType="ComboBox" BasedOn="{StaticResource {x:Type ComboBox}}">
                         <Style.Triggers>
@@ -121,31 +147,27 @@
                     </Style>
                 </ComboBox.Style>
             </ComboBox>
-            <TextBlock x:Name="InfoTextBlock" 
-                       Text="(Aula pré-selecionada)"
-                       FontSize="10"
-                       Foreground="#7f8c8d"
-                       Margin="0,3,0,0"
-                       Visibility="Collapsed"/>
+        </StackPanel>
+
+        <!-- Sala de Aula -->
+        <StackPanel Grid.Row="2">
+            <TextBlock Text="Sala de Aula *"/>
+            <ComboBox x:Name="SalaComboBox"
+                      DisplayMemberPath="Display"
+                      SelectedValuePath="Value"
+                      ItemContainerStyle="{StaticResource DefaultComboBoxItemStyle}"/>
         </StackPanel>
 
         <!-- Selecionar Data -->
-        <StackPanel Grid.Row="2">
+        <StackPanel Grid.Row="4">
             <TextBlock Text="Data da Aula:"/>
             <DatePicker x:Name="DatePicker"
                         SelectedDateFormat="Short"
                         FirstDayOfWeek="Monday"/>
         </StackPanel>
 
-        <!-- Informação -->
-        <TextBlock Grid.Row="4"
-                   Text="⚠ Para testes: pode selecionar datas passadas. Em produção: mínimo 1 dia de antecedência."
-                   Foreground="#f39c12"
-                   FontSize="11"
-                   TextWrapping="Wrap"/>
-
         <!-- Botões -->
-        <StackPanel Grid.Row="6" Orientation="Horizontal" HorizontalAlignment="Right">
+        <StackPanel Grid.Row="6" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,15,0,0">
             <Button Content="Cancelar"
                     Style="{StaticResource SecondaryButton}"
                     Click="CancelButton_Click"

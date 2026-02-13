@@ -12,6 +12,7 @@
         <converters:EnumNameConverter x:Key="EnumNameConverter"/>
         <converters:TimeSpanToStringConverter x:Key="TimeSpanToStringConverter"/>
         <converters:InverseBoolToVisibilityConverter x:Key="InverseBoolToVisibilityConverter"/>
+        <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
         
         <Style TargetType="{x:Type Button}" x:Key="SidebarButtonStyle">
             <Setter Property="Background" Value="Transparent"/>
@@ -761,7 +762,6 @@
                                 <DataGridTextColumn Header="Email" Binding="{Binding Email}" Width="200"/>
                                 <DataGridTextColumn Header="Telemóvel" Binding="{Binding Telemovel}" Width="120"/>
                                 <DataGridTextColumn Header="Função" Binding="{Binding Funcao, Converter={StaticResource EnumNameConverter}}" Width="120"/>
-                                <DataGridTextColumn Header="Data Registo" Binding="{Binding DataRegistoDisplay}" Width="120"/>
                                 <DataGridCheckBoxColumn Header="Ativo" Binding="{Binding Ativo}" Width="60"/>
                                 <DataGridTemplateColumn Header="Ações" Width="150">
                                     <DataGridTemplateColumn.CellTemplate>
@@ -907,25 +907,9 @@
                                           Padding="10,8"
                                           FontSize="14"
                                           MinWidth="150"
-                                          SelectionChanged="ExerciseFilters_Changed">
-                                    <ComboBox.ItemContainerStyle>
-                                        <Style TargetType="ComboBoxItem">
-                                            <Setter Property="Background" Value="#272936"/>
-                                            <Setter Property="Foreground" Value="White"/>
-                                            <Setter Property="BorderThickness" Value="0"/>
-                                            <Setter Property="Padding" Value="12,8"/>
-                                            <Style.Triggers>
-                                                <Trigger Property="IsMouseOver" Value="True">
-                                                    <Setter Property="Background" Value="#1f2937"/>
-                                                    <Setter Property="Foreground" Value="Black"/>
-                                                </Trigger>
-                                                <Trigger Property="IsSelected" Value="True">
-                                                    <Setter Property="Background" Value="#02acc3"/>
-                                                    <Setter Property="Foreground" Value="Black"/>
-                                                </Trigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </ComboBox.ItemContainerStyle>
+                                          SelectionChanged="ExerciseFilters_Changed"
+                                          ItemContainerStyle="{StaticResource DefaultComboBoxItemStyle}">
+
                                     <ComboBoxItem Content="Todos" IsSelected="True"/>
                                     <ComboBoxItem Content="Ativo"/>
                                     <ComboBoxItem Content="Inativo"/>
@@ -946,25 +930,9 @@
                                           Padding="10,8"
                                           FontSize="14"
                                           MinWidth="150"
-                                          SelectionChanged="ExerciseFilters_Changed">
-                                    <ComboBox.ItemContainerStyle>
-                                        <Style TargetType="ComboBoxItem">
-                                            <Setter Property="Background" Value="#272936"/>
-                                            <Setter Property="Foreground" Value="White"/>
-                                            <Setter Property="BorderThickness" Value="0"/>
-                                            <Setter Property="Padding" Value="12,8"/>
-                                            <Style.Triggers>
-                                                <Trigger Property="IsMouseOver" Value="True">
-                                                    <Setter Property="Background" Value="#1f2937"/>
-                                                    <Setter Property="Foreground" Value="Black"/>
-                                                </Trigger>
-                                                <Trigger Property="IsSelected" Value="True">
-                                                    <Setter Property="Background" Value="#02acc3"/>
-                                                    <Setter Property="Foreground" Value="Black"/>
-                                                </Trigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </ComboBox.ItemContainerStyle>
+                                          SelectionChanged="ExerciseFilters_Changed"
+                                          ItemContainerStyle="{StaticResource DefaultComboBoxItemStyle}">
+
                                     <ComboBoxItem Content="Todos" IsSelected="True"/>
                                 </ComboBox>
                             </StackPanel>
@@ -983,25 +951,9 @@
                                           Padding="10,8"
                                           FontSize="14"
                                           MinWidth="150"
-                                          SelectionChanged="ExerciseFilters_Changed">
-                                    <ComboBox.ItemContainerStyle>
-                                        <Style TargetType="ComboBoxItem">
-                                            <Setter Property="Background" Value="#272936"/>
-                                            <Setter Property="Foreground" Value="White"/>
-                                            <Setter Property="BorderThickness" Value="0"/>
-                                            <Setter Property="Padding" Value="12,8"/>
-                                            <Style.Triggers>
-                                                <Trigger Property="IsMouseOver" Value="True">
-                                                    <Setter Property="Background" Value="#1f2937"/>
-                                                    <Setter Property="Foreground" Value="Black"/>
-                                                </Trigger>
-                                                <Trigger Property="IsSelected" Value="True">
-                                                    <Setter Property="Background" Value="#02acc3"/>
-                                                    <Setter Property="Foreground" Value="Black"/>
-                                                </Trigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </ComboBox.ItemContainerStyle>
+                                          SelectionChanged="ExerciseFilters_Changed"
+                                          ItemContainerStyle="{StaticResource DefaultComboBoxItemStyle}">
+
                                     <ComboBoxItem Content="Nome" IsSelected="True"/>
                                     <ComboBoxItem Content="Grupo Muscular"/>
                                     <ComboBoxItem Content="Estado"/>
@@ -1022,25 +974,9 @@
                                           Padding="10,8"
                                           FontSize="14"
                                           MinWidth="150"
-                                          SelectionChanged="ExerciseFilters_Changed">
-                                    <ComboBox.ItemContainerStyle>
-                                        <Style TargetType="ComboBoxItem">
-                                            <Setter Property="Background" Value="#272936"/>
-                                            <Setter Property="Foreground" Value="White"/>
-                                            <Setter Property="BorderThickness" Value="0"/>
-                                            <Setter Property="Padding" Value="12,8"/>
-                                            <Style.Triggers>
-                                                <Trigger Property="IsMouseOver" Value="True">
-                                                    <Setter Property="Background" Value="#1f2937"/>
-                                                    <Setter Property="Foreground" Value="Black"/>
-                                                </Trigger>
-                                                <Trigger Property="IsSelected" Value="True">
-                                                    <Setter Property="Background" Value="#02acc3"/>
-                                                    <Setter Property="Foreground" Value="Black"/>
-                                                </Trigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </ComboBox.ItemContainerStyle>
+                                          SelectionChanged="ExerciseFilters_Changed"
+                                          ItemContainerStyle="{StaticResource DefaultComboBoxItemStyle}">
+
                                     <ComboBoxItem Content="Ascendente" IsSelected="True"/>
                                     <ComboBoxItem Content="Descendente"/>
                                 </ComboBox>
@@ -1322,33 +1258,6 @@
                                 <DataGridTextColumn Header="Estado Pagamento" Binding="{Binding EstadoPagamento}" Width="130"/>
                                 <DataGridTextColumn Header="Mês Referente" Binding="{Binding MesReferente, StringFormat=MM/yyyy}" Width="100"/>
                                 <DataGridTextColumn Header="Status" Binding="{Binding StatusAtivo}" Width="80"/>
-                                <DataGridTemplateColumn Header="Ações" Width="100">
-                                    <DataGridTemplateColumn.CellTemplate>
-                                        <DataTemplate>
-                                            <Button Content="Editar"
-                                                    Click="EditPaymentButton_Click"
-                                                    Tag="{Binding IdPagamento}"
-                                                    Padding="8,4"
-                                                    Margin="2"
-                                                    Background="#02acc3"
-                                                    Foreground="White"
-                                                    BorderThickness="0"
-                                                    Cursor="Hand"
-                                                    FontSize="12">
-                                                <Button.Style>
-                                                    <Style TargetType="Button">
-                                                        <Setter Property="Background" Value="#02acc3"/>
-                                                        <Style.Triggers>
-                                                            <Trigger Property="IsMouseOver" Value="True">
-                                                                <Setter Property="Background" Value="#0299b0"/>
-                                                            </Trigger>
-                                                        </Style.Triggers>
-                                                    </Style>
-                                                </Button.Style>
-                                            </Button>
-                                        </DataTemplate>
-                                    </DataGridTemplateColumn.CellTemplate>
-                                </DataGridTemplateColumn>
                             </DataGrid.Columns>
                         </DataGrid>
                     </ScrollViewer>
@@ -1535,33 +1444,57 @@
                                       GridLinesVisibility="All"
                                       HeadersVisibility="Column">
                                 <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Id Reserva" Binding="{Binding IdMembroAvaliacao}" Width="90"/>
                                     <DataGridTextColumn Header="Membro" Binding="{Binding NomeMembro}" Width="200"/>
+                                    <DataGridTextColumn Header="Nº Telemóvel" Binding="{Binding TelemovelMembro}" Width="110"/>
                                     <DataGridTextColumn Header="Data Avaliação" Binding="{Binding DataReserva, StringFormat=dd/MM/yyyy HH:mm}" Width="150"/>
                                     <DataGridTextColumn Header="Estado" Binding="{Binding EstadoString}" Width="120"/>
-                                    <DataGridTemplateColumn Header="Ações" Width="150">
+                                    <DataGridTemplateColumn Header="Ações" Width="280">
                                         <DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate>
-                                                <Button Content="Reservar"
-                                                        Click="ReserveButton_Click"
-                                                        Tag="{Binding IdMembroAvaliacao}"
-                                                        Padding="8,4"
-                                                        Margin="2"
-                                                        Background="#27AE60"
-                                                        Foreground="White"
-                                                        BorderThickness="0"
-                                                        Cursor="Hand"
-                                                        FontSize="12">
-                                                    <Button.Style>
-                                                        <Style TargetType="Button">
-                                                            <Setter Property="Background" Value="#27AE60"/>
-                                                            <Style.Triggers>
-                                                                <Trigger Property="IsMouseOver" Value="True">
-                                                                    <Setter Property="Background" Value="#229954"/>
-                                                                </Trigger>
-                                                            </Style.Triggers>
-                                                        </Style>
-                                                    </Button.Style>
-                                                </Button>
+                                                <StackPanel Orientation="Horizontal">
+                                                    <Button Content="Completar Avaliação"
+                                                            Click="CompleteEvaluationFromReservationButton_Click"
+                                                            Tag="{Binding}"
+                                                            Padding="8,4"
+                                                            Margin="0,0,6,0"
+                                                            Background="#27AE60"
+                                                            Foreground="White"
+                                                            BorderThickness="0"
+                                                            Cursor="Hand"
+                                                            FontSize="12">
+                                                        <Button.Style>
+                                                            <Style TargetType="Button">
+                                                                <Setter Property="Background" Value="#27AE60"/>
+                                                                <Style.Triggers>
+                                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                                        <Setter Property="Background" Value="#229954"/>
+                                                                    </Trigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </Button.Style>
+                                                    </Button>
+                                                    <Button Content="Falta de comparência"
+                                                            Click="MarkNoShowReservationButton_Click"
+                                                            Tag="{Binding}"
+                                                            Padding="8,4"
+                                                            Background="#e74c3c"
+                                                            Foreground="White"
+                                                            BorderThickness="0"
+                                                            Cursor="Hand"
+                                                            FontSize="12">
+                                                        <Button.Style>
+                                                            <Style TargetType="Button">
+                                                                <Setter Property="Background" Value="#e74c3c"/>
+                                                                <Style.Triggers>
+                                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                                        <Setter Property="Background" Value="#c0392b"/>
+                                                                    </Trigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </Button.Style>
+                                                    </Button>
+                                                </StackPanel>
                                             </DataTemplate>
                                         </DataGridTemplateColumn.CellTemplate>
                                     </DataGridTemplateColumn>
@@ -1570,62 +1503,33 @@
                         </ScrollViewer>
                     </Border>
 
-                    <!-- Tabela 2: Reservas Completas -->
-                    <TextBlock Text="Reservas Completas"
+                    <!-- Tabela 2: Reservas completas (inclui canceladas; sem coluna Ações) -->
+                    <TextBlock Text="Reservas completas"
                                FontSize="18"
                                FontWeight="Bold"
                                Foreground="#e6e6e8"
                                Margin="0,0,0,10"/>
                     <Border Background="#272936" CornerRadius="10" Padding="20" Margin="0,0,0,30">
                         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
-                            <DataGrid x:Name="CompletedReservationsDataGrid"
+                            <DataGrid x:Name="CompletedEvaluationsDataGrid"
                                       AutoGenerateColumns="False"
                                       IsReadOnly="True"
                                       SelectionMode="Single"
                                       GridLinesVisibility="All"
                                       HeadersVisibility="Column">
                                 <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Id Reserva" Binding="{Binding IdMembroAvaliacao}" Width="90"/>
                                     <DataGridTextColumn Header="Membro" Binding="{Binding NomeMembro}" Width="200"/>
-                                    <DataGridTextColumn Header="PT" Binding="{Binding NomeFuncionario}" Width="150"/>
-                                    <DataGridTextColumn Header="Data Avaliação" Binding="{Binding DataReserva, StringFormat=dd/MM/yyyy HH:mm}" Width="150"/>
+                                    <DataGridTextColumn Header="Nº Telemóvel" Binding="{Binding TelemovelMembro}" Width="110"/>
+                                    <DataGridTextColumn Header="Data de avaliação" Binding="{Binding DataReserva, StringFormat=dd/MM/yyyy HH:mm}" Width="150"/>
                                     <DataGridTextColumn Header="Estado" Binding="{Binding EstadoString}" Width="120"/>
-                                    <DataGridTemplateColumn Header="Ações" Width="150">
-                                        <DataGridTemplateColumn.CellTemplate>
-                                            <DataTemplate>
-                                                <Button Content="Completar Avaliação"
-                                                        Click="MakeEvaluationButton_Click"
-                                                        Tag="{Binding IdMembroAvaliacao}"
-                                                        Padding="8,4"
-                                                        Margin="2"
-                                                        Background="#27AE60"
-                                                        Foreground="White"
-                                                        BorderThickness="0"
-                                                        Cursor="Hand"
-                                                        FontSize="12">
-                                                    <Button.Style>
-                                                        <Style TargetType="Button">
-                                                            <Setter Property="Background" Value="#27AE60"/>
-                                                            <Setter Property="Visibility" Value="Visible"/>
-                                                            <Style.Triggers>
-                                                                <DataTrigger Binding="{Binding TemAvaliacaoFisica}" Value="True">
-                                                                    <Setter Property="Visibility" Value="Collapsed"/>
-                                                                </DataTrigger>
-                                                                <Trigger Property="IsMouseOver" Value="True">
-                                                                    <Setter Property="Background" Value="#229954"/>
-                                                                </Trigger>
-                                                            </Style.Triggers>
-                                                        </Style>
-                                                    </Button.Style>
-                                                </Button>
-                                            </DataTemplate>
-                                        </DataGridTemplateColumn.CellTemplate>
-                                    </DataGridTemplateColumn>
+                                    <DataGridTextColumn Header="PT" Binding="{Binding NomeFuncionario}" Width="180"/>
                                 </DataGrid.Columns>
                             </DataGrid>
                         </ScrollViewer>
                     </Border>
 
-                    <!-- Tabela 3: Histórico (Avaliações Completadas) -->
+                    <!-- Tabela 3: Histórico (completadas, canceladas, faltas) -->
                     <TextBlock Text="Histórico de Avaliações Físicas"
                                FontSize="18"
                                FontWeight="Bold"
@@ -1685,8 +1589,10 @@
                                       GridLinesVisibility="All"
                                       HeadersVisibility="Column">
                                 <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Id Avaliação" Binding="{Binding IdAvaliacao}" Width="90"/>
                                     <DataGridTextColumn Header="Membro" Binding="{Binding NomeMembro}" Width="150"/>
-                                    <DataGridTextColumn Header="PT" Binding="{Binding NomeFuncionario}" Width="130"/>
+                                    <DataGridTextColumn Header="Nº Telemóvel" Binding="{Binding TelemovelMembro}" Width="110"/>
+                                    <DataGridTextColumn Header="PT" Binding="{Binding NomeFuncionario}" Width="180"/>
                                     <DataGridTextColumn Header="Data" Binding="{Binding DataAvaliacao, StringFormat=dd/MM/yyyy}" Width="100"/>
                                     <DataGridTextColumn Header="Peso (kg)" Binding="{Binding Peso, StringFormat={}{0:F1}}" Width="80"/>
                                     <DataGridTextColumn Header="Altura (m)" Binding="{Binding Altura, StringFormat={}{0:F2}}" Width="90"/>
@@ -2059,7 +1965,8 @@
                                                             Foreground="White"
                                                             BorderThickness="0"
                                                             Cursor="Hand"
-                                                            FontSize="12">
+                                                            FontSize="12"
+                                                            Visibility="{Binding IsPtClassView, ElementName=RootWindow, Converter={StaticResource BoolToVisibilityConverter}}">
                                                         <Button.Style>
                                                             <Style TargetType="Button">
                                                                 <Setter Property="Background" Value="#9b59b6"/>
@@ -2120,23 +2027,38 @@
                                 <DataGrid.Columns>
                                     <DataGridTextColumn Header="Data" Binding="{Binding DataAula, StringFormat=dd/MM/yyyy}" Width="100"/>
                                     <DataGridTextColumn Header="Aula" Binding="{Binding NomeAula}" Width="200"/>
+                                    <DataGridTextColumn Header="Sala" Binding="{Binding Sala}" Width="60"/>
                                     <DataGridTextColumn Header="Hora Início" Binding="{Binding HoraInicio, Converter={StaticResource TimeSpanToStringConverter}}" Width="100"/>
                                     <DataGridTextColumn Header="Hora Fim" Binding="{Binding HoraFim, Converter={StaticResource TimeSpanToStringConverter}}" Width="100"/>
                                     <DataGridTextColumn Header="Capacidade" Binding="{Binding Capacidade}" Width="100"/>
                                     <DataGridTextColumn Header="Reservas" Binding="{Binding TotalReservas}" Width="80"/>
-                                    <DataGridTemplateColumn Header="Ações" Width="150">
+                                    <DataGridTemplateColumn x:Name="ClassReservationsActionsColumn" Header="Ações" Width="260">
                                         <DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate>
-                                                <Button Content="Marcar Presenças"
-                                                        Click="MarkClassAttendanceButton_Click"
-                                                        Tag="{Binding IdAulaMarcada}"
-                                                        Padding="8,4"
-                                                        Margin="2"
-                                                        Background="#f39c12"
-                                                        Foreground="White"
-                                                        BorderThickness="0"
-                                                        Cursor="Hand"
-                                                        FontSize="12"/>
+                                                <StackPanel Orientation="Horizontal">
+                                                    <Button Content="Marcar Presenças"
+                                                            Click="MarkClassAttendanceButton_Click"
+                                                            Tag="{Binding IdAulaMarcada}"
+                                                            Padding="8,4"
+                                                            Margin="0,0,4,0"
+                                                            Background="#f39c12"
+                                                            Foreground="White"
+                                                            BorderThickness="0"
+                                                            Cursor="Hand"
+                                                            FontSize="12"
+                                                            Visibility="{Binding IsPtClassView, ElementName=RootWindow, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                                                    <Button Content="Cancelar"
+                                                            Click="CancelScheduledClassButton_Click"
+                                                            Tag="{Binding IdAulaMarcada}"
+                                                            Padding="8,4"
+                                                            Margin="0,0,0,0"
+                                                            Background="#e74c3c"
+                                                            Foreground="White"
+                                                            BorderThickness="0"
+                                                            Cursor="Hand"
+                                                            FontSize="12"
+                                                            Visibility="{Binding IsPtClassView, ElementName=RootWindow, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                                                </StackPanel>
                                             </DataTemplate>
                                         </DataGridTemplateColumn.CellTemplate>
                                     </DataGridTemplateColumn>
@@ -2163,11 +2085,12 @@
                                 <DataGrid.Columns>
                                     <DataGridTextColumn Header="Data" Binding="{Binding DataAula, StringFormat=dd/MM/yyyy}" Width="100"/>
                                     <DataGridTextColumn Header="Aula" Binding="{Binding NomeAula}" Width="200"/>
+                                    <DataGridTextColumn Header="Sala" Binding="{Binding Sala}" Width="60"/>
                                     <DataGridTextColumn Header="Hora Início" Binding="{Binding HoraInicio, Converter={StaticResource TimeSpanToStringConverter}}" Width="100"/>
                                     <DataGridTextColumn Header="Hora Fim" Binding="{Binding HoraFim, Converter={StaticResource TimeSpanToStringConverter}}" Width="100"/>
                                     <DataGridTextColumn Header="Capacidade" Binding="{Binding Capacidade}" Width="100"/>
                                     <DataGridTextColumn Header="Reservas" Binding="{Binding TotalReservas}" Width="80"/>
-                                    <DataGridTemplateColumn Header="Ações" Width="150">
+                                    <DataGridTemplateColumn x:Name="FinishedClassesActionsColumn" Header="Ações" Width="150">
                                         <DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate>
                                                 <Button Content="Consultar Presenças"
@@ -2179,7 +2102,8 @@
                                                         Foreground="White"
                                                         BorderThickness="0"
                                                         Cursor="Hand"
-                                                        FontSize="12"/>
+                                                        FontSize="12"
+                                                        Visibility="{Binding IsPtClassView, ElementName=RootWindow, Converter={StaticResource BoolToVisibilityConverter}}"/>
                                             </DataTemplate>
                                         </DataGridTemplateColumn.CellTemplate>
                                     </DataGridTemplateColumn>
@@ -2241,54 +2165,48 @@
                     </Grid>
 
                     <!-- DataGrid de Planos -->
-                    <Border Background="#272936" CornerRadius="10" Padding="20" Margin="0,0,0,20">
+                    <Border Background="#272936" CornerRadius="10" Padding="20" Margin="0,0,0,30">
+
                         <DataGrid x:Name="TrainingPlansDataGrid"
-                                  AutoGenerateColumns="False"
-                                  IsReadOnly="True"
-                                  SelectionMode="Single"
-                                  GridLinesVisibility="Horizontal"
-                                  HeadersVisibility="Column"
-                                  Background="#1f2937"
-                                  Foreground="#e6e6e8"
-                                  RowBackground="#1f2937"
-                                  AlternatingRowBackground="#252f3f"
-                                  BorderThickness="0"
-                                  CanUserAddRows="False"
-                                  CanUserDeleteRows="False"
-                                  MinHeight="200">
-                            <DataGrid.Columns>
-                                <DataGridTextColumn Header="ID" Binding="{Binding IdPlano}" Width="50"/>
-                                <DataGridTextColumn Header="Nome" Binding="{Binding Nome}" Width="*"/>
-                                <DataGridTextColumn Header="Data Criação" Binding="{Binding DataCriacao, StringFormat=dd/MM/yyyy}" Width="100"/>
-                                <DataGridTemplateColumn Header="Estado" Width="70">
-                                    <DataGridTemplateColumn.CellTemplate>
-                                        <DataTemplate>
-                                            <TextBlock>
-                                                <TextBlock.Style>
-                                                    <Style TargetType="TextBlock">
-                                                        <Setter Property="Foreground" Value="#e6e6e8"/>
-                                                        <Setter Property="Text" Value="—"/>
-                                                        <Style.Triggers>
-                                                            <DataTrigger Binding="{Binding Ativo}" Value="True">
-                                                                <Setter Property="Text" Value="Ativo"/>
-                                                                <Setter Property="Foreground" Value="#27ae60"/>
-                                                            </DataTrigger>
-                                                            <DataTrigger Binding="{Binding Ativo}" Value="False">
-                                                                <Setter Property="Text" Value="Inativo"/>
-                                                                <Setter Property="Foreground" Value="#e74c3c"/>
-                                                            </DataTrigger>
-                                                        </Style.Triggers>
-                                                    </Style>
-                                                </TextBlock.Style>
-                                            </TextBlock>
-                                        </DataTemplate>
-                                    </DataGridTemplateColumn.CellTemplate>
-                                </DataGridTemplateColumn>
-                                <DataGridTemplateColumn Header="Ações" Width="280">
-                                    <DataGridTemplateColumn.CellTemplate>
-                                        <DataTemplate>
-                                            <StackPanel Orientation="Horizontal">
-                                                <Button Content="Ver"
+                                      AutoGenerateColumns="False"
+                                      IsReadOnly="True"
+                                      SelectionMode="Single"
+                                      GridLinesVisibility="All"
+                                      HeadersVisibility="Column">
+
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="ID" Binding="{Binding IdPlano}" Width="50"/>
+                                    <DataGridTextColumn Header="Nome" Binding="{Binding Nome}" Width="*"/>
+                                    <DataGridTextColumn Header="Data Criação" Binding="{Binding DataCriacao, StringFormat=dd/MM/yyyy}" Width="100"/>
+                                    <DataGridTemplateColumn Header="Estado" Width="70">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock>
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Setter Property="Foreground" Value="#e6e6e8"/>
+                                                            <Setter Property="Text" Value="—"/>
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding Ativo}" Value="True">
+                                                                    <Setter Property="Text" Value="Ativo"/>
+                                                                    <Setter Property="Foreground" Value="#27ae60"/>
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding Ativo}" Value="False">
+                                                                    <Setter Property="Text" Value="Inativo"/>
+                                                                    <Setter Property="Foreground" Value="#e74c3c"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                    <DataGridTemplateColumn Header="Ações" Width="280">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <StackPanel Orientation="Horizontal">
+                                                    <Button Content="Ver"
                                                         Click="ViewTrainingPlanButton_Click"
                                                         Tag="{Binding IdPlano}"
                                                         Padding="8,4" Margin="0,0,4,0"
@@ -2297,7 +2215,7 @@
                                                         BorderThickness="0"
                                                         Cursor="Hand"
                                                         FontSize="12"/>
-                                                <Button Content="Editar"
+                                                    <Button Content="Editar"
                                                         Click="EditTrainingPlanButton_Click"
                                                         Tag="{Binding}"
                                                         Padding="8,4" Margin="0,0,4,0"
@@ -2306,7 +2224,7 @@
                                                         BorderThickness="0"
                                                         Cursor="Hand"
                                                         FontSize="12"/>
-                                                <Button Content="Atribuir"
+                                                    <Button Content="Atribuir"
                                                         Click="AssignTrainingPlanButton_Click"
                                                         Tag="{Binding IdPlano}"
                                                         Padding="8,4" Margin="0,0,4,0"
@@ -2315,7 +2233,7 @@
                                                         BorderThickness="0"
                                                         Cursor="Hand"
                                                         FontSize="12"/>
-                                                <Button Content="Ativar/Desativar"
+                                                    <Button Content="Ativar/Desativar"
                                                         Click="ToggleTrainingPlanStateButton_Click"
                                                         Tag="{Binding}"
                                                         Padding="8,4"
@@ -2324,12 +2242,12 @@
                                                         BorderThickness="0"
                                                         Cursor="Hand"
                                                         FontSize="12"/>
-                                            </StackPanel>
-                                        </DataTemplate>
-                                    </DataGridTemplateColumn.CellTemplate>
-                                </DataGridTemplateColumn>
-                            </DataGrid.Columns>
-                        </DataGrid>
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                </DataGrid.Columns>
+                            </DataGrid>
                     </Border>
 
                     <!-- Tabela de membros e planos -->
@@ -2338,36 +2256,31 @@
                                FontWeight="Bold"
                                Foreground="#e6e6e8"
                                Margin="0,20,0,10"/>
-                    <Border Background="#272936" CornerRadius="10" Padding="20" Margin="0,0,0,20">
+                    <Border Background="#272936"
+                            CornerRadius="10"
+                            Padding="20"
+                            Margin="0,0,0,30">
+
                         <DataGrid x:Name="MembersWithPlansDataGrid"
                                   AutoGenerateColumns="False"
                                   IsReadOnly="True"
                                   SelectionMode="Single"
-                                  GridLinesVisibility="Horizontal"
-                                  HeadersVisibility="Column"
-                                  Background="#1f2937"
-                                  Foreground="#e6e6e8"
-                                  RowBackground="#1f2937"
-                                  AlternatingRowBackground="#252f3f"
-                                  BorderThickness="0"
-                                  CanUserAddRows="False"
-                                  CanUserDeleteRows="False"
-                                  MinHeight="150">
-                            <DataGrid.Resources>
-                                <Style TargetType="DataGridCell">
-                                    <Setter Property="Foreground" Value="#e6e6e8"/>
-                                </Style>
-                                <Style TargetType="DataGridColumnHeader">
-                                    <Setter Property="Background" Value="#e6e6e8"/>
-                                    <Setter Property="Foreground" Value="Black"/>
-                                </Style>
-                            </DataGrid.Resources>
+                                  GridLinesVisibility="All"
+                                  HeadersVisibility="Column">
+
                             <DataGrid.Columns>
-                                <DataGridTextColumn Header="Membro" Binding="{Binding Nome}" Width="*"/>
-                                <DataGridTextColumn Header="Plano atual" Binding="{Binding PlanoTreino}" Width="*"/>
+                                <DataGridTextColumn Header="Membro"
+                                                    Binding="{Binding Nome}"
+                                                    Width="*"/>
+
+                                <DataGridTextColumn Header="Plano atual"
+                                                    Binding="{Binding PlanoTreino}"
+                                                    Width="*"/>
                             </DataGrid.Columns>
+
                         </DataGrid>
                     </Border>
+
                 </StackPanel>
             </ScrollViewer>
 

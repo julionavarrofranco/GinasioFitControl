@@ -137,15 +137,18 @@ namespace FitControlAdmin
                 var employees = await _apiService.GetAllEmployeesAsync();
                 if (employees != null)
                 {
-                    Funcionarios = employees.Select(e => new FuncionarioDto
-                    {
-                        IdUser = e.IdUser,
-                        IdFuncionario = e.IdFuncionario,
-                        Nome = e.Nome,
-                        Email = e.Email,
-                        Telemovel = e.Telemovel,
-                        Funcao = Enum.Parse<Funcao>(e.Funcao.ToString())
-                    }).ToList();
+                    // Apenas PTs podem ser instrutores de aula
+                    Funcionarios = employees
+                        .Where(e => e.Funcao == Funcao.PT)
+                        .Select(e => new FuncionarioDto
+                        {
+                            IdUser = e.IdUser,
+                            IdFuncionario = e.IdFuncionario,
+                            Nome = e.Nome,
+                            Email = e.Email,
+                            Telemovel = e.Telemovel,
+                            Funcao = e.Funcao
+                        }).ToList();
                 }
             }
             catch (Exception ex)

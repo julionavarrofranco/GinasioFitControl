@@ -173,7 +173,8 @@
         </Border>
 
         <!-- Lista de Membros com Checkboxes -->
-        <Border Grid.Row="2" 
+        <Border x:Name="MembersListBorder"
+                Grid.Row="2" 
                 Background="#1f2937" 
                 BorderBrush="#34495E" 
                 BorderThickness="1"
@@ -214,6 +215,7 @@
                 <ListBox Grid.Row="2" 
                          x:Name="MembersListBox"
                          SelectionMode="Multiple"
+                         Background="#1f2937"
                          ScrollViewer.VerticalScrollBarVisibility="Auto">
                     <ListBox.ItemTemplate>
                         <DataTemplate>

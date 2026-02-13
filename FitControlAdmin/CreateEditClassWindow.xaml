@@ -137,7 +137,9 @@
                         <ComboBox x:Name="DiaSemanaComboBox"
                                   Foreground="Black"
                                   SelectedValuePath="Tag"
-                                  SelectedValue="{Binding SelectedDiaSemana, UpdateSourceTrigger=PropertyChanged}">
+                                  SelectedValue="{Binding SelectedDiaSemana, UpdateSourceTrigger=PropertyChanged}"
+                                  ItemContainerStyle="{StaticResource DefaultComboBoxItemStyle}">
+                            
                             <ComboBoxItem Content="Segunda" Tag="Segunda"/>
                             <ComboBoxItem Content="Terça" Tag="Terca"/>
                             <ComboBoxItem Content="Quarta" Tag="Quarta"/>
@@ -180,7 +182,8 @@
                                   Foreground="Black"
                                   DisplayMemberPath="Nome"
                                   SelectedValuePath="IdFuncionario"
-                                  SelectedValue="{Binding SelectedFuncionarioId, UpdateSourceTrigger=PropertyChanged}"/>
+                                  SelectedValue="{Binding SelectedFuncionarioId, UpdateSourceTrigger=PropertyChanged}"
+                                  ItemContainerStyle="{StaticResource DefaultComboBoxItemStyle}"/>
                     </StackPanel>
                 </StackPanel>
             </ScrollViewer>

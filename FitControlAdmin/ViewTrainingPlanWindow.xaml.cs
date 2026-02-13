@@ -75,5 +75,10 @@ namespace FitControlAdmin
         {
             Close();
         }
+
+        private void ExercisesDataGrid_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        {
+
+        }
     }
 }

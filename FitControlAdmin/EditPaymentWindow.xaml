@@ -6,10 +6,55 @@
         Height="450" Width="450"
         WindowStartupLocation="CenterOwner"
         Background="#313443"
+        Foreground="#e6e6e8"
+        FontFamily="Segoe UI"
         ResizeMode="NoResize">
 
     <Window.Resources>
         <converters:EnumNameConverter x:Key="EnumNameConverter"/>
+
+        <!-- ToggleButton do ComboBox (seta + fundo) -->
+        <ControlTemplate x:Key="EditPaymentComboBoxToggleButton" TargetType="{x:Type ToggleButton}">
+            <Border x:Name="Border" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" SnapsToDevicePixels="True">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="20"/>
+                    </Grid.ColumnDefinitions>
+                    <Path x:Name="Arrow" Grid.Column="1" Data="M 0 0 L 4 4 L 8 0 Z" Fill="#e6e6e8" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                </Grid>
+            </Border>
+        </ControlTemplate>
+
+        <!-- ComboBox com popup de fundo escuro (igual Criar membro) - aplicar com Style="{StaticResource EditPaymentComboBoxStyle}" -->
+        <Style x:Key="EditPaymentComboBoxStyle" TargetType="ComboBox">
+            <Setter Property="Padding" Value="12,10"/>
+            <Setter Property="Background" Value="#272936"/>
+            <Setter Property="Foreground" Value="Black"/>
+            <Setter Property="BorderBrush" Value="#34495E"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="OverridesDefaultStyle" Value="True"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type ComboBox}">
+                        <Grid>
+                            <ToggleButton x:Name="ToggleButton" Template="{StaticResource EditPaymentComboBoxToggleButton}" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Focusable="False" IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}" ClickMode="Press"/>
+                            <ContentPresenter x:Name="ContentSite" Content="{TemplateBinding SelectionBoxItem}" ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}" ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}" Margin="12,10,28,10" VerticalAlignment="Center" HorizontalAlignment="Left" IsHitTestVisible="False"/>
+                            <Popup x:Name="Popup" Placement="Bottom" IsOpen="{TemplateBinding IsDropDownOpen}" AllowsTransparency="True" Focusable="False" PopupAnimation="Slide">
+                                <Grid MinWidth="{TemplateBinding ActualWidth}" MaxHeight="{TemplateBinding MaxDropDownHeight}" SnapsToDevicePixels="True" Background="#272936">
+                                    <Border x:Name="DropDownBorder" Background="#272936" BorderBrush="#34495E" BorderThickness="1">
+                                        <ScrollViewer Margin="4,6,4,6" SnapsToDevicePixels="True" Background="#272936">
+                                            <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Contained" Background="#272936"/>
+                                        </ScrollViewer>
+                                    </Border>
+                                </Grid>
+                            </Popup>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </Window.Resources>
 
     <Grid Margin="25">
@@ -33,37 +78,15 @@
                            Margin="0,0,0,8"
                            FontSize="14"/>
                 <ComboBox x:Name="SubscricaoComboBox"
+                          Style="{StaticResource EditPaymentComboBoxStyle}"
                           Margin="0,0,0,20"
-                          Padding="12,10"
-                          Background="#272936"
-                          Foreground="Black"
-                          BorderBrush="#34495E"
-                          BorderThickness="1"
-                          FontSize="14">
+                          ItemContainerStyle="{StaticResource DefaultComboBoxItemStyle}">
+                    
                     <ComboBox.ItemTemplate>
                         <DataTemplate>
-                            <TextBlock Text="{Binding Nome}"
-                                       Foreground="{Binding RelativeSource={RelativeSource AncestorType=ComboBox}, Path=Foreground}"/>
+                            <TextBlock Text="{Binding Nome}"/>
                         </DataTemplate>
                     </ComboBox.ItemTemplate>
-                    <ComboBox.ItemContainerStyle>
-                        <Style TargetType="ComboBoxItem">
-                            <Setter Property="Background" Value="#272936"/>
-                            <Setter Property="Foreground" Value="White"/>
-                            <Setter Property="BorderThickness" Value="0"/>
-                            <Setter Property="Padding" Value="12,8"/>
-                            <Style.Triggers>
-                                <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter Property="Background" Value="#1f2937"/>
-                                    <Setter Property="Foreground" Value="Black"/>
-                                </Trigger>
-                                <Trigger Property="IsSelected" Value="True">
-                                    <Setter Property="Background" Value="#02acc3"/>
-                                    <Setter Property="Foreground" Value="Black"/>
-                                </Trigger>
-                            </Style.Triggers>
-                        </Style>
-                    </ComboBox.ItemContainerStyle>
                 </ComboBox>
 
                 <TextBlock Text="Método de Pagamento:"
@@ -71,31 +94,10 @@
                            Margin="0,0,0,8"
                            FontSize="14"/>
                 <ComboBox x:Name="MetodoPagamentoComboBox"
+                          Style="{StaticResource EditPaymentComboBoxStyle}"
                           Margin="0,0,0,20"
-                          Padding="12,10"
-                          Background="#272936"
-                          Foreground="Black"
-                          BorderBrush="#34495E"
-                          BorderThickness="1"
-                          FontSize="14">
-                    <ComboBox.ItemContainerStyle>
-                        <Style TargetType="ComboBoxItem">
-                            <Setter Property="Background" Value="#272936"/>
-                            <Setter Property="Foreground" Value="White"/>
-                            <Setter Property="BorderThickness" Value="0"/>
-                            <Setter Property="Padding" Value="12,8"/>
-                            <Style.Triggers>
-                                <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter Property="Background" Value="#1f2937"/>
-                                    <Setter Property="Foreground" Value="Black"/>
-                                </Trigger>
-                                <Trigger Property="IsSelected" Value="True">
-                                    <Setter Property="Background" Value="#02acc3"/>
-                                    <Setter Property="Foreground" Value="Black"/>
-                                </Trigger>
-                            </Style.Triggers>
-                        </Style>
-                    </ComboBox.ItemContainerStyle>
+                          ItemContainerStyle="{StaticResource DefaultComboBoxItemStyle}">
+
                 </ComboBox>
 
                 <TextBlock Text="Estado:"
@@ -103,31 +105,10 @@
                            Margin="0,0,0,8"
                            FontSize="14"/>
                 <ComboBox x:Name="EstadoPagamentoComboBox"
+                          Style="{StaticResource EditPaymentComboBoxStyle}"
                           Margin="0,0,0,20"
-                          Padding="12,10"
-                          Background="#272936"
-                          Foreground="Black"
-                          BorderBrush="#34495E"
-                          BorderThickness="1"
-                          FontSize="14">
-                    <ComboBox.ItemContainerStyle>
-                        <Style TargetType="ComboBoxItem">
-                            <Setter Property="Background" Value="#272936"/>
-                            <Setter Property="Foreground" Value="White"/>
-                            <Setter Property="BorderThickness" Value="0"/>
-                            <Setter Property="Padding" Value="12,8"/>
-                            <Style.Triggers>
-                                <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter Property="Background" Value="#1f2937"/>
-                                    <Setter Property="Foreground" Value="Black"/>
-                                </Trigger>
-                                <Trigger Property="IsSelected" Value="True">
-                                    <Setter Property="Background" Value="#02acc3"/>
-                                    <Setter Property="Foreground" Value="Black"/>
-                                </Trigger>
-                            </Style.Triggers>
-                        </Style>
-                    </ComboBox.ItemContainerStyle>
+                          ItemContainerStyle="{StaticResource DefaultComboBoxItemStyle}">
+
                 </ComboBox>
             </StackPanel>
         </ScrollViewer>

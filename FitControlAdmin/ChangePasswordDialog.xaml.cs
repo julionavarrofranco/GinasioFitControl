@@ -7,14 +7,25 @@ namespace FitControlAdmin
     public partial class ChangePasswordDialog : Window
     {
         private readonly ApiService _apiService;
+        private readonly string? _currentPasswordFirstLogin;
         private bool _isOldPasswordVisible = false;
         private bool _isNewPasswordVisible = false;
         private bool _isConfirmPasswordVisible = false;
 
-        public ChangePasswordDialog(ApiService apiService)
+        /// <summary>Palavra-passe definida após alteração com sucesso (para primeiro login re-autenticar).</summary>
+        public string? NewPasswordAfterChange { get; private set; }
+
+        public ChangePasswordDialog(ApiService apiService, string? currentPasswordForFirstLogin = null)
         {
             InitializeComponent();
             _apiService = apiService;
+            _currentPasswordFirstLogin = currentPasswordForFirstLogin;
+            if (!string.IsNullOrEmpty(_currentPasswordFirstLogin))
+            {
+                Title = "Primeiro login - Alterar palavra-passe";
+                TitleTextBlock.Text = "Primeiro login - Alterar palavra-passe";
+                OldPasswordPanel.Visibility = Visibility.Collapsed;
+            }
             
             // Sync password fields
             OldPasswordBox.PasswordChanged += (s, e) =>
@@ -68,7 +79,9 @@ namespace FitControlAdmin
 
         private async void ChangePasswordButton_Click(object sender, RoutedEventArgs e)
         {
-            var oldPassword = _isOldPasswordVisible ? OldPasswordTextBox.Text : OldPasswordBox.Password;
+            var oldPassword = !string.IsNullOrEmpty(_currentPasswordFirstLogin)
+                ? _currentPasswordFirstLogin
+                : (_isOldPasswordVisible ? OldPasswordTextBox.Text : OldPasswordBox.Password);
             var newPassword = _isNewPasswordVisible ? NewPasswordTextBox.Text : NewPasswordBox.Password;
             var confirmPassword = _isConfirmPasswordVisible ? ConfirmPasswordTextBox.Text : ConfirmPasswordBox.Password;
 
@@ -100,6 +113,7 @@ namespace FitControlAdmin
 
                 if (success)
                 {
+                    NewPasswordAfterChange = newPassword;
                     MessageBox.Show("Palavra-passe alterada com sucesso!", 
                         "Sucesso", 
                         MessageBoxButton.OK, 

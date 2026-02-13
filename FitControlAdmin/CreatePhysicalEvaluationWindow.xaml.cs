@@ -19,31 +19,41 @@ namespace FitControlAdmin
             _idMembro = idMembro;
             _idFuncionario = idFuncionario;
             _idAvaliacao = idAvaliacao;
+            PesoTextBox.TextChanged += (s, e) => UpdateImc();
+            AlturaTextBox.TextChanged += (s, e) => UpdateImc();
+        }
+
+        private void UpdateImc()
+        {
+            if (decimal.TryParse(PesoTextBox.Text?.Replace(",", "."), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out decimal peso) &&
+                decimal.TryParse(AlturaTextBox.Text?.Replace(",", "."), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out decimal altura) &&
+                altura > 0)
+            {
+                decimal imc = peso / (altura * altura);
+                ImcTextBox.Text = imc.ToString("F1", System.Globalization.CultureInfo.InvariantCulture);
+            }
+            else
+                ImcTextBox.Text = "";
         }
 
         private async void ConfirmButton_Click(object sender, RoutedEventArgs e)
         {
             // Validação
-            if (string.IsNullOrWhiteSpace(PesoTextBox.Text) || !decimal.TryParse(PesoTextBox.Text, out decimal peso))
+            if (string.IsNullOrWhiteSpace(PesoTextBox.Text) || !decimal.TryParse(PesoTextBox.Text.Replace(",", "."), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out decimal peso) || peso <= 0)
             {
                 MessageBox.Show("Por favor, insira um peso válido.", "Validação", 
                     MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
-            if (string.IsNullOrWhiteSpace(AlturaTextBox.Text) || !decimal.TryParse(AlturaTextBox.Text, out decimal altura))
+            if (string.IsNullOrWhiteSpace(AlturaTextBox.Text) || !decimal.TryParse(AlturaTextBox.Text.Replace(",", "."), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out decimal altura) || altura <= 0)
             {
-                MessageBox.Show("Por favor, insira uma altura válida.", "Validação", 
+                MessageBox.Show("Por favor, insira uma altura válida (em metros).", "Validação", 
                     MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
-            if (string.IsNullOrWhiteSpace(ImcTextBox.Text) || !decimal.TryParse(ImcTextBox.Text, out decimal imc))
-            {
-                MessageBox.Show("Por favor, insira um IMC válido.", "Validação", 
-                    MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
-            }
+            decimal imc = peso / (altura * altura);
 
             if (string.IsNullOrWhiteSpace(MassaMuscularTextBox.Text) || !decimal.TryParse(MassaMuscularTextBox.Text, out decimal massaMuscular))
             {
@@ -61,6 +71,14 @@ namespace FitControlAdmin
 
             try
             {
+                // Confirmar reserva só quando o utilizador efetivamente completar a avaliação (não ao abrir a janela)
+                var confirmResult = await _apiService.ConfirmReservationAsync(_idMembro, _idAvaliacao, _idFuncionario);
+                if (!confirmResult.Success)
+                {
+                    MessageBox.Show(confirmResult.ErrorMessage ?? "Erro ao confirmar reserva.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
                 // Criar DTO para marcar presença e completar a avaliação
                 var markAttendanceDto = new MarkAttendanceDto
                 {

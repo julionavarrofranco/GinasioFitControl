@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Media;
 using FitControlAdmin.Models;
 using FitControlAdmin.Services;
 
@@ -29,6 +31,10 @@ namespace FitControlAdmin
                 ActionButtonsPanel.Visibility = Visibility.Collapsed;
                 MembersListHeader.Text = "Lista de Membros (quem esteve presente):";
                 MembersListBox.IsEnabled = false;
+                var darkBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#1f2937"));
+                MembersListBorder.Background = darkBrush;
+                MembersListBox.Background = darkBrush;
+                Loaded += (s, e) => ApplyDarkBackgroundToListBoxChildren();
             }
 
             LoadAttendanceData();
@@ -161,6 +167,26 @@ namespace FitControlAdmin
         {
             DialogResult = false;
             Close();
+        }
+
+        private void ApplyDarkBackgroundToListBoxChildren()
+        {
+            if (!_somenteConsulta) return;
+            var darkBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#1f2937"));
+            ApplyBackgroundToDescendants(MembersListBox, darkBrush);
+        }
+
+        private static void ApplyBackgroundToDescendants(DependencyObject parent, SolidColorBrush brush)
+        {
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
+            {
+                var child = VisualTreeHelper.GetChild(parent, i);
+                if (child is Border border)
+                    border.Background = brush;
+                else if (child is ScrollViewer sv)
+                    sv.Background = brush;
+                ApplyBackgroundToDescendants(child, brush);
+            }
         }
     }
 }

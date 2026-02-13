@@ -1,9 +1,9 @@
 <Window x:Class="FitControlAdmin.LoginWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="FitControl Admin - Login" Height="550" Width="450"
+        Title="FitControl Admin - Login" Height="650" Width="480"
         WindowStartupLocation="CenterScreen"
-        ResizeMode="NoResize"
+        ResizeMode="CanResize"
         Background="#313443">
     <Grid>
         <Grid.RowDefinitions>

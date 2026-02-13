@@ -68,15 +68,15 @@
                       BorderBrush="#34495E"
                       HeadersVisibility="Column"
                       CanUserAddRows="False"
-                      MinHeight="120">
+                      MinHeight="120" SelectionChanged="ExercisesDataGrid_SelectionChanged">
                 <DataGrid.Resources>
                     <Style TargetType="DataGridCell">
                         <Setter Property="Foreground" Value="#FFE6E6E8"/>
                     </Style>
 
                     <Style TargetType="DataGridColumnHeader">
-                        <Setter Property="Background" Value="#FFE6E6E8"/>
-                        <Setter Property="Foreground" Value="Black"/>
+                        <Setter Property="Background" Value="#ff1a4d5c"/>
+                        <Setter Property="Foreground" Value="#e6e6e8"/>
                     </Style>
                 </DataGrid.Resources>
                 <DataGrid.Columns>

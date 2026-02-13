@@ -70,24 +70,45 @@
                            Foreground="#95a5a6" 
                            Margin="0,0,0,8"
                            FontSize="14"/>
-                <TextBox x:Name="TelemovelTextBox" 
-                         Margin="0,0,0,20" 
-                         Padding="12,10"
-                         Background="#272936"
-                         Foreground="#e6e6e8"
-                         BorderBrush="#34495E"
-                         BorderThickness="1"
-                         FontSize="14">
-                    <TextBox.Style>
-                        <Style TargetType="TextBox">
-                            <Style.Triggers>
-                                <Trigger Property="IsFocused" Value="True">
-                                    <Setter Property="BorderBrush" Value="#02acc3"/>
-                                </Trigger>
-                            </Style.Triggers>
-                        </Style>
-                    </TextBox.Style>
-                </TextBox>
+                <Grid Margin="0,0,0,20">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="120"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <ComboBox x:Name="TelemovelCountryCodeComboBox"
+                        Grid.Column="0"
+                        Margin="0,0,8,0"
+                        Padding="8,10"
+                        Background="#272936"
+                        Foreground="Black"
+                        BorderBrush="#34495E"
+                        BorderThickness="1"
+                        FontSize="14"
+                        ItemContainerStyle="{StaticResource DefaultComboBoxItemStyle}">
+
+                        <ComboBoxItem Content="(PT) +351" Tag="+351"/>
+                        <ComboBoxItem Content="(ES) +34" Tag="+34"/>
+                        <ComboBoxItem Content="(UK) +44" Tag="+44"/>
+                    </ComboBox>
+                    <TextBox x:Name="TelemovelTextBox" 
+                             Grid.Column="1"
+                             Padding="12,10"
+                             Background="#272936"
+                             Foreground="#e6e6e8"
+                             BorderBrush="#34495E"
+                             BorderThickness="1"
+                             FontSize="14">
+                        <TextBox.Style>
+                            <Style TargetType="TextBox">
+                                <Style.Triggers>
+                                    <Trigger Property="IsFocused" Value="True">
+                                        <Setter Property="BorderBrush" Value="#02acc3"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBox.Style>
+                    </TextBox>
+                </Grid>
 
                 <TextBlock Text="Função:" 
                            Foreground="#95a5a6" 
@@ -100,28 +121,12 @@
                           Foreground="Black"
                           BorderBrush="#34495E"
                           BorderThickness="1"
-                          FontSize="14">
-                    <ComboBox.ItemContainerStyle>
-                        <Style TargetType="ComboBoxItem">
-                            <Setter Property="Background" Value="#272936"/>
-                            <Setter Property="Foreground" Value="White"/>
-                            <Setter Property="BorderThickness" Value="0"/>
-                            <Setter Property="Padding" Value="12,8"/>
-                            <Style.Triggers>
-                                <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter Property="Background" Value="#1f2937"/>
-                                    <Setter Property="Foreground" Value="Black"/>
-                                </Trigger>
-                                <Trigger Property="IsSelected" Value="True">
-                                    <Setter Property="Background" Value="#02acc3"/>
-                                    <Setter Property="Foreground" Value="Black"/>
-                                </Trigger>
-                            </Style.Triggers>
-                        </Style>
-                    </ComboBox.ItemContainerStyle>
-                    <ComboBoxItem Content="Admin"/>
-                    <ComboBoxItem Content="Rececao"/>
-                    <ComboBoxItem Content="PT"/>
+                          FontSize="14"
+                          ItemContainerStyle="{StaticResource DefaultComboBoxItemStyle}">
+                  
+                    <ComboBoxItem Content="Admin" Tag="Admin"/>
+                    <ComboBoxItem Content="Receção" Tag="Rececao"/>
+                    <ComboBoxItem Content="PT" Tag="PT"/>
                 </ComboBox>
 
                 <CheckBox x:Name="AtivoCheckBox" 

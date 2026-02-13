@@ -236,3 +236,4 @@ C:\Users\tiago\OneDrive\Área de Trabalho\PF\nova versao\FitControlAdmin\obj\Deb
 C:\Users\tiago\OneDrive\Área de Trabalho\PF\nova versao\FitControlAdmin\obj\Debug\net10.0-windows\ViewTrainingPlanWindow.g.cs
 C:\Users\tiago\OneDrive\Área de Trabalho\PF\nova versao\FitControlAdmin\obj\Debug\net10.0-windows\CreateFuncionarioWindow.baml
 C:\Users\tiago\OneDrive\Área de Trabalho\PF\nova versao\FitControlAdmin\obj\Debug\net10.0-windows\CreateFuncionarioWindow.g.cs
+C:\Users\tiago\OneDrive\Área de Trabalho\PF\nova versao\FitControlAdmin\obj\Debug\net10.0-windows\App.baml

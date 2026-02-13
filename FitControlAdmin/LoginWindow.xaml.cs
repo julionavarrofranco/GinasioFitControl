@@ -53,6 +53,26 @@ namespace FitControlAdmin
 
                 if (tokenResponse != null && !string.IsNullOrEmpty(tokenResponse.AccessToken))
                 {
+                    if (tokenResponse.NeedsPasswordChange)
+                    {
+                        var changePasswordDialog = new ChangePasswordDialog(_apiService, password);
+                        if (changePasswordDialog.ShowDialog() == true && !string.IsNullOrEmpty(changePasswordDialog.NewPasswordAfterChange))
+                        {
+                            var newPassword = changePasswordDialog.NewPasswordAfterChange;
+                            var reLogin = await _apiService.LoginAsync(email, newPassword);
+                            if (reLogin != null && !string.IsNullOrEmpty(reLogin.AccessToken))
+                            {
+                                var win = new MainWindow(_apiService);
+                                win.Show();
+                                this.Close();
+                            }
+                            else
+                                ShowError("Palavra-passe alterada. Por favor, faça login novamente com a nova palavra-passe.");
+                        }
+                        else
+                            ShowError("É obrigatório alterar a palavra-passe no primeiro login para continuar.");
+                        return;
+                    }
                     var mainWindow = new MainWindow(_apiService);
                     mainWindow.Show();
                     this.Close();
@@ -62,9 +82,9 @@ namespace FitControlAdmin
                     ShowError("Email ou palavra-passe incorretos.");
                 }
             }
-            catch(Exception ex)
+            catch (Exception)
             {
-                ShowError(ex.Message);
+                ShowError("Credenciais inválidas.");
             }
             finally
             {

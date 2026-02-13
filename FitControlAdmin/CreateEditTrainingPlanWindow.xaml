@@ -114,8 +114,8 @@
                 </Style>
 
                 <Style TargetType="DataGridColumnHeader">
-                    <Setter Property="Background" Value="#FFE6E6E8"/>
-                    <Setter Property="Foreground" Value="Black"/>
+                    <Setter Property="Background" Value="#ff1a4d5c"/> 
+                    <Setter Property="Foreground" Value="#e6e6e8"/>
                 </Style>
             </DataGrid.Resources>
             <DataGrid.Columns>
