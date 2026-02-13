@@ -7,68 +7,63 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 </head>
 <body class="@(ViewData["BodyClass"] ?? "")" style="@(ViewData["BodyStyle"] ?? "")">
-    <header>
-        <nav class="navbar member-navbar">
+    <div class="page-wrapper">
+        <!-- wrapper flex vertical -->
+        <header>
+            <nav class="navbar member-navbar">
+                <div class="container">
+                    <div class="logo">
+                        <a href="@Url.Action("Index", "Home")" style="text-decoration: none; color: inherit;">
+                            <h1>FitControl</h1>
+                        </a>
+                        <span class="member-badge">Área de Membros</span>
+                    </div>
+                    <ul class="nav-menu">
+                        <li><a href="@Url.Action("Dashboard", "Member")">Dashboard</a></li>
+                        <li><a href="@Url.Action("Classes", "Member")">Aulas</a></li>
+                        <li><a href="@Url.Action("TrainingPlan", "Member")">Plano de Treino</a></li>
+                        <li><a href="@Url.Action("PhysicalAssessment", "Member")">Avaliação Física</a></li>
+                        <li><a href="@Url.Action("Profile", "Member")">Perfil</a></li>
+                    </ul>
+                    <div class="nav-user">
+                        <span class="user-name">Olá, @ViewData["MemberName"]</span>
+                        <form asp-controller="Account" asp-action="Logout" method="post" style="display: inline;">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn-logout">Sair</button>
+                        </form>
+                    </div>
+                </div>
+            </nav>
+        </header>
+
+        <main class="page-content">
+            @RenderBody()
+        </main>
+
+        <footer class="footer">
             <div class="container">
-                <div class="logo">
-                    <a href="@Url.Action("Index", "Home")" style="text-decoration: none; color: inherit;">
-                        <h1>FitControl</h1>
-                    </a>
-                    <span class="member-badge">Área de Membros</span>
+                <div class="footer-content">
+                    <div class="footer-section">
+                        <h3>FitControl</h3>
+                        <p>Área exclusiva para membros</p>
+                    </div>
+                    <div class="footer-section">
+                        <h3>Contactos</h3>
+                        <p>Rua Cipriano Dourado, 14B,<br>1600-428 Lisboa</p>
+                        <p>geral@fitcontrol.pt</p>
+                    </div>
                 </div>
-                <ul class="nav-menu">
-                    <li><a href="@Url.Action("Dashboard", "Member")">Dashboard</a></li>
-                    <li><a href="@Url.Action("Classes", "Member")">Aulas</a></li>
-        <li><a href="@Url.Action("TrainingPlan", "Member")">Plano de Treino</a></li>
-                    <li><a href="@Url.Action("PhysicalAssessment", "Member")">Avaliação Física</a></li>
-                    <li><a href="@Url.Action("Profile", "Member")">Perfil</a></li>
-                </ul>
-                <div class="nav-user">
-@{
-    // derive a friendly username: if identity is an email, use the portion before '@'
-    var rawName = User?.Identity?.Name ?? "";
-    var friendly = "user";
-    if (!string.IsNullOrEmpty(rawName)) {
-        var at = rawName.IndexOf('@');
-        friendly = at > 0 ? rawName.Substring(0, at) : rawName;
-    }
-}
-                    <span class="user-name">Olá, @friendly</span>
-                    <form asp-controller="Account" asp-action="Logout" method="post" style="display: inline;">
-                        @Html.AntiForgeryToken()
-                        <button type="submit" class="btn-logout">Sair</button>
-                    </form>
+                <div class="footer-bottom">
+                    <p>&copy; 2025 FitControl. Todos os direitos reservados.</p>
                 </div>
             </div>
-        </nav>
-    </header>
-
-    <main>
-        @RenderBody()
-    </main>
-
-    <footer class="footer">
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-section">
-                    <h3>FitControl</h3>
-                    <p>Área exclusiva para membros</p>
-                </div>
-                <div class="footer-section">
-                    <h3>Contactos</h3>
-                    <p>Rua Cipriano Dourado, 14B,<br>1600-428 Lisboa</p>
-                    <p>geral@fitcontrol.pt</p>
-                </div>
-            </div>
-            <div class="footer-bottom">
-                <p>&copy; 2025 FitControl. Todos os direitos reservados.</p>
-            </div>
-        </div>
-    </footer>
+        </footer>
+    </div> <!-- end page-wrapper -->
 
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
+
 </html>
 
 <style>

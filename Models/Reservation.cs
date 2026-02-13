@@ -12,7 +12,6 @@ namespace TTFWebsite.Models
         public int UserId { get; set; }
         public int? ClassId { get; set; }
         public int? AssessmentId { get; set; } // novo campo para ligação 
-        public DateTime ReservationDate { get; set; }
         public DateTime CreatedAt { get; set; }
         public bool IsCancelled { get; set; }
         public ReservationType Type { get; set; }

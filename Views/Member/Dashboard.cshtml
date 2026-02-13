@@ -6,7 +6,7 @@
 
 <div class="dashboard-container">
     <div class="dashboard-header">
-        <h1>Bem-vindo, @Model.Profile.Name!</h1>
+        <h1>Bem-vindo, @Model.Profile.Name</h1>
         <p class="subtitle">Ginásio: AAAA</p>
     </div>
 
@@ -24,37 +24,22 @@
                     {
                         <div class="reservation-item">
                             <div class="reservation-time">
-                                <span class="time">@reservation.ReservationDate.ToString("HH:mm")</span>
-                                <span class="date">@reservation.ReservationDate.ToString("dd MMM")</span>
+                                <span class="time">@reservation.dataReserva.ToString("HH:mm")</span>
+                                <span class="date">@reservation.dataReserva.ToString("dd MMM")</span>
                             </div>
                             <div class="reservation-details">
                                 <h3>
                                     @{
-                                        var title = reservation.Class?.Name;
-                                        if (string.IsNullOrWhiteSpace(title))
-                                        {
-                                            if (reservation.Type == TTFWebsite.Models.ReservationType.PhysicalAssessment)
-                                            {
-                                                title = "Avaliação Física";
-                                            }
-                                            else if (reservation.Type == TTFWebsite.Models.ReservationType.Class)
-                                            {
-                                                title = "Aula";
-                                            }
-                                            else
-                                            {
-                                                title = reservation.Type.ToString();
-                                            }
-                                        }
+                                        var title = reservation.nomeAula;
                                     }
                                     @title
                                 </h3>
                                 <p>
-                                    @((!string.IsNullOrWhiteSpace(reservation.Class?.Instructor) ? reservation.Class.Instructor : "—"))
+                                    @((!string.IsNullOrWhiteSpace(reservation.instrutor) ? reservation.instrutor : "—"))
                                     •
-                                    @((!string.IsNullOrWhiteSpace(reservation.Class?.Room) ? reservation.Class.Room : "—"))
+                                    @(reservation.sala)
                                 </p>
-                                <p>@reservation.ReservationDate.ToString("dddd, dd MMMM")</p>
+                                <p>@reservation.dataReserva.ToString("dddd, dd MMMM")</p>
                             </div>
                         </div>
                     }

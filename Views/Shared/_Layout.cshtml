@@ -22,7 +22,22 @@
                     <li><a href="#plans">Planos</a></li>
                     <li><a href="#contact">Contacto</a></li>
                 </ul>
-                <a href="@Url.Action("Login", "Account")" class="btn-primary">Área de Membros</a>
+                <div class="nav-user">
+                    @if (User.Identity != null && User.Identity.IsAuthenticated)
+                    {
+                        <a href="@Url.Action("Dashboard", "Member")"
+                           class="member-link">
+                            Olá, @ViewData["MemberName"]
+                        </a>
+                    }
+                    else
+                    {
+                        <a href="@Url.Action("Login", "Account")" class="btn-primary">
+                            Área de Membros
+                        </a>
+                    }
+                </div>
+
             </div>
         </nav>
     </header>
@@ -61,6 +76,7 @@
                     <h3>Contactos</h3>
                     <p>Rua Cipriano Dourado, 14B,<br>1600-428 Lisboa</p>
                     <p>geral@fitcontrol.pt</p>
+                    <p>960 699 101</p>
                 </div>
             </div>
             <div class="footer-bottom">
@@ -80,3 +96,14 @@
 </body>
 </html>
 
+<style>
+
+.member-link {
+    color: var(--text-secondary); /* cinzento da homepage */
+    text-decoration: underline;
+    text-decoration-color: var(--accent); /* azul da homepage */
+    text-decoration-thickness: 2px;
+    cursor: pointer;
+}
+
+</style>

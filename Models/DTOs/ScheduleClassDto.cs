@@ -8,9 +8,11 @@
         public TimeSpan HoraInicio { get; set; }
         public TimeSpan HoraFim { get; set; }
         public int Capacidade { get; set; }
-        public int Reservas { get; set; }
-        public string? NomeFuncionario { get; set; }
-        public string? Sala { get; set; }
-    }
 
+        // Propriedade oficial vindo do servidor: reservas atuais
+        public int ReservasAtuais { get; set; }
+
+        public string? NomeInstrutor { get; set; }
+        public int? Sala { get; set; }
+    }
 }

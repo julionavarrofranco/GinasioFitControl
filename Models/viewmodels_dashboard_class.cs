@@ -7,7 +7,7 @@ namespace TTFWebsite.Models
     public class DashboardViewModel
     {
         public MemberProfileViewModel Profile { get; set; } = new();
-        public List<Reservation> UpcomingReservations { get; set; } = new();
+        public List<ClassReservationDto> UpcomingReservations { get; set; } = new();
         public PhysicalAssessment? RecentAssessment { get; set; }
         public List<ScheduleClassDto> AvailableClassesToday { get; set; } = new();
         public TrainingPlanViewModel TrainingPlan { get; set; } = new TrainingPlanViewModel();
@@ -16,6 +16,6 @@ namespace TTFWebsite.Models
     public class ClassesViewModel
     {
         public List<ScheduleClassDto> AvailableClasses { get; set; } = new();
-        public List<Reservation> UserReservations { get; set; } = new();
+        public List<ClassReservationDto> UserReservations { get; set; } = new();
     }
 }

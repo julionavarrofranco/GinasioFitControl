@@ -21,23 +21,31 @@ public class MemberController : Controller
         return user?.IdMembro;
     }
 
+    private async Task<MemberProfileViewModel> GetProfileAsync(int idMembro)
+    {
+        var profile = await _api.GetMemberProfileAsync(idMembro);
+        ViewData["MemberName"] = profile?.Name ?? "Membro";
+        return profile ?? new MemberProfileViewModel();
+    }
+
+    // pequenos DTOs para binding de AJAX
+    public class BookClassRequestDto { public int classId { get; set; } }
+    public class CancelReservationRequestDto {
+        public int MemberId { get; set; }
+        public int ClassId { get; set; }
+    }
+
     // -------------------------
     // DASHBOARD
     // -------------------------
     public async Task<IActionResult> Dashboard()
     {
-        Console.WriteLine("Dashboard chamado");
         var idMembro = await GetIdMembro();
-        if (idMembro == null)
-        {
-            // Apenas retorna Unauthorized, middleware trata o redirect
-            Console.WriteLine("ID do membro não encontrado. Provável JWT expirado ou refresh falhou.");
-            return Unauthorized();
-        }
+        if (idMembro == null) return Unauthorized();
 
-        var profile = await _api.GetMemberProfileAsync(idMembro.Value) ?? new MemberProfileViewModel();
+        var profile = await GetProfileAsync(idMembro.Value);
         var recentAssessment = await _api.GetLatestPhysicalAssessmentAsync(idMembro.Value);
-        var trainingPlan = await _api.GetTrainingPlanAsync(idMembro.Value) ?? new TrainingPlanViewModel();
+        var trainingPlan = await _api.GetCurrentTrainingPlanAsync() ?? new TrainingPlanViewModel();
         var reservations = await _api.GetUserReservationsAsync(idMembro.Value);
         var classesToday = await _api.GetAvailableClassesAsync();
 
@@ -50,9 +58,8 @@ public class MemberController : Controller
             AvailableClassesToday = classesToday
         };
 
-        return View(model); // View: Dashboard.cshtml
+        return View(model);
     }
-
 
     // -------------------------
     // PROFILE
@@ -62,8 +69,20 @@ public class MemberController : Controller
         var idMembro = await GetIdMembro();
         if (idMembro == null) return Unauthorized();
 
-        var profile = await _api.GetMemberProfileAsync(idMembro.Value) ?? new MemberProfileViewModel();
-        return View(profile); // View: Profile.cshtml
+        var profile = await GetProfileAsync(idMembro.Value);
+        return View(profile);
+    }
+
+    [AllowAnonymous]
+    public async Task<IActionResult> GetMemberName()
+    {
+        var idMembro = await GetIdMembro();
+        if (idMembro == null) return Json(null);
+
+        var profile = await _api.GetMemberProfileAsync(idMembro.Value);
+        if (profile == null) return Json(null);
+
+        return Json(profile.Name);
     }
 
     // -------------------------
@@ -74,6 +93,7 @@ public class MemberController : Controller
         var idMembro = await GetIdMembro();
         if (idMembro == null) return Unauthorized();
 
+        var profile = await GetProfileAsync(idMembro.Value);
         var classes = await _api.GetAvailableClassesAsync();
         var reservations = await _api.GetUserReservationsAsync(idMembro.Value);
 
@@ -83,25 +103,38 @@ public class MemberController : Controller
             UserReservations = reservations
         };
 
-        return View(model); // View: Classes.cshtml
+        return View(model);
     }
 
     [HttpPost]
-    public async Task<IActionResult> BookClass(int idAula)
+    public async Task<IActionResult> BookClass([FromQuery] int id)
     {
         var idMembro = await GetIdMembro();
         if (idMembro == null) return Unauthorized();
 
-        await _api.BookClassAsync(idMembro.Value, idAula);
-        return RedirectToAction("Classes");
+        var reservationId = await _api.BookClassAsync(idMembro.Value, id);
+        if (reservationId == null) return BadRequest(new { message = "Erro ao reservar." });
+
+        // Busca reservas atualizadas
+        var reservations = await _api.GetUserReservationsAsync(idMembro.Value);
+
+        return PartialView("UserReservationsPartial", reservations);
     }
 
-    [HttpPost]
-    public async Task<IActionResult> CancelReservation(int reservationId)
+    [HttpPatch]
+    public async Task<IActionResult> CancelReservation([FromQuery] CancelReservationRequestDto request)
     {
-        await _api.CancelReservationAsync(reservationId);
-        return RedirectToAction("Dashboard");
+        if (request.MemberId <= 0 || request.ClassId <= 0)
+            return BadRequest(new { message = "Dados inválidos." });
+
+        await _api.CancelReservationAsync(request.MemberId, request.ClassId);
+
+        var reservations = await _api.GetUserReservationsAsync(request.MemberId);
+        return PartialView("UserReservationsPartial", reservations);
     }
+
+
+
 
     // -------------------------
     // TRAINING PLAN
@@ -111,8 +144,13 @@ public class MemberController : Controller
         var idMembro = await GetIdMembro();
         if (idMembro == null) return Unauthorized();
 
-        var plan = await _api.GetTrainingPlanAsync(idMembro.Value) ?? new TrainingPlanViewModel();
-        return View(plan); // View: TrainingPlan.cshtml
+        var profile = await GetProfileAsync(idMembro.Value);
+        var plan = await _api.GetCurrentTrainingPlanAsync();
+
+        if (plan == null || plan.Exercises.Count == 0)
+            return RedirectToAction("Dashboard");
+
+        return View(plan);
     }
 
     // -------------------------
@@ -120,11 +158,12 @@ public class MemberController : Controller
     // -------------------------
     public async Task<IActionResult> PhysicalAssessment()
     {
-        var memberId = await GetIdMembro();
-        if (memberId == null) return Unauthorized();
+        var idMembro = await GetIdMembro();
+        if (idMembro == null) return Unauthorized();
 
-        var latestAssessment = await _api.GetLatestPhysicalAssessmentAsync(memberId.Value);
-        var nextReservation = await _api.GetActivePhysicalAssessmentAsync(memberId.Value);
+        var profile = await GetProfileAsync(idMembro.Value);
+        var latestAssessment = await _api.GetLatestPhysicalAssessmentAsync(idMembro.Value);
+        var nextReservation = await _api.GetActivePhysicalAssessmentAsync(idMembro.Value);
 
         var vm = new PhysicalAssessmentViewModel
         {
@@ -138,8 +177,6 @@ public class MemberController : Controller
         return View(vm);
     }
 
-
-
     [HttpPost]
     public async Task<IActionResult> BookPhysicalAssessment([FromBody] BookPhysicalAssessmentDto request)
     {
@@ -149,29 +186,61 @@ public class MemberController : Controller
         if (string.IsNullOrWhiteSpace(request.DataReserva))
             return BadRequest(new { message = "DataReserva não fornecida." });
 
-        if (!DateTime.TryParse(request.DataReserva, null, System.Globalization.DateTimeStyles.AssumeLocal, out var dataReserva))
+        if (!DateTime.TryParse(request.DataReserva, null, System.Globalization.DateTimeStyles.RoundtripKind, out var dataReserva))
             return BadRequest(new { message = "DataReserva inválida." });
 
-        var errorMessage = await _api.BookPhysicalAssessmentAsync(idMembro.Value, dataReserva);
+        // ✅ Verifica se já existe reserva ativa
+        var existing = await _api.GetActivePhysicalAssessmentAsync(idMembro.Value);
+        if (existing != null)
+            return BadRequest(new { message = "O membro já possui uma reserva ativa." });
 
-        if (!string.IsNullOrEmpty(errorMessage))
-            return BadRequest(new { message = errorMessage });
+        Reservation? reservation;
+        try
+        {
+            // ✅ Cria reserva e retorna o objeto criado
+            reservation = await _api.BookPhysicalAssessmentAsync(idMembro.Value, dataReserva);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
 
-        return Ok();
+        if (reservation == null)
+            return BadRequest(new { message = "Erro ao criar a reserva." });
+
+        // ✅ Retorna o ID válido da reserva imediatamente
+        return Ok(new
+        {
+            IdMembroAvaliacao = reservation.Id,
+            IdAvaliacaoFisica = reservation.AssessmentId,
+            DataReserva = reservation.CreatedAt,
+            Estado = 0
+        });
     }
-
-
-
-
-
+        
     [HttpPost]
-    public async Task<IActionResult> CancelPhysicalAssessment(int reservationId)
+    public async Task<IActionResult> CancelPhysicalAssessment([FromQuery] int reservationId)
     {
         var idMembro = await GetIdMembro();
         if (idMembro == null) return Unauthorized();
 
-        await _api.CancelPhysicalAssessmentAsync(reservationId);
-        return RedirectToAction("PhysicalAssessment");
-    }
+        var reservation = await _api.GetActivePhysicalAssessmentAsync(idMembro.Value);
+        if (reservation == null)
+            return NotFound(new { success = false, message = "Reserva não encontrada." });
 
+        // ✅ Verifica se a reserva pertence ao membro
+        if (reservation.Id != reservationId)
+            return BadRequest(new { success = false, message = "Reserva não corresponde ao membro." });
+
+        try
+        {
+            await _api.CancelPhysicalAssessmentAsync(reservation.Id);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { success = false, message = ex.Message });
+        }
+
+        return Ok(new { success = true });
+    }
 }

@@ -7,10 +7,15 @@
     var latestAssessment = Model.LatestAssessment;
     var nextReservation = Model.NextReservation;
 
-    bool hasValidReservation = nextReservation != null && nextReservation.ReservationDate != DateTime.MinValue && !nextReservation.IsCancelled;
+    bool hasValidReservation = nextReservation != null && nextReservation.CreatedAt != DateTime.MinValue && !nextReservation.IsCancelled;
 }
 
 <div class="assessment-container">
+    <div id="global-booking-messages">
+        <div id="booking-success-message" class="booking-message success"></div>
+        <div id="booking-error-message" class="booking-message error"></div>
+    </div>
+
     <div class="assessment-header">
         <h1>Avaliação Física</h1>
         <p>Consulta abaixo a tua avaliação mais recente</p>
@@ -28,11 +33,8 @@
                 </button>
             }
         </div>
-
-
     </div>
 
-    @* Próxima reserva válida *@
     @if (hasValidReservation)
     {
         <div class="assessment-notice-card" data-reservation-id="@nextReservation.Id">
@@ -41,9 +43,10 @@
                     <div class="notice-icon">🩺</div>
                     <div>
                         <div class="notice-title">Tens uma avaliação marcada</div>
-                        <div class="notice-sub">@nextReservation.ReservationDate.ToString("dddd, dd MMMM yyyy 'às' HH:mm")</div>
+                        <div class="notice-sub">@nextReservation.CreatedAt.ToString("dddd, dd MMMM yyyy 'às' HH:mm")</div>
                     </div>
                     <div class="notice-actions">
+                        <!-- ALTERAÇÃO: envia o ID da reserva, não AssessmentId -->
                         <button class="btn-cancel" onclick="cancelAssessment(@nextReservation.Id)">Cancelar</button>
                     </div>
                 </div>
@@ -119,15 +122,13 @@
 
     <!-- Modal de agendamento -->
     <div class="assessment-reservations-block">
-        <div id="booking-modal" class="booking-modal" aria-hidden="true">
+        <div id="booking-modal" class="booking-modal" inert>
             <div class="booking-dialog" role="dialog" aria-modal="true" aria-labelledby="bookingTitle">
                 <button class="close-btn" aria-label="Fechar" onclick="closeAssessmentModal()">×</button>
                 <h3 id="bookingTitle">Escolher Data para Avaliação Física</h3>
                 <p class="muted">Escolhe uma data e hora conveniente. Receberás confirmação por email.</p>
                 <input type="datetime-local" id="assessmentDateInput" class="input-datetime" aria-label="Data e hora para avaliação" step="1800"><br>
                 <div id="date-help" style="margin-bottom: 20px">Marcação com 7 dias de antecedência</div>
-                <div id="booking-success-message" class="booking-message success" style="display:none"></div>
-                <div id="booking-error-message" class="booking-message error" style="display:none"></div>
                 <div class="dialog-actions">
                     <button class="btn btn-primary" onclick="bookAssessment(document.getElementById('assessmentDateInput').value)">
                         Agendar
@@ -140,87 +141,246 @@
 </div>
 
 <script>
-                function openAssessmentModal() {
-        // Modal só pode ser aberto se o botão estiver ativo
-        const modal = document.getElementById('booking-modal');
-        modal.classList.add('open');
-        modal.setAttribute('aria-hidden', 'false');
+    // Elementos principais
+    const modal = document.getElementById('booking-modal');
+    const btnAgendar = document.querySelector('.btn-agendar-avaliacao');
+    const dateInput = document.getElementById('assessmentDateInput');
+    const successEl = document.getElementById('booking-success-message');
+    const errorEl = document.getElementById('booking-error-message');
+
+    if (!btnAgendar) {
+        console.warn('Botão de agendamento não encontrado na página.');
     }
 
+    // ==================== Funções de mensagens ====================
+    // Garante que a posição e visibilidade das mensagens se mantenham constantes
+    function clearMessageElements() {
+        [successEl, errorEl].forEach(el => {
+            if (!el) return;
+            el.classList.remove('show');
+            el.style.display = 'none';
+            el.innerText = '';
+        });
+    }
 
+    function showBookingMessage(msg, type) {
+        if (!successEl || !errorEl) return;
 
+        const el = type === 'success' ? successEl : errorEl;
+        const otherEl = type === 'success' ? errorEl : successEl;
+
+        // Esconder a outra mensagem imediatamente
+        otherEl.classList.remove('show');
+        otherEl.style.display = 'none';
+        otherEl.innerText = '';
+
+        // Mostrar a mensagem atual de forma previsível
+        el.innerText = msg;
+        el.style.display = 'block';
+        // Forçar reflow para garantir animação consistente
+        void el.offsetWidth;
+        el.classList.add('show');
+
+        // Esconder após 3s e limpar texto
+        setTimeout(() => {
+            el.classList.remove('show');
+            // garantir que depois da transição a display fique oculta
+            setTimeout(() => {
+                el.style.display = 'none';
+                el.innerText = '';
+            }, 300);
+        }, 3000);
+    }
+
+    function showBookingSuccess(msg) { showBookingMessage(msg, 'success'); }
+    function showBookingError(msg) { showBookingMessage(msg, 'error'); }
+
+    // ==================== Modal ====================
+    function openAssessmentModal() {
+        // Resetar input e mensagens sempre que abrir
+        if (dateInput) dateInput.value = '';
+        clearMessageElements();
+
+        modal.classList.add('open');
+        modal.removeAttribute('inert');
+        modal.setAttribute('aria-hidden', 'false');
+        const focusable = modal.querySelector('button, input, [tabindex]:not([tabindex="-1"])');
+        if (focusable) focusable.focus();
+    }
 
     function closeAssessmentModal() {
-        document.getElementById('booking-modal').classList.remove('open');
-        document.getElementById('booking-modal').setAttribute('aria-hidden', 'true');
+        modal.classList.remove('open');
+        modal.setAttribute('inert', '');
+        modal.setAttribute('aria-hidden', 'true');
+
+        // Limpar input e mensagens ao fechar para evitar "estado" residual
+        if (dateInput) dateInput.value = '';
+        clearMessageElements();
     }
 
-        async function bookAssessment(dataReserva) {
-        if (!dataReserva) { showBookingError("Escolhe uma data válida."); return; }
+    // ==================== Atualizar botão ====================
+    function updateBookingButton() {
+        const hasReservation = document.querySelector('.assessment-notice-card') !== null;
+        if (hasReservation && btnAgendar) {
+            btnAgendar.classList.add('disabled');
+            btnAgendar.disabled = true;
+        } else if (btnAgendar) {
+            btnAgendar.classList.remove('disabled');
+            btnAgendar.disabled = false;
+        }
+    }
+
+    // ==================== Agendar avaliação ====================
+    async function bookAssessment(dataReserva) {
+        if (!dataReserva) {
+            showBookingError("Escolhe uma data válida.");
+            return;
+        }
 
         const selectedDate = new Date(dataReserva);
-        const now = new Date();
-        const minDate = new Date(now);
-        minDate.setDate(minDate.getDate() + 7); // +7 dias
+        const isoDate = selectedDate.toISOString();
 
+        const minDate = new Date();
+        minDate.setDate(minDate.getDate() + 7);
         if (selectedDate < minDate) {
             showBookingError("A avaliação deve ser agendada com pelo menos 7 dias de antecedência.");
             return;
         }
 
         try {
-            const response = await fetch('/Member/BookPhysicalAssessment', {
+            const res = await fetch('/Member/BookPhysicalAssessment', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ DataReserva: dataReserva }),
+                body: JSON.stringify({ DataReserva: isoDate }),
                 credentials: 'include'
             });
 
-                   if (!response.ok) {
-            let msg = "Erro ao agendar.";
+            let data;
+            try { data = await res.json(); } catch { data = {}; }
 
-            // tenta ler o corpo como JSON
-            try {
-                const text = await response.text(); // primeiro lê como texto
-                const data = JSON.parse(text);      // depois parse JSON
-                if (data?.message) msg = data.message;
-            } catch {
-                // fallback, se não for JSON, deixa msg padrão
+            if (!res.ok) {
+                const msg = data?.message || "Erro ao agendar.";
+                showBookingError(msg);
+                return;
             }
 
-            throw new Error(msg);
-        }
+            // Aceitar vários nomes possíveis no JSON (camelCase / PascalCase / id)
+            const idRaw = data?.IdMembroAvaliacao ?? data?.idMembroAvaliacao ?? data?.id ?? 0;
+            const reservationId = Number(idRaw || 0);
 
-            showBookingSuccess("Avaliação agendada com sucesso!");
-            setTimeout(() => location.reload(), 1200);
-        } catch (err) {
-            showBookingError(err.message);
-        }
-    }
+            if (!reservationId || reservationId === 0) {
+                showBookingError("Erro ao agendar: ID da reserva inválido.");
+                return;
+            }
 
+            // Cria cartão da reserva
+            const container = document.createElement('div');
+            container.className = 'assessment-notice-card';
+            container.setAttribute('data-reservation-id', reservationId);
+            container.innerHTML = `
+                <div class="container">
+                    <div class="notice-content">
+                        <div class="notice-icon">🩺</div>
+                        <div>
+                            <div class="notice-title">Tens uma avaliação marcada</div>
+                            <div class="notice-sub">${selectedDate.toLocaleDateString('pt-PT', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' })} às ${selectedDate.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' })}</div>
+                        </div>
+                        <div class="notice-actions">
+                            <button class="btn-cancel" data-reservation-id="${reservationId}">Cancelar</button>
+                        </div>
+                    </div>
+                </div>
+            `;
 
-    function cancelAssessment(reservationId) {
-        fetch(`/Member/CancelPhysicalAssessment?reservationId=${reservationId}`, { method: 'POST' })
-            .then(res => {
-                if (res.ok) location.reload();
-                else alert('Erro ao cancelar a avaliação.');
+            container.querySelector('.btn-cancel').addEventListener('click', function () {
+                cancelAssessment(this.dataset.reservationId);
             });
+
+            const recentBlock = document.querySelector('.recent-assessment-block');
+            recentBlock.parentNode.insertBefore(container, recentBlock);
+
+            // Limpar input e mensagens para evitar estado residual quando reabrir modal
+            if (dateInput) dateInput.value = '';
+
+            updateBookingButton();
+            closeAssessmentModal();
+            showBookingSuccess("Avaliação agendada com sucesso!");
+
+        } catch (err) {
+            showBookingError(err?.message || "Erro inesperado ao agendar.");
+        }
     }
 
-    function showBookingError(msg) {
-        document.getElementById('booking-error-message').innerText = msg;
-        document.getElementById('booking-error-message').style.display = 'block';
-        document.getElementById('booking-success-message').style.display = 'none';
+    // ==================== Cancelar avaliação ====================
+    async function cancelAssessment(reservationId) {
+        const id = Number(reservationId);
+
+        try {
+            const res = await fetch(`/Member/CancelPhysicalAssessment?reservationId=${id}`, {
+                method: 'POST',
+                credentials: 'include'
+            });
+            const data = await res.json();
+
+            if (!res.ok || !data.success) throw new Error(data?.message || 'Erro ao cancelar a avaliação.');
+
+            const card = document.querySelector(`.assessment-notice-card[data-reservation-id='${id}']`);
+            if (card) card.remove();
+
+            // Garantir que o botão volte ao estado correto
+            updateBookingButton();
+
+            // Limpar mensagens e input para que, ao abrir modal novamente, não haja resquício
+            clearMessageElements();
+            if (dateInput) dateInput.value = '';
+
+            showBookingSuccess("Avaliação cancelada com sucesso.");
+        } catch (err) {
+            showBookingError(err?.message || 'Erro ao cancelar a avaliação.');
+        }
     }
 
-    function showBookingSuccess(msg) {
-        document.getElementById('booking-success-message').innerText = msg;
-        document.getElementById('booking-success-message').style.display = 'block';
-        document.getElementById('booking-error-message').style.display = 'none';
+    // ==================== Inicialização ====================
+    if (btnAgendar) {
+        btnAgendar.onclick = () => {
+            if (!btnAgendar.disabled) openAssessmentModal();
+        };
     }
+
+    // Estado inicial
+    clearMessageElements();
+    updateBookingButton(); // Atualiza botão no carregamento
 </script>
 
+
 <style>
+    /* ======================= CSS ANTIGO PRESERVADO ======================= */
+    #global-booking-messages {
+        position: fixed;
+        top: 22%; /* 25% do topo da página */
+        left: 50%;
+        transform: translateX(-50%); /* só centraliza horizontalmente */
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+        pointer-events: none;
+    }
+
+
+        #global-booking-messages .booking-message {
+            pointer-events: auto;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            display: block;
+        }
+
+            #global-booking-messages .booking-message.show {
+                opacity: 1;
+                transform: translateY(0);
+            }
     /* ======================= CSS ANTIGO PRESERVADO ======================= */
     .assessment-container {
         position: relative;
@@ -515,16 +675,18 @@
     }
 
         .booking-message.success {
-            background: rgba(40,167,69,0.08);
-            border: 1px solid rgba(40,167,69,0.15);
-            color: #155724;
+            background: rgba(40,167,69,0.7); /* verde mais visível */
+            border: 1px solid rgba(40,167,69,0.9);
+            color: #fff; /* texto branco */
         }
 
         .booking-message.error {
-            background: rgba(220,53,69,0.06);
-            border: 1px solid rgba(220,53,69,0.12);
-            color: #721c24;
+            background: rgba(220,53,69,0.7); /* vermelho mais visível */
+            border: 1px solid rgba(220,53,69,0.9);
+            color: #fff; /* texto branco */
         }
+
+
 
     .btn-agendar-avaliacao.disabled {
         opacity: 0.6;

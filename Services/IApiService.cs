@@ -28,26 +28,28 @@ namespace TTFWebsite.Services
         // =========================
         Task<MemberProfileViewModel?> GetMemberProfileAsync(int idMembro);
 
+        Task<List<SubscriptionDto>> GetActiveSubscriptionsAsync();
+
         // =========================
         // RESERVAS / AULAS
         // =========================
-        Task<List<Reservation>> GetUserReservationsAsync(int idMembro);
+        Task<List<ClassReservationDto>> GetUserReservationsAsync(int idMembro);
         Task<List<ScheduleClassDto>> GetAvailableClassesAsync();
-        Task<bool> BookClassAsync(int idMembro, int classId);
-        Task<bool> CancelReservationAsync(int reservationId);
+        Task<int?> BookClassAsync(int idMembro, int classId);
+        Task CancelReservationAsync(int reservationId, int classId);
 
         // =========================
         // AVALIAÇÕES FÍSICAS
         // =========================
         Task<PhysicalAssessment?> GetLatestPhysicalAssessmentAsync(int idMembro);
-        Task<string?> BookPhysicalAssessmentAsync(int idMembro, DateTime dataReserva);
+        Task<Reservation?> BookPhysicalAssessmentAsync(int idMembro, DateTime dataReserva);
         Task<Reservation?> GetActivePhysicalAssessmentAsync(int memberId);
-        Task<bool> CancelPhysicalAssessmentAsync(int assessmentId);
+        Task CancelPhysicalAssessmentAsync(int idAvaliacao);
 
         // =========================
         // TREINO
         // =========================
-        Task<TrainingPlanViewModel?> GetTrainingPlanAsync(int idMembro);
+        Task<TrainingPlanViewModel?> GetCurrentTrainingPlanAsync();
     }
 
     // =========================
