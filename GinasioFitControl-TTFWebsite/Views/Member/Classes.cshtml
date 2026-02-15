@@ -41,9 +41,9 @@
                         <div class="class-body small">
                             <h3>@reservation.nomeAula</h3>
                             <div class="class-details">
-                                <div>🕜 @($"{date} {timeRange}")</div>
-                                <div>👤 @reservation.instrutor</div>
-                                <div>📍 Sala @reservation.sala</div>
+                                <div><span class="detail-icon">🕜</span> @($"{date} {timeRange}")</div>
+                                <div><span class="detail-icon">👤</span> @reservation.instrutor</div>
+                                <div><span class="detail-icon">📍</span> Sala @reservation.sala</div>
                             </div>
                         </div>
 
@@ -60,7 +60,7 @@
     }
 
     <!-- ================= AULAS DISPONÍVEIS ================= -->
-    <div class="section">
+    <div class="section section-available">
         <h2>Aulas Disponíveis</h2>
 
         <div class="classes-filters">
@@ -95,11 +95,10 @@
 
                         <div class="class-body small">
                             <div class="class-details">
-                             
-                                <div class="instructor">👤 @classItem.NomeInstrutor</div>
-                                <div class="room">📍Sala @classItem.Sala</div>
+                                <div class="instructor"><span class="detail-icon">👤</span> @classItem.NomeInstrutor</div>
+                                <div class="room"><span class="detail-icon">📍</span> Sala @classItem.Sala</div>
                                 <div class="reservas-contador">
-                                    👥 Capacidade: @classItem.ReservasAtuais/@classItem.Capacidade
+                                    <span class="detail-icon">👥</span> Capacidade: @classItem.ReservasAtuais/@classItem.Capacidade
                                 </div>
                             </div>
                         </div>
@@ -428,7 +427,19 @@
         align-items: center;
         justify-content: center;
         cursor: pointer;
-        margin: 0 8px;
+        flex-shrink: 0;
+    }
+
+    .carousel-arrow.prev {
+        position: absolute;
+        left: -52px;
+        z-index: 1;
+    }
+
+    .carousel-arrow.next {
+        position: absolute;
+        right: -52px;
+        z-index: 1;
     }
 
         .carousel-arrow:hover {
@@ -437,10 +448,15 @@
 
     /* ================= FILTROS ================= */
 
+    .section-available h2 {
+        margin-bottom: 1.25rem;
+    }
+
     .classes-filters {
         display: flex;
         gap: 0.5rem;
         margin-bottom: 1.25rem; /* espaço entre filtros e cards */
+        margin-top: 0.5rem;
         align-items: center;
     }
 
@@ -466,6 +482,8 @@
         overflow-x: scroll; /* mantém scroll funcional */
         scrollbar-width: none; /* Firefox */
         -ms-overflow-style: none; /* IE/Edge */
+        margin-left: 0;
+        margin-right: 52px; /* espaço para a seta direita */
     }
 
         .classes-grid.horizontal-carousel::-webkit-scrollbar {
@@ -540,6 +558,13 @@
         margin-top: 0.35rem;
     }
 
+    .class-details .detail-icon {
+        display: inline-block;
+        width: 1.4em;
+        text-align: center;
+        margin-right: 0.1em;
+    }
+
     /* Apenas para os cards das aulas (não mexer nas reservas) */
     #classesCarousel .class-body .class-details {
         display: flex;
@@ -553,7 +578,6 @@
     }
 
     .reservas-contador {
-        font-weight: 600;
         margin-top: 4px;
     }
 

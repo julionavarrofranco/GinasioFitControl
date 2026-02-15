@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TTFWebsite.Models;
@@ -21,6 +23,17 @@ public class MemberController : Controller
         return user?.IdMembro;
     }
 
+    /// <summary>
+    /// Faz logout e redireciona para Login com mensagem (evita ficar preso na página "Unauthorized").
+    /// </summary>
+    private async Task<IActionResult> RequireMemberAsync()
+    {
+        await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+        HttpContext.Session.Clear();
+        TempData["ErrorMessage"] = "Apenas membros podem aceder a esta área.";
+        return RedirectToAction("Login", "Account");
+    }
+
     private async Task<MemberProfileViewModel> GetProfileAsync(int idMembro)
     {
         var profile = await _api.GetMemberProfileAsync(idMembro);
@@ -41,7 +54,7 @@ public class MemberController : Controller
     public async Task<IActionResult> Dashboard()
     {
         var idMembro = await GetIdMembro();
-        if (idMembro == null) return Unauthorized();
+        if (idMembro == null) return await RequireMemberAsync();
 
         var profile = await GetProfileAsync(idMembro.Value);
         var recentAssessment = await _api.GetLatestPhysicalAssessmentAsync(idMembro.Value);
@@ -67,7 +80,7 @@ public class MemberController : Controller
     public async Task<IActionResult> Profile()
     {
         var idMembro = await GetIdMembro();
-        if (idMembro == null) return Unauthorized();
+        if (idMembro == null) return await RequireMemberAsync();
 
         var profile = await GetProfileAsync(idMembro.Value);
         return View(profile);
@@ -91,7 +104,7 @@ public class MemberController : Controller
     public async Task<IActionResult> Classes()
     {
         var idMembro = await GetIdMembro();
-        if (idMembro == null) return Unauthorized();
+        if (idMembro == null) return await RequireMemberAsync();
 
         var profile = await GetProfileAsync(idMembro.Value);
         var classes = await _api.GetAvailableClassesAsync();
@@ -110,7 +123,7 @@ public class MemberController : Controller
     public async Task<IActionResult> BookClass([FromQuery] int id)
     {
         var idMembro = await GetIdMembro();
-        if (idMembro == null) return Unauthorized();
+        if (idMembro == null) return await RequireMemberAsync();
 
         var reservationId = await _api.BookClassAsync(idMembro.Value, id);
         if (reservationId == null) return BadRequest(new { message = "Erro ao reservar." });
@@ -142,7 +155,7 @@ public class MemberController : Controller
     public async Task<IActionResult> TrainingPlan()
     {
         var idMembro = await GetIdMembro();
-        if (idMembro == null) return Unauthorized();
+        if (idMembro == null) return await RequireMemberAsync();
 
         var profile = await GetProfileAsync(idMembro.Value);
         var plan = await _api.GetCurrentTrainingPlanAsync();
@@ -159,7 +172,7 @@ public class MemberController : Controller
     public async Task<IActionResult> PhysicalAssessment()
     {
         var idMembro = await GetIdMembro();
-        if (idMembro == null) return Unauthorized();
+        if (idMembro == null) return await RequireMemberAsync();
 
         var profile = await GetProfileAsync(idMembro.Value);
         var latestAssessment = await _api.GetLatestPhysicalAssessmentAsync(idMembro.Value);
@@ -222,7 +235,7 @@ public class MemberController : Controller
     public async Task<IActionResult> CancelPhysicalAssessment([FromQuery] int reservationId)
     {
         var idMembro = await GetIdMembro();
-        if (idMembro == null) return Unauthorized();
+        if (idMembro == null) return await RequireMemberAsync();
 
         var reservation = await _api.GetActivePhysicalAssessmentAsync(idMembro.Value);
         if (reservation == null)

@@ -7,14 +7,13 @@
 <div class="dashboard-container">
     <div class="dashboard-header">
         <h1>Bem-vindo, @Model.Profile.Name</h1>
-        <p class="subtitle">Ginásio: AAAA</p>
     </div>
 
     <div class="dashboard-grid">
-        <!-- Próximas Reservas -->
+        <!-- Aulas Reservadas -->
         <div class="dashboard-card">
             <div class="card-header">
-                <h2>Próximas Aulas</h2>
+                <h2>Aulas Reservadas</h2>
                 <a href="@Url.Action("Classes", "Member")" class="btn-link">Ver todas</a>
             </div>
             @if (Model.UpcomingReservations.Any())
@@ -22,30 +21,25 @@
                 <div class="reservations-list">
                     @foreach (var reservation in Model.UpcomingReservations)
                     {
+                        var aulaDateTime = reservation.DataAula.Date.Add(reservation.HoraInicio);
+                        var aulaDate = reservation.DataAula.ToString("dd MMM", new System.Globalization.CultureInfo("pt-PT"));
+                        var aulaTime = reservation.HoraInicio.ToString(@"hh\:mm");
                         <div class="reservation-item">
                             <div class="reservation-time">
-                                <span class="time">@reservation.dataReserva.ToString("HH:mm")</span>
-                                <span class="date">@reservation.dataReserva.ToString("dd MMM")</span>
+                                <span class="time">@aulaTime</span>
+                                <span class="date">@aulaDate</span>
                             </div>
                             <div class="reservation-details">
-                                <h3>
-                                    @{
-                                        var title = reservation.nomeAula;
-                                    }
-                                    @title
-                                </h3>
+                                <h3>@reservation.nomeAula</h3>
                                 <p>
                                     @((!string.IsNullOrWhiteSpace(reservation.instrutor) ? reservation.instrutor : "—"))
                                     •
-                                    @(reservation.sala)
+                                    Sala @(reservation.sala)
                                 </p>
-                                <p>@reservation.dataReserva.ToString("dddd, dd MMMM")</p>
+                                <p>@aulaDateTime.ToString("dddd, dd MMMM", new System.Globalization.CultureInfo("pt-PT"))</p>
                             </div>
                         </div>
                     }
-                </div>
-                <div style="margin-top:1rem; text-align:right;">
-                    <a href="@Url.Action("Classes", "Member")" class="btn-small">Reservar Aulas</a>
                 </div>
             }
             else
@@ -181,12 +175,7 @@
 .dashboard-header h1 {
     font-size: 2.5rem;
     color: var(--text-primary);
-    margin-bottom: 0.5rem;
-}
-
-.subtitle {
-    color: var(--text-secondary);
-    font-size: 1.1rem;
+    margin-bottom: 0;
 }
 
 .dashboard-grid {
@@ -316,9 +305,10 @@
 }
 
 .metric-value {
-    font-size: 1.5rem;
+    font-size: 1rem;
     font-weight: bold;
     color: var(--accent);
+    white-space: nowrap;
 }
 
 .assessment-trainer {

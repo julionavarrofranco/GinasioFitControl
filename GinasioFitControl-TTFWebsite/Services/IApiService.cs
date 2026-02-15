@@ -6,7 +6,7 @@ namespace TTFWebsite.Services
     public interface IApiService
     {
         // =========================
-        // AUTENTICA«√O
+        // AUTENTICA√á√ÉO
         // =========================
         Task<TokenResponse?> LoginAsync(string email, string password);
         Task<bool> LogoutAsync(string token);
@@ -39,7 +39,7 @@ namespace TTFWebsite.Services
         Task CancelReservationAsync(int reservationId, int classId);
 
         // =========================
-        // AVALIA«’ES FÕSICAS
+        // AVALIA√á√ïES F√çSICAS
         // =========================
         Task<PhysicalAssessment?> GetLatestPhysicalAssessmentAsync(int idMembro);
         Task<Reservation?> BookPhysicalAssessmentAsync(int idMembro, DateTime dataReserva);

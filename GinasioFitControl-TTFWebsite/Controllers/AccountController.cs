@@ -76,9 +76,19 @@ namespace TTFWebsite.Controllers
                 authProperties
             );
 
-            // Guardar refresh token na sessão se quiser renovar JWT futuramente
+            // Guardar refresh token na sessão
             HttpContext.Session.SetString("RefreshToken", tokenResponse.RefreshToken);
             _logger.LogInformation("AccessToken saved to claims, length: {Length}", tokenResponse.AccessToken.Length);
+
+            // Apenas membros podem usar a área de membros: a API coloca a claim "Tipo" no JWT (Membro / Funcionario)
+            var tipoClaim = principal.FindFirst("Tipo")?.Value;
+            if (!string.Equals(tipoClaim, "Membro", StringComparison.OrdinalIgnoreCase))
+            {
+                await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                HttpContext.Session.Clear();
+                ModelState.AddModelError("", "Apenas membros podem aceder a esta área. Utilize o painel de administração com as suas credenciais de administrador.");
+                return View(model);
+            }
 
             // Se precisa alterar password
             if (tokenResponse.NeedsPasswordChange)
