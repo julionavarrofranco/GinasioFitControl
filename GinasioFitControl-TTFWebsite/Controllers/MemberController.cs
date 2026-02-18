@@ -44,8 +44,7 @@ public class MemberController : Controller
     // pequenos DTOs para binding de AJAX
     public class BookClassRequestDto { public int classId { get; set; } }
     public class CancelReservationRequestDto {
-        public int MemberId { get; set; }
-        public int ClassId { get; set; }
+        public int classId { get; set; }
     }
 
     // -------------------------
@@ -59,7 +58,7 @@ public class MemberController : Controller
         var profile = await GetProfileAsync(idMembro.Value);
         var recentAssessment = await _api.GetLatestPhysicalAssessmentAsync(idMembro.Value);
         var trainingPlan = await _api.GetCurrentTrainingPlanAsync() ?? new TrainingPlanViewModel();
-        var reservations = await _api.GetUserReservationsAsync(idMembro.Value);
+        var reservations = await _api.GetUserReservationsAsync();
         var classesToday = await _api.GetAvailableClassesAsync();
 
         var model = new DashboardViewModel
@@ -103,12 +102,8 @@ public class MemberController : Controller
     // -------------------------
     public async Task<IActionResult> Classes()
     {
-        var idMembro = await GetIdMembro();
-        if (idMembro == null) return await RequireMemberAsync();
-
-        var profile = await GetProfileAsync(idMembro.Value);
         var classes = await _api.GetAvailableClassesAsync();
-        var reservations = await _api.GetUserReservationsAsync(idMembro.Value);
+        var reservations = await _api.GetUserReservationsAsync();
 
         var model = new ClassesViewModel
         {
@@ -119,32 +114,38 @@ public class MemberController : Controller
         return View(model);
     }
 
+
     [HttpPost]
     public async Task<IActionResult> BookClass([FromQuery] int id)
     {
-        var idMembro = await GetIdMembro();
-        if (idMembro == null) return await RequireMemberAsync();
+        var (result, _) = await _api.BookClassAsync(id);
 
-        var reservationId = await _api.BookClassAsync(idMembro.Value, id);
-        if (reservationId == null) return BadRequest(new { message = "Erro ao reservar." });
+        if (!result.Success)
+            return BadRequest(new { message = result.ErrorMessage });
 
-        // Busca reservas atualizadas
-        var reservations = await _api.GetUserReservationsAsync(idMembro.Value);
-
+        var reservations = await _api.GetUserReservationsAsync();
         return PartialView("UserReservationsPartial", reservations);
     }
+
 
     [HttpPatch]
-    public async Task<IActionResult> CancelReservation([FromQuery] CancelReservationRequestDto request)
+    public async Task<IActionResult> CancelReservation(int classId)
     {
-        if (request.MemberId <= 0 || request.ClassId <= 0)
+        if (classId <= 0)
             return BadRequest(new { message = "Dados inválidos." });
 
-        await _api.CancelReservationAsync(request.MemberId, request.ClassId);
+        var result = await _api.CancelReservationAsync(classId);
 
-        var reservations = await _api.GetUserReservationsAsync(request.MemberId);
+        if (!result.Success)
+            return BadRequest(new { message = result.ErrorMessage });
+
+        // 🔴 IMPORTANTE: dar tempo à API para persistir a alteração
+        await Task.Delay(150);
+
+        var reservations = await _api.GetUserReservationsAsync();
         return PartialView("UserReservationsPartial", reservations);
     }
+
 
 
 

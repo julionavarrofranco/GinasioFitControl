@@ -7,6 +7,5 @@
         public string? Descricao { get; set; }
         public decimal Preco { get; set; }
         public string Tipo { get; set; } = string.Empty; // Mensal, Trimestral, Anual
-        public bool Ativo { get; set; }
     }
 }

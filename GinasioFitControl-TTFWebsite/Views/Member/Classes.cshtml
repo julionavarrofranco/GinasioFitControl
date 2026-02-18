@@ -34,7 +34,6 @@
                     var timeRange = $"{startTime:hh\\:mm} - {endTime:hh\\:mm}";
 
                     <div class="class-card reserved"
-                         data-member-id="@reservation.idMembro"
                          data-id="@reservation.idAulaMarcada"
                          data-start="@startAttr">
 
@@ -49,7 +48,7 @@
 
                         <div class="class-footer">
                             <button class="btn-cancel"
-                                    onclick="openCancelModal(@reservation.idMembro, @reservation.idAulaMarcada)">
+                                    onclick="openCancelModal(@reservation.idAulaMarcada)">
                                 Cancelar
                             </button>
                         </div>
@@ -210,9 +209,9 @@
         pendingClassId = null;
     }
 
-    function openCancelModal(memberId, classId){
+    function openCancelModal(classId){
         clearMessageElements();
-        pendingCancel = { memberId, classId };
+        pendingCancel = classId;
         cancelModal.classList.add('open');
         cancelModal.removeAttribute('inert');
     }
@@ -317,7 +316,7 @@
 
 
     // ================= BOOK / CANCEL =================
-    async function confirmBookClass() {
+        async function confirmBookClass() {
         if (!pendingClassId) return showBookingError("ID da aula inválido.");
 
         try {
@@ -326,51 +325,63 @@
                 credentials: 'include'
             });
 
-            const html = await res.text();
+            const contentType = res.headers.get("content-type");
+            const body = await res.text(); // ← ler apenas uma vez
 
             if (!res.ok) {
-                return showBookingError("Erro ao reservar a aula.");
+                if (contentType && contentType.includes("application/json")) {
+                    const error = JSON.parse(body);
+                    return showBookingError(error.message ?? "Erro ao reservar.");
+                }
+                return showBookingError(body || "Erro ao reservar.");
             }
 
-            const newGrid = replaceReservationsGridFromHtml(html);
+            const newGrid = replaceReservationsGridFromHtml(body);
             const newReservedIds = computeReservedIdsFromGrid(newGrid);
             refreshCarouselButtons(newReservedIds);
 
             showBookingSuccess("Reserva efetuada com sucesso.");
             closeClassBookingModal();
         } catch (err) {
-            showBookingError("Erro inesperado ao reservar.");
             console.error(err);
+            showBookingError("Erro inesperado ao reservar.");
         }
     }
 
+
     async function confirmCancelReservation() {
         if (!pendingCancel) return showBookingError("Reserva inválida.");
-        const { memberId, classId } = pendingCancel;
+        const classId = pendingCancel;
 
         try {
-            const res = await fetch(`@Url.Action("CancelReservation", "Member")?memberId=${memberId}&classId=${classId}`, {
-                method:'PATCH',
-                credentials:'include'
+            const res = await fetch(`@Url.Action("CancelReservation", "Member")?classId=${classId}`, {
+                method: 'PATCH',
+                credentials: 'include'
             });
 
-            const html = await res.text();
+            const contentType = res.headers.get("content-type");
+            const body = await res.text(); // ← ler apenas uma vez
 
             if (!res.ok) {
-                return showBookingError("Erro ao cancelar a reserva.");
+                if (contentType && contentType.includes("application/json")) {
+                    const error = JSON.parse(body);
+                    return showBookingError(error.message ?? "Erro ao cancelar.");
+                }
+                return showBookingError(body || "Erro ao cancelar.");
             }
 
-            const newGrid = replaceReservationsGridFromHtml(html);
+            const newGrid = replaceReservationsGridFromHtml(body);
             const newReservedIds = computeReservedIdsFromGrid(newGrid);
             refreshCarouselButtons(newReservedIds);
 
             closeCancelModal();
             showBookingSuccess("Reserva cancelada.");
         } catch (err) {
-            showBookingError("Erro inesperado ao cancelar.");
             console.error(err);
+            showBookingError("Erro inesperado ao cancelar.");
         }
     }
+
 
     // ================= CAROUSEL =================
     document.querySelector('.carousel-arrow.prev').addEventListener('click',()=>document.getElementById('classesCarousel').scrollBy({left:-360,behavior:'smooth'}));

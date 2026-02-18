@@ -33,10 +33,10 @@ namespace TTFWebsite.Services
         // =========================
         // RESERVAS / AULAS
         // =========================
-        Task<List<ClassReservationDto>> GetUserReservationsAsync(int idMembro);
+        Task<List<ClassReservationDto>> GetUserReservationsAsync();
         Task<List<ScheduleClassDto>> GetAvailableClassesAsync();
-        Task<int?> BookClassAsync(int idMembro, int classId);
-        Task CancelReservationAsync(int reservationId, int classId);
+        Task<(ApiResult result, int? classId)> BookClassAsync(int classId);
+        Task<ApiResult> CancelReservationAsync(int classId);
 
         // =========================
         // AVALIAÇÕES FÍSICAS

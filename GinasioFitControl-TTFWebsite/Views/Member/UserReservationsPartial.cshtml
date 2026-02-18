@@ -1,4 +1,4 @@
-﻿@model IEnumerable<TTFWebsite.Models.DTOs.ClassReservationDto>
+@model IEnumerable<TTFWebsite.Models.DTOs.ClassReservationDto>
 
 <div class="reservations-grid" id="reservationsGrid">
     @foreach (var reservation in Model)
@@ -27,7 +27,7 @@
 
             <div class="class-footer">
                 <button class="btn-cancel"
-                        onclick="openCancelModal(@reservation.idMembro, @reservation.idAulaMarcada)">
+                        onclick="openCancelModal(@reservation.idAulaMarcada)">
                     Cancelar
                 </button>
             </div>

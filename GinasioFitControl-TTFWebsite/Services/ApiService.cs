@@ -378,9 +378,9 @@
 
 
 
-        public async Task<List<ClassReservationDto>> GetUserReservationsAsync(int idMembro)
+        public async Task<List<ClassReservationDto>> GetUserReservationsAsync()
         {
-            using var req = new HttpRequestMessage(HttpMethod.Get, $"/api/MemberClass/member-reservations/{idMembro}");
+            using var req = new HttpRequestMessage(HttpMethod.Get, "/api/MemberClass/member-reservations");
             AddAuth(req);
 
             var res = await _httpClient.SendAsync(req);
@@ -391,47 +391,82 @@
         }
 
 
-        public async Task<int?> BookClassAsync(int idMembro, int classId)
+
+        public async Task<(ApiResult result, int? classId)> BookClassAsync(int classId)
         {
-            var url = $"/api/MemberClass/reserve?idMembro={idMembro}&idAulaMarcada={classId}";
+            var url = $"/api/MemberClass/reserve?idAulaMarcada={classId}";
             using var req = new HttpRequestMessage(HttpMethod.Post, url);
             AddAuth(req);
 
             var res = await _httpClient.SendAsync(req);
             var content = await res.Content.ReadAsStringAsync();
 
-            _logger.LogInformation("Reserva API response: {Content}", content);
+            if (!res.IsSuccessStatusCode)
+                return (new ApiResult
+                {
+                    Success = false,
+                    ErrorMessage = ExtractApiMessage(content)
+                }, null);
 
-            if (!res.IsSuccessStatusCode) return null;
+            var dto = JsonSerializer.Deserialize<ReserveClassResponseDto>(content, _jsonOptions);
 
-            // Desserializar objeto retornado
-            var result = JsonSerializer.Deserialize<ReserveClassResponseDto>(content, _jsonOptions);
-            return result?.IdAulaMarcada;
+            return (new ApiResult { Success = true }, dto?.IdAulaMarcada);
         }
 
 
 
 
-        public async Task CancelReservationAsync(int memberId, int classId)
+
+
+        public async Task<ApiResult> CancelReservationAsync(int classId)
         {
             using var req = new HttpRequestMessage(HttpMethod.Patch,
-                $"/api/MemberClass/cancel?idMembro={memberId}&idAulaMarcada={classId}");
+                $"/api/MemberClass/cancel?idAulaMarcada={classId}");
 
             AddAuth(req);
 
             var res = await _httpClient.SendAsync(req);
+            var content = await res.Content.ReadAsStringAsync();
+
             if (!res.IsSuccessStatusCode)
-            {
-                var content = await res.Content.ReadAsStringAsync();
-                throw new Exception(content);
-            }
+                return new ApiResult
+                {
+                    Success = false,
+                    ErrorMessage = ExtractApiMessage(content)
+                };
+
+            return new ApiResult { Success = true };
         }
+
+
 
 
 
         // -------------------------
         // HELPERS
         // -------------------------
+
+        private string ExtractApiMessage(string content)
+        {
+            try
+            {
+                var json = JsonDocument.Parse(content);
+
+                if (json.RootElement.TryGetProperty("message", out var msg))
+                    return msg.GetString() ?? "Erro inesperado.";
+
+                if (json.RootElement.TryGetProperty("title", out var title))
+                    return title.GetString() ?? content;
+
+                return content;
+            }
+            catch
+            {
+                return content;
+            }
+        }
+
+
         private void AddAuth(HttpRequestMessage req)
             {
                 var token = _httpContextAccessor.HttpContext?.User.FindFirst("jwt")?.Value;
