@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using System.Security.Claims;
 using TTFWebsite.Services;
@@ -58,6 +58,17 @@ public class JwtValidationMiddleware
                         // Atualiza JWT e refresh token
                         await ReSignInWithNewJwt(context, newTokens.AccessToken);
                         context.Session.SetString("RefreshToken", newTokens.RefreshToken);
+                        
+                        // Atualiza NeedsPasswordChange se o novo token indicar isso
+                        if (newTokens.NeedsPasswordChange)
+                        {
+                            context.Session.SetString("NeedsPasswordChange", "True");
+                        }
+                        // Se não precisa mais alterar, remove da sessão (caso tenha sido alterado)
+                        else
+                        {
+                            context.Session.Remove("NeedsPasswordChange");
+                        }
 
                         await _next(context);
                         return;
@@ -120,11 +131,12 @@ public class JwtValidationMiddleware
         }
         else
         {
-            // Evita loops de redirect: só redireciona se não estivermos já na página de login
+            // Evita loops de redirect: só redireciona se não estivermos já na página pública
             var path = context.Request.Path.ToString().ToLower();
-            if (!path.Contains("/account/login"))
+            if (!path.Contains("/home/index") && !path.Contains("/home"))
             {
-                context.Response.Redirect("/Account/Login");
+                // Quando o utilizador perde JWT/refresh tokens, volta ao site público (Home/Index).
+                context.Response.Redirect("/Home/Index");
             }
         }
     }

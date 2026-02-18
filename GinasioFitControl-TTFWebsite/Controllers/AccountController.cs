@@ -78,6 +78,10 @@ namespace TTFWebsite.Controllers
 
             // Guardar refresh token na sessão
             HttpContext.Session.SetString("RefreshToken", tokenResponse.RefreshToken);
+            
+            // Guardar se precisa alterar password na sessão (para verificação posterior)
+            HttpContext.Session.SetString("NeedsPasswordChange", tokenResponse.NeedsPasswordChange.ToString());
+            
             _logger.LogInformation("AccessToken saved to claims, length: {Length}", tokenResponse.AccessToken.Length);
 
             // Apenas membros podem usar a área de membros: a API coloca a claim "Tipo" no JWT (Membro / Funcionario)
@@ -124,20 +128,33 @@ namespace TTFWebsite.Controllers
 
             _logger.LogInformation("Usuário deslogado e sessão limpa");
 
-            return RedirectToAction("Login");
+            return RedirectToAction("Index", "Home");
         }
 
 
         [HttpGet]
         public IActionResult AccessDenied()
         {
+            // Se o utilizador está autenticado mas não alterou a password, redireciona para ChangePassword
+            if (User?.Identity?.IsAuthenticated == true)
+            {
+                var needsPasswordChange = HttpContext.Session.GetString("NeedsPasswordChange");
+                if (needsPasswordChange == "True")
+                {
+                    TempData["NeedsPasswordChange"] = true;
+                    TempData["Message"] = "Por favor, altere a sua palavra-passe antes de continuar.";
+                    return RedirectToAction("ChangePassword");
+                }
+            }
+            
             return View();
         }
 
         [HttpGet]
         [Authorize]
-        public IActionResult ChangePassword()
+        public async Task<IActionResult> ChangePassword()
         {
+            await PopulateMemberNameAsync();
             return View();
         }
 
@@ -147,23 +164,55 @@ namespace TTFWebsite.Controllers
         public async Task<IActionResult> ChangePassword(ChangePasswordViewModel model)
         {
             if (!ModelState.IsValid)
+            {
+                await PopulateMemberNameAsync();
                 return View(model);
+            }
 
             var result = await _apiService.ChangePasswordAsync(model.CurrentPassword, model.NewPassword);
 
             if (!result.Success)
             {
                 ModelState.AddModelError("", result.ErrorMessage ?? "Erro ao alterar a palavra-passe.");
+                await PopulateMemberNameAsync();
                 return View(model);
             }
 
-            TempData["SuccessMessage"] = "Palavra-passe alterada com sucesso. Por favor, faça login novamente.";
+            // Limpar flag de NeedsPasswordChange da sessão antes de logout
+            HttpContext.Session.Remove("NeedsPasswordChange");
 
-            // Logout para forçar re-login
+            // Logout para forçar re-login (agora com PrimeiraVez=false)
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             HttpContext.Session.Clear();
 
             return RedirectToAction("Login");
+        }
+
+        private async Task PopulateMemberNameAsync()
+        {
+            try
+            {
+                var currentUser = await _apiService.GetCurrentUserAsync();
+                var name = currentUser?.Nome;
+
+                if (string.IsNullOrWhiteSpace(name))
+                {
+                    var email = currentUser?.Email ?? User.Identity?.Name ?? "";
+                    if (!string.IsNullOrWhiteSpace(email) && email.Contains("@"))
+                    {
+                        name = email.Split('@')[0];
+                    }
+                }
+
+                if (!string.IsNullOrWhiteSpace(name))
+                {
+                    ViewData["MemberName"] = name;
+                }
+            }
+            catch
+            {
+                // Se falhar, simplesmente não define o nome; o fallback do layout trata do resto.
+            }
         }
 
 
@@ -185,7 +234,9 @@ namespace TTFWebsite.Controllers
 
         [Required(ErrorMessage = "A nova palavra-passe é obrigatória.")]
         [DataType(DataType.Password)]
-        [MinLength(6, ErrorMessage = "A palavra-passe deve ter pelo menos 6 caracteres.")]
+        [MinLength(12, ErrorMessage = "A palavra-passe deve ter pelo menos 12 caracteres.")]
+        [RegularExpression(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%\^&\*\?_~\-]).{12,}$",
+            ErrorMessage = "A palavra-passe deve ter maiúscula, minúscula, número e símbolo (!@#$%^&*?_~-).")]
         public string NewPassword { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "A confirmação da palavra-passe é obrigatória.")]

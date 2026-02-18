@@ -25,9 +25,17 @@
                 <div class="nav-user">
                     @if (User.Identity != null && User.Identity.IsAuthenticated)
                     {
+                        var memberName = ViewData["MemberName"] as string;
+                        if (string.IsNullOrWhiteSpace(memberName))
+                        {
+                            var email = User.Identity?.Name ?? "";
+                            memberName = !string.IsNullOrWhiteSpace(email) && email.Contains("@")
+                                ? email.Split('@')[0]
+                                : "Membro";
+                        }
                         <a href="@Url.Action("Dashboard", "Member")"
-                           class="member-link">
-                            Olá, @ViewData["MemberName"]
+                           class="btn-primary">
+                            Olá, @memberName
                         </a>
                     }
                     else
@@ -96,14 +104,3 @@
 </body>
 </html>
 
-<style>
-
-.member-link {
-    color: var(--text-secondary); /* cinzento da homepage */
-    text-decoration: underline;
-    text-decoration-color: var(--accent); /* azul da homepage */
-    text-decoration-thickness: 2px;
-    cursor: pointer;
-}
-
-</style>

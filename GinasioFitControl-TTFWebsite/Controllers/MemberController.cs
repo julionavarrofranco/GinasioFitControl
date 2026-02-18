@@ -7,7 +7,7 @@ using TTFWebsite.Models.DTOs;
 using TTFWebsite.Services;
 using TTFWebsite.ViewModels;
 
-[Authorize]
+[Authorize(Policy = "PasswordChanged")]
 public class MemberController : Controller
 {
     private readonly IApiService _api;
@@ -82,6 +82,11 @@ public class MemberController : Controller
         if (idMembro == null) return await RequireMemberAsync();
 
         var profile = await GetProfileAsync(idMembro.Value);
+
+        // Obter o plano de treino atual para apresentar no perfil
+        var trainingPlan = await _api.GetCurrentTrainingPlanAsync();
+        ViewBag.TrainingPlanName = trainingPlan?.Name;
+
         return View(profile);
     }
 

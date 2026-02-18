@@ -26,7 +26,17 @@
                         <li><a href="@Url.Action("Profile", "Member")">Perfil</a></li>
                     </ul>
                     <div class="nav-user">
-                        <span class="user-name">Olá, @ViewData["MemberName"]</span>
+                        @{
+                            var memberName = ViewData["MemberName"] as string;
+                            if (string.IsNullOrWhiteSpace(memberName))
+                            {
+                                var email = User.Identity?.Name ?? "";
+                                memberName = !string.IsNullOrWhiteSpace(email) && email.Contains("@")
+                                    ? email.Split('@')[0]
+                                    : "Membro";
+                            }
+                        }
+                        <span class="user-name">Olá, @memberName</span>
                         <form asp-controller="Account" asp-action="Logout" method="post" style="display: inline;">
                             @Html.AntiForgeryToken()
                             <button type="submit" class="btn-logout">Sair</button>

@@ -1,4 +1,4 @@
-﻿using System.IdentityModel.Tokens.Jwt;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using Microsoft.IdentityModel.Tokens;
 
@@ -7,12 +7,16 @@ namespace TTFWebsite.Services
     public class JwtService
     {
         private readonly string _jwtSecret;
+        private readonly string? _issuer;
+        private readonly string? _audience;
 
         public JwtService(IConfiguration configuration)
         {
             // Pega a chave do user secrets / appsettings
             _jwtSecret = configuration["Jwt:Key"]
                          ?? throw new InvalidOperationException("JWT Key não encontrada nas configurações.");
+            _issuer = configuration["Jwt:Issuer"];
+            _audience = configuration["Jwt:Audience"];
         }
 
 
@@ -28,11 +32,13 @@ namespace TTFWebsite.Services
 
                 var validationParameters = new TokenValidationParameters
                 {
-                    ValidateIssuer = false, // adapta conforme tua API
-                    ValidateAudience = false,
+                    ValidateIssuer = !string.IsNullOrEmpty(_issuer),
+                    ValidateAudience = !string.IsNullOrEmpty(_audience),
                     ValidateLifetime = true, // verifica expiração
                     ValidateIssuerSigningKey = true,
                     IssuerSigningKey = new SymmetricSecurityKey(key),
+                    ValidIssuer = _issuer,
+                    ValidAudience = _audience,
                     ClockSkew = TimeSpan.Zero // sem tolerância extra
                 };
 

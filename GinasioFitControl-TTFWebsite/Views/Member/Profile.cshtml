@@ -17,7 +17,7 @@
             <p>Informações da tua conta</p>
         </div>
         <div class="profile-actions">
-            <button class="btn-edit">Mudar Palavra-passe</button>
+            <a href="@Url.Action("ChangePassword", "Account")" class="btn-edit">Mudar Palavra-passe</a>
         </div>
     </div>
 
@@ -64,8 +64,12 @@
                     <span class="detail-value">@Model.Plan</span>
                 </div>
                 <div class="detail-row">
-                    <span class="detail-label">Personal Trainer</span>
-                    <span class="detail-value">@(!string.IsNullOrWhiteSpace(Model.PersonalTrainer) ? Model.PersonalTrainer : "—")</span>
+                    <span class="detail-label">Plano de treino</span>
+                    <span class="detail-value">
+                        @(ViewBag.TrainingPlanName != null && !string.IsNullOrWhiteSpace((string)ViewBag.TrainingPlanName)
+                            ? (string)ViewBag.TrainingPlanName
+                            : "Sem plano de treino")
+                    </span>
                 </div>
                 <div class="detail-row">
                     <span class="detail-label">Membro Desde:</span>

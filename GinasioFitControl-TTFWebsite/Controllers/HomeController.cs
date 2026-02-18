@@ -24,9 +24,18 @@ namespace TTFWebsite.Controllers
                 {
                     memberName = currentUser.Nome;
                 }
+
+                if (string.IsNullOrWhiteSpace(memberName))
+                {
+                    // fallback: usar email do token (claim Name) e mostrar parte antes do '@'
+                    var email = currentUser?.Email ?? User.Identity?.Name ?? "";
+                    memberName = !string.IsNullOrWhiteSpace(email) && email.Contains("@")
+                        ? email.Split('@')[0]
+                        : memberName;
+                }
             }
 
-            ViewData["MemberName"] = memberName ?? "Membro";
+            ViewData["MemberName"] = string.IsNullOrWhiteSpace(memberName) ? "Membro" : memberName;
             // Buscar subscrições/planos ativos da API
             var activeSubscriptions = await _apiService.GetActiveSubscriptionsAsync();
 

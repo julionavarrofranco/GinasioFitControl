@@ -99,7 +99,7 @@
                     if (res.IsSuccessStatusCode) return new ApiResult { Success = true };
 
                     var content = await res.Content.ReadAsStringAsync();
-                    return new ApiResult { Success = false, ErrorMessage = content };
+                    return new ApiResult { Success = false, ErrorMessage = ExtractApiMessage(content) };
                 }
                 catch (Exception ex)
                 {

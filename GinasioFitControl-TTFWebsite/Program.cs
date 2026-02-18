@@ -13,12 +13,20 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
     {
         options.LoginPath = "/Account/Login";
         options.LogoutPath = "/Account/Logout";
-        options.AccessDeniedPath = "/Account/AccessDenied";
+        options.AccessDeniedPath = "/Account/AccessDenied"; // Será redirecionado para ChangePassword se PrimeiraVez=true
         options.ExpireTimeSpan = TimeSpan.FromDays(30);
         options.SlidingExpiration = true;
     });
 
-builder.Services.AddAuthorization();
+// Configurar autorização com policy para verificar se password foi alterada
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("PasswordChanged", policy =>
+        policy.Requirements.Add(new TTFWebsite.Authorization.PasswordChangedRequirement()));
+});
+
+// Registrar o handler de autorização (scoped porque precisa de IHttpContextAccessor)
+builder.Services.AddScoped<IAuthorizationHandler, TTFWebsite.Authorization.PasswordChangedHandler>();
 
 // Session para guardar dados do utilizador
 builder.Services.AddSession(options =>
@@ -63,7 +71,7 @@ app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Account}/{action=Login}/{id?}");
+    pattern: "{controller=Home}/{action=Index}/{id?}");
 
 
 app.Run();
