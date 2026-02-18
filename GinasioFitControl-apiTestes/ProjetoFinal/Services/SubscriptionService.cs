@@ -23,12 +23,21 @@ namespace ProjetoFinal.Services
 
         public async Task<Subscricao> CreateSubscriptionAsync(SubscriptionDto request)
         {
-            ValidateSubscription(request.Nome,request.Tipo,request.Preco,request.Descricao, false);
+            if (request == null)
+                throw new InvalidOperationException("Dados da subscrição inválidos.");
+
+            if (string.IsNullOrWhiteSpace(request.Tipo))
+                throw new InvalidOperationException("O tipo da subscrição é obrigatório.");
+
+            if (!Enum.TryParse<TipoSubscricao>(request.Tipo, true, out var tipoEnum))
+                throw new InvalidOperationException("Tipo da subscrição inválido.");
+
+            ValidateSubscription(request.Nome, tipoEnum, request.Preco, request.Descricao, false);
 
             Subscricao subscricao = new Subscricao
             {
                 Nome = request.Nome,
-                Tipo = request.Tipo,
+                Tipo = tipoEnum,
                 Preco = request.Preco,
                 Descricao = request.Descricao
             };
@@ -97,7 +106,7 @@ namespace ProjetoFinal.Services
         }
 
 
-        public async Task<List<Subscricao>> GetSubscriptionsByStateAsync(bool ativo, bool ordenarNomeAsc = true, bool? ordenarPrecoAsc = null) // null = não ordenar por preço
+        public async Task<List<SubscriptionDto>> GetSubscriptionsByStateAsync(bool ativo, bool ordenarNomeAsc = true, bool? ordenarPrecoAsc = null) // null = não ordenar por preço
         {
             IQueryable<Subscricao> query = _context.Subscricoes
                 .AsNoTracking()
@@ -125,7 +134,19 @@ namespace ProjetoFinal.Services
                 }
             }
 
-            return await orderedQuery.ToListAsync();
+            // Primeiro materializa a lista de entidades, depois faz o mapeamento para DTO
+            var subscricoes = await orderedQuery.ToListAsync();
+
+            return subscricoes
+                .Select(s => new SubscriptionDto
+                {
+                    IdSubscricao = s.IdSubscricao,
+                    Nome = s.Nome,
+                    Descricao = s.Descricao,
+                    Preco = s.Preco,
+                    Tipo = s.Tipo.ToString()
+                })
+                .ToList();
         }
 
         public async Task<List<Subscricao>> GetSubscriptionsByTypeAsync(TipoSubscricao tipo, bool ordenarNomeAsc = true, bool? ordenarPrecoAsc = null)

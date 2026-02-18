@@ -11,7 +11,7 @@ namespace ProjetoFinal.Services.Interfaces
 
         Task ChangeSubscriptionActiveStatusAsync(int idSubscricao, bool ativo);
 
-        Task<List<Subscricao>> GetSubscriptionsByStateAsync(bool ativo, bool ordenarNomeAsc = true, bool? ordenarPrecoAsc = null);
+        Task<List<SubscriptionDto>> GetSubscriptionsByStateAsync(bool ativo, bool ordenarNomeAsc = true, bool? ordenarPrecoAsc = null);
 
         Task<List<Subscricao>> GetSubscriptionsByTypeAsync(TipoSubscricao tipo, bool ordenarNomeAsc = true, bool? ordenarPrecoAsc = null);
 

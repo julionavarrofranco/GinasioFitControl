@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ProjetoFinal.Models.DTOs;
 using ProjetoFinal.Services.Interfaces;
+using System.Security.Claims;
 
 namespace ProjetoFinal.Controllers
 {
@@ -11,7 +12,6 @@ namespace ProjetoFinal.Controllers
     {
         private readonly IMemberClassService _memberClassService;
 
-
         public MemberClassController(IMemberClassService memberClassService)
         {
             _memberClassService = memberClassService;
@@ -19,11 +19,14 @@ namespace ProjetoFinal.Controllers
 
         [Authorize(Policy = "OnlyMembers")]
         [HttpPost("reserve")]
-        public async Task<IActionResult> ReserveClass([FromQuery] int idMembro, [FromQuery] int idAulaMarcada)
+        public async Task<IActionResult> ReserveClass([FromQuery] int idAulaMarcada)
         {
             try
             {
-                var reserva = await _memberClassService.ReservarAsync(idMembro, idAulaMarcada);
+                var idUser = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+
+                var reserva = await _memberClassService.ReservarAsync(idUser, idAulaMarcada);
+
                 var response = new ReserveClassResponseDto
                 {
                     IdMembro = reserva.IdMembro,
@@ -31,6 +34,7 @@ namespace ProjetoFinal.Controllers
                     DataReserva = reserva.DataReserva,
                     Presenca = reserva.Presenca.ToString()
                 };
+
                 return Ok(response);
             }
             catch (KeyNotFoundException ex)
@@ -49,11 +53,13 @@ namespace ProjetoFinal.Controllers
 
         [Authorize(Policy = "OnlyMembers")]
         [HttpPatch("cancel")]
-        public async Task<IActionResult> CancelReservation([FromQuery] int idMembro, [FromQuery] int idAulaMarcada)
+        public async Task<IActionResult> CancelReservation([FromQuery] int idAulaMarcada)
         {
             try
             {
-                var result = await _memberClassService.CancelarReservaAsync(idMembro, idAulaMarcada);
+                var idUser = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+
+                var result = await _memberClassService.CancelarReservaAsync(idUser, idAulaMarcada);
                 return Ok(new { message = result });
             }
             catch (KeyNotFoundException ex)
@@ -71,12 +77,13 @@ namespace ProjetoFinal.Controllers
         }
 
         [Authorize(Policy = "OnlyMembers")]
-        [HttpGet("member-reservations/{idMembro}")]
-        public async Task<IActionResult> ListMemberReservations(int idMembro)
+        [HttpGet("member-reservations")]
+        public async Task<IActionResult> ListMemberReservations()
         {
             try
             {
-                var reservas = await _memberClassService.ListarReservasDoMembroAsync(idMembro);
+                var idUser = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+                var reservas = await _memberClassService.ListarReservasDoMembroAsync(idUser);
                 return Ok(reservas);
             }
             catch

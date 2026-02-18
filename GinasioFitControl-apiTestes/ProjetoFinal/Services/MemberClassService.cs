@@ -9,22 +9,27 @@ namespace ProjetoFinal.Services
     public class MemberClassService : IMemberClassService
     {
         private readonly GinasioDbContext _context;
+        private readonly IUserService _userService;
 
-        public MemberClassService(GinasioDbContext context)
+        public MemberClassService(GinasioDbContext context, IUserService userService)
         {
             _context = context;
+            _userService = userService;
         }
 
-        // Membro reserva aula
-        private async Task<MembroAula?> GetReservationAsync(int idMembro, int idAulaMarcada)
+        private async Task<int> GetIdMembroFromUser(int idUser)
         {
-            return await _context.MembrosAulas
-                .Include(r => r.AulaMarcada)
-                .FirstOrDefaultAsync(r => r.IdMembro == idMembro && r.IdAulaMarcada == idAulaMarcada);
+            var user = await _userService.GetUserByIdAsync(idUser, includeMembro: true);
+            if (user?.Membro == null)
+                throw new InvalidOperationException("O utilizador não é um membro.");
+
+            return user.Membro.IdMembro;
         }
 
-        public async Task<MembroAula> ReservarAsync(int idMembro, int idAulaMarcada)
+        public async Task<MembroAula> ReservarAsync(int idUser, int idAulaMarcada)
         {
+            var idMembro = await GetIdMembroFromUser(idUser);
+
             await using var transaction = await _context.Database
                 .BeginTransactionAsync(System.Data.IsolationLevel.Serializable);
 
@@ -43,16 +48,13 @@ namespace ProjetoFinal.Services
             if (diasAntecedencia > 15)
                 throw new InvalidOperationException("Não é possível reservar com mais de 15 dias de antecedência.");
 
-            // Procura reserva existente
-            var reservaExistente = aula.MembrosAulas
-                .FirstOrDefault(r => r.IdMembro == idMembro);
+            var reservaExistente = aula.MembrosAulas.FirstOrDefault(r => r.IdMembro == idMembro);
 
             if (reservaExistente != null)
             {
                 if (reservaExistente.Presenca == Presenca.Reservado)
                     throw new InvalidOperationException("O membro já possui reserva nesta aula.");
 
-                // Se estava cancelado, volta para reservado
                 reservaExistente.Presenca = Presenca.Reservado;
                 reservaExistente.DataReserva = DateTime.UtcNow;
 
@@ -61,12 +63,10 @@ namespace ProjetoFinal.Services
                 return reservaExistente;
             }
 
-            // Verifica se a aula está cheia
             int reservasAtuais = aula.MembrosAulas.Count(m => m.Presenca == Presenca.Reservado);
             if (reservasAtuais >= aula.Aula.Capacidade)
                 throw new InvalidOperationException("Aula cheia.");
 
-            // Cria nova reserva
             var reserva = new MembroAula
             {
                 IdMembro = idMembro,
@@ -82,11 +82,10 @@ namespace ProjetoFinal.Services
             return reserva;
         }
 
-
-
-
-        public async Task<string> CancelarReservaAsync(int idMembro, int idAulaMarcada)
+        public async Task<string> CancelarReservaAsync(int idUser, int idAulaMarcada)
         {
+            var idMembro = await GetIdMembroFromUser(idUser);
+
             await using var transaction = await _context.Database
                 .BeginTransactionAsync(System.Data.IsolationLevel.Serializable);
 
@@ -94,9 +93,7 @@ namespace ProjetoFinal.Services
                 .FirstOrDefaultAsync(m => m.IdMembro == idMembro && m.IdAulaMarcada == idAulaMarcada)
                 ?? throw new KeyNotFoundException("Reserva não encontrada.");
 
-            await _context.Entry(reserva)
-                .Reference(r => r.AulaMarcada)
-                .LoadAsync();
+            await _context.Entry(reserva).Reference(r => r.AulaMarcada).LoadAsync();
 
             if (reserva.AulaMarcada.DataAula.Date <= DateTime.UtcNow.Date)
                 throw new InvalidOperationException("Não é possível cancelar com menos de 1 dia de antecedência.");
@@ -109,38 +106,31 @@ namespace ProjetoFinal.Services
             return "Reserva cancelada com sucesso.";
         }
 
-
-
-
-        public async Task<List<ClassReservationDto>> ListarReservasDoMembroAsync(int idMembro)
+        public async Task<List<ClassReservationDto>> ListarReservasDoMembroAsync(int idUser)
         {
-            var reservas = await _context.MembrosAulas
+            var idMembro = await GetIdMembroFromUser(idUser);
+
+            return await _context.MembrosAulas
                 .AsNoTracking()
-                .Include(r => r.AulaMarcada)
-                    .ThenInclude(a => a.Aula)
+                .Include(r => r.AulaMarcada).ThenInclude(a => a.Aula)
                 .Include(r => r.Membro)
                 .Where(r => r.IdMembro == idMembro && r.Presenca == Presenca.Reservado)
-                .OrderBy(r => r.AulaMarcada != null ? r.AulaMarcada.DataAula : DateTime.MinValue)
+                .OrderBy(r => r.AulaMarcada.DataAula)
                 .Select(r => new ClassReservationDto
                 {
                     IdMembro = r.IdMembro,
                     IdAulaMarcada = r.IdAulaMarcada,
-                    NomeAula = (r.AulaMarcada != null && r.AulaMarcada.Aula != null) ? r.AulaMarcada.Aula.Nome : string.Empty,
-                    NomeMembro = r.Membro != null ? r.Membro.Nome : string.Empty,
-                    Instrutor = (r.AulaMarcada != null && r.AulaMarcada.Aula != null) ? r.AulaMarcada.Aula.Funcionario.Nome : string.Empty,
-                    DataAula = r.AulaMarcada != null ? r.AulaMarcada.DataAula : DateTime.MinValue,
-                    HoraInicio = (r.AulaMarcada != null && r.AulaMarcada.Aula != null) ? r.AulaMarcada.Aula.HoraInicio : TimeSpan.MinValue,
-                    HoraFim = (r.AulaMarcada != null && r.AulaMarcada.Aula != null) ? r.AulaMarcada.Aula.HoraFim : TimeSpan.MinValue,
-
+                    NomeAula = r.AulaMarcada.Aula.Nome,
+                    NomeMembro = r.Membro.Nome,
+                    Instrutor = r.AulaMarcada.Aula.Funcionario.Nome,
+                    DataAula = r.AulaMarcada.DataAula,
+                    HoraInicio = r.AulaMarcada.Aula.HoraInicio,
+                    HoraFim = r.AulaMarcada.Aula.HoraFim,
                     DataReserva = r.DataReserva,
-                    Sala = r.AulaMarcada != null ? r.AulaMarcada.Sala : 0
+                    Sala = r.AulaMarcada.Sala
                 })
                 .ToListAsync();
-
-            return reservas;
         }
-
-
 
         public async Task<string> MarcarPresencasAsync(int idAulaMarcada, List<int> idsMembrosPresentes)
         {
@@ -169,8 +159,6 @@ namespace ProjetoFinal.Services
             await _context.SaveChangesAsync();
             return "Presenças marcadas com sucesso.";
         }
-
-
 
         public async Task<ClassAttendanceDto> ObterAulaParaPresencaAsync(int idAulaMarcada)
         {
@@ -253,3 +241,4 @@ namespace ProjetoFinal.Services
 
     }
 }
+        
