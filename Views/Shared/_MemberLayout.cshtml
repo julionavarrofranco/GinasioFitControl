@@ -8,12 +8,11 @@
 </head>
 <body class="@(ViewData["BodyClass"] ?? "")" style="@(ViewData["BodyStyle"] ?? "")">
     <div class="page-wrapper">
-        <!-- wrapper flex vertical -->
         <header>
             <nav class="navbar member-navbar">
                 <div class="container">
                     <div class="logo">
-                        <a href="@Url.Action("Index", "Home")" style="text-decoration: none; color: inherit;">
+                        <a href="@Url.Action("Index", "Home", new { forcePublic = true })" style="text-decoration: none; color: inherit;">
                             <h1>FitControl</h1>
                         </a>
                         <span class="member-badge">Área de Membros</span>
@@ -68,7 +67,7 @@
                 </div>
             </div>
         </footer>
-    </div> <!-- end page-wrapper -->
+    </div> 
 
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
@@ -77,30 +76,30 @@
 </html>
 
 <style>
-.member-navbar {
+    .member-navbar {
     background: var(--bg-card);
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
-}
+    }
 
-.member-badge {
+    .member-badge {
     font-size: 0.75rem;
     color: var(--accent);
     margin-left: 0.5rem;
     font-weight: normal;
-}
+    }
 
-.nav-user {
+    .nav-user {
     display: flex;
     align-items: center;
     gap: 1rem;
-}
+    }
 
-.user-name {
+    .user-name {
     color: var(--text-secondary);
     font-size: 0.9rem;
-}
+    }
 
-.btn-logout {
+    .btn-logout {
     padding: 0.5rem 1rem;
     background: transparent;
     border: 1px solid var(--border);
@@ -109,25 +108,25 @@
     cursor: pointer;
     font-size: 0.9rem;
     transition: all 0.3s;
-}
+    }
 
-.btn-logout:hover {
+    .btn-logout:hover {
     background: var(--error);
     border-color: var(--error);
     color: white;
-}
+    }
 
-.nav-menu a {
+    .nav-menu a {
     color: var(--text-primary);
     text-decoration: none;
     padding: 0.5rem 1rem;
     border-radius: 6px;
     transition: all 0.3s;
-}
+    }
 
-.nav-menu a:hover {
+    .nav-menu a:hover {
     background: var(--bg-primary);
     color: var(--accent);
-}
+    }
 </style>
 

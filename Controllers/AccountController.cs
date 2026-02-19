@@ -4,9 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
-using System.Net.Http;
 using System.Security.Claims;
-using System.Text.Json;
 using TTFWebsite.Models;
 using TTFWebsite.Services;
 
@@ -51,7 +49,7 @@ namespace TTFWebsite.Controllers
                 return View(model);
             }
 
-            // Decodificar JWT
+            // Decodificar JWT (validação de assinatura/expiração) e extrair claims.
             var principal = _jwtService.DecodeToken(tokenResponse.AccessToken);
             if (principal == null)
             {
@@ -59,9 +57,9 @@ namespace TTFWebsite.Controllers
                 return View(model);
             }
 
-            // Criar claims e adicionar o token JWT como claim
+            // Criar claims e adicionar o JWT como claim própria ("jwt") para uso pelo ApiService.
             var claims = principal.Claims.ToList();
-            claims.Add(new Claim("jwt", tokenResponse.AccessToken)); // <-- JWT guardado aqui
+            claims.Add(new Claim("jwt", tokenResponse.AccessToken));
             var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
 
             var authProperties = new AuthenticationProperties
@@ -76,15 +74,15 @@ namespace TTFWebsite.Controllers
                 authProperties
             );
 
-            // Guardar refresh token na sessão
+            // Guardar refresh token na Session para suportar refresh de acesso quando o JWT expirar.
             HttpContext.Session.SetString("RefreshToken", tokenResponse.RefreshToken);
             
-            // Guardar se precisa alterar password na sessão (para verificação posterior)
+            // Guardar se precisa alterar password (gating da área de membros via policy PasswordChanged).
             HttpContext.Session.SetString("NeedsPasswordChange", tokenResponse.NeedsPasswordChange.ToString());
             
             _logger.LogInformation("AccessToken saved to claims, length: {Length}", tokenResponse.AccessToken.Length);
 
-            // Apenas membros podem usar a área de membros: a API coloca a claim "Tipo" no JWT (Membro / Funcionario)
+            // Apenas membros podem usar a área de membros
             var tipoClaim = principal.FindFirst("Tipo")?.Value;
             if (!string.Equals(tipoClaim, "Membro", StringComparison.OrdinalIgnoreCase))
             {
@@ -94,7 +92,7 @@ namespace TTFWebsite.Controllers
                 return View(model);
             }
 
-            // Se precisa alterar password
+            // Se precisar de alterar password inicial, força a alteração antes de dar acesso ao dashboard.
             if (tokenResponse.NeedsPasswordChange)
             {
                 TempData["NeedsPasswordChange"] = true;
@@ -102,6 +100,7 @@ namespace TTFWebsite.Controllers
                 return RedirectToAction("ChangePassword", "Account");
             }
 
+            // Redireciona para returnUrl (se for local) ou para a área de membros.
             return !string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl)
                 ? Redirect(returnUrl)
                 : RedirectToAction("Dashboard", "Member");
@@ -113,7 +112,7 @@ namespace TTFWebsite.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Logout()
         {
-            // Pegar token dos claims antes de limpar
+            // Pegar token dos claims antes de limpar (para tentar invalidar sessão na API).
             var token = HttpContext.User.FindFirst("jwt")?.Value;
 
             if (!string.IsNullOrEmpty(token))
@@ -122,7 +121,7 @@ namespace TTFWebsite.Controllers
                 await _apiService.LogoutAsync(token);
             }
 
-            // Limpar cookie de autenticação e sessão
+            // Limpar cookie de autenticação e sessão local do website
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             HttpContext.Session.Clear();
 
@@ -161,6 +160,7 @@ namespace TTFWebsite.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize]
+        // POST /Account/ChangePassword
         public async Task<IActionResult> ChangePassword(ChangePasswordViewModel model)
         {
             if (!ModelState.IsValid)
@@ -178,10 +178,10 @@ namespace TTFWebsite.Controllers
                 return View(model);
             }
 
-            // Limpar flag de NeedsPasswordChange da sessão antes de logout
+            // Limpar flag antes de logout (a partir daqui o utilizador já não deve ser bloqueado).
             HttpContext.Session.Remove("NeedsPasswordChange");
 
-            // Logout para forçar re-login (agora com PrimeiraVez=false)
+            // Logout para forçar re-login (agora com NeedsPasswordChange=false).
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             HttpContext.Session.Clear();
 
@@ -210,9 +210,7 @@ namespace TTFWebsite.Controllers
                 }
             }
             catch
-            {
-                // Se falhar, simplesmente não define o nome; o fallback do layout trata do resto.
-            }
+            {}
         }
 
 

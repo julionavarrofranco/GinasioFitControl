@@ -52,13 +52,10 @@
                 <div class="detail-row">
                     <span class="detail-label">Nº Membro</span>
                     <span class="detail-value membership-number">
-                        @(
-                                                Model.IdMembro > 0 ? Model.IdMembro.ToString() : "—"
-                                                )
+                        @(Model.IdMembro > 0 ? Model.IdMembro.ToString() : "—")
                     </span>
                 </div>
 
-                @* 'Nº de Membro' removed as requested *@
                 <div class="detail-row">
                     <span class="detail-label">Plano</span>
                     <span class="detail-value">@Model.Plan</span>
@@ -81,7 +78,6 @@
 </div>
 
 <style>
-/* keep minimal inline styles for small overrides, main styles are in site.css */
 .profile-header { display:none; }
 </style>
 

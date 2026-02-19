@@ -12,13 +12,11 @@ namespace TTFWebsite.Services
 
         public JwtService(IConfiguration configuration)
         {
-            // Pega a chave do user secrets / appsettings
             _jwtSecret = configuration["Jwt:Key"]
                          ?? throw new InvalidOperationException("JWT Key não encontrada nas configurações.");
             _issuer = configuration["Jwt:Issuer"];
             _audience = configuration["Jwt:Audience"];
         }
-
 
         public ClaimsPrincipal? DecodeToken(string token)
         {
@@ -43,8 +41,7 @@ namespace TTFWebsite.Services
                 };
 
                 var principal = tokenHandler.ValidateToken(token, validationParameters, out var validatedToken);
-
-                // opcional: garantir que o token é JWT
+              
                 if (validatedToken is not JwtSecurityToken jwtToken)
                     return null;
 
@@ -52,7 +49,7 @@ namespace TTFWebsite.Services
             }
             catch
             {
-                // Token inválido ou expirado → retorna null
+                // Token inválido ou expirado
                 return null;
             }
         }

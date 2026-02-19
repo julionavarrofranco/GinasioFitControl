@@ -4,16 +4,16 @@ Este projeto é uma replicação do site TTF (https://ttf.pt/) desenvolvido em A
 
 ## Funcionalidades
 
-- ✅ Hero section com call-to-action
-- ✅ Seção de localização de ginásios
-- ✅ Benefícios do ginásio
-- ✅ Tipos de treino disponíveis
-- ✅ Depoimentos de clientes
-- ✅ Planos e preços
-- ✅ Formulário de treino grátis
-- ✅ Newsletter subscription
-- ✅ Design responsivo
-- ✅ Paleta de cores personalizada
+- Hero section com call-to-action
+- Seção de localização de ginásios
+- Benefícios do ginásio
+- Tipos de treino disponíveis
+- Depoimentos de clientes
+- Planos e preços
+- Formulário de treino grátis
+- Newsletter subscription
+- Design responsivo
+- Paleta de cores personalizada
 
 ## Tecnologias
 

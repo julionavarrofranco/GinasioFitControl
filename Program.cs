@@ -4,31 +4,28 @@ using TTFWebsite.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 builder.Services.AddControllersWithViews();
 
-// Configurar autenticação com cookies
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {
+        // Rotas públicas do fluxo de autenticação (não alterar sem ajustar controllers/views).
         options.LoginPath = "/Account/Login";
         options.LogoutPath = "/Account/Logout";
-        options.AccessDeniedPath = "/Account/AccessDenied"; // Será redirecionado para ChangePassword se PrimeiraVez=true
+        // AccessDenied redireciona para ChangePassword quando NeedsPasswordChange=True.
+        options.AccessDeniedPath = "/Account/AccessDenied";
         options.ExpireTimeSpan = TimeSpan.FromDays(30);
         options.SlidingExpiration = true;
     });
 
-// Configurar autorização com policy para verificar se password foi alterada
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("PasswordChanged", policy =>
         policy.Requirements.Add(new TTFWebsite.Authorization.PasswordChangedRequirement()));
 });
 
-// Registrar o handler de autorização (scoped porque precisa de IHttpContextAccessor)
 builder.Services.AddScoped<IAuthorizationHandler, TTFWebsite.Authorization.PasswordChangedHandler>();
 
-// Session para guardar dados do utilizador
 builder.Services.AddSession(options =>
 {
     options.IdleTimeout = TimeSpan.FromDays(30);
@@ -36,9 +33,8 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;
 });
 
-// Registrar HttpClient e ApiService
 builder.Services.AddHttpClient<TTFWebsite.Services.IApiService, TTFWebsite.Services.ApiService>();
-builder.Services.AddHttpContextAccessor(); // <-- Adiciona isto
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddSingleton<JwtService>();
 
 var apiBaseUrl = builder.Configuration["ApiSettings:BaseUrl"] ?? "http://localhost:7267";
@@ -50,7 +46,6 @@ builder.Services.AddHttpClient("FitControlApi", client =>
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -69,10 +64,10 @@ app.UseMiddleware<JwtValidationMiddleware>();
 
 app.UseAuthorization();
 
+// Rota default (não alterar: é a base das rotas MVC do site)
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
-
 
 app.Run();
 

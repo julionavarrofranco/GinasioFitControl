@@ -3,10 +3,6 @@ using Microsoft.AspNetCore.Http;
 
 namespace TTFWebsite.Authorization
 {
-    /// <summary>
-    /// Handler que verifica se o utilizador já alterou a password inicial.
-    /// Verifica a Session para ver se NeedsPasswordChange=true (indicando PrimeiraVez=true).
-    /// </summary>
     public class PasswordChangedHandler : AuthorizationHandler<PasswordChangedRequirement>
     {
         private readonly IHttpContextAccessor _httpContextAccessor;

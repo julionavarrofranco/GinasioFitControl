@@ -10,7 +10,6 @@
     </div>
 
     <div class="dashboard-grid">
-        <!-- Aulas Reservadas -->
         <div class="dashboard-card">
             <div class="card-header">
                 <h2>Aulas Reservadas</h2>
@@ -45,11 +44,9 @@
             else
             {
                 <p class="empty-state">Não tens aulas reservadas.</p>
-                <a href="@Url.Action("Classes", "Member")" class="btn-primary">Reservar Aula</a>
             }
         </div>
 
-        <!-- Avaliação Física Recente -->
         <div class="dashboard-card">
             <div class="card-header">
                 <h2>Avaliação Física</h2>
@@ -90,7 +87,6 @@
             }
         </div>
 
-        <!-- Plano de Treino -->
         <div class="dashboard-card">
             <div class="card-header">
                 <h2>Plano de Treino</h2>
@@ -124,7 +120,6 @@
             }
         </div>
 
-        <!-- Informações do Membro -->
         <div class="dashboard-card">
             <div class="card-header">
                 <h2>O Meu Perfil</h2>
@@ -140,9 +135,9 @@
                     )</span>
                 </div>
                 <div class="profile-item">
-    <span class="profile-label">Nº Membro:</span>
-    <span class="profile-value">@(Model.Profile.IdMembro > 0 ? Model.Profile.IdMembro.ToString() : "—")</span>
-</div>
+                    <span class="profile-label">Nº Membro:</span>
+                    <span class="profile-value">@(Model.Profile.IdMembro > 0 ? Model.Profile.IdMembro.ToString() : "—")</span>
+                </div>
 
                 <div class="profile-item">
                     <span class="profile-label">Plano:</span>
@@ -184,7 +179,6 @@
     gap: 1.5rem;
 }
 
-/* ensure cards align vertically at the start so titles line up */
 .dashboard-grid > .dashboard-card {
     display: flex;
     flex-direction: column;
@@ -390,7 +384,6 @@
     font-weight: 500;
 }
 
-/* Small exercise card styles for plan summary in dashboard */
 .plan-exercises-cards {
     display: flex;
     flex-direction: column;

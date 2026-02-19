@@ -7,6 +7,7 @@ using TTFWebsite.Models.DTOs;
 using TTFWebsite.Services;
 using TTFWebsite.ViewModels;
 
+
 [Authorize(Policy = "PasswordChanged")]
 public class MemberController : Controller
 {
@@ -23,9 +24,6 @@ public class MemberController : Controller
         return user?.IdMembro;
     }
 
-    /// <summary>
-    /// Faz logout e redireciona para Login com mensagem (evita ficar preso na página "Unauthorized").
-    /// </summary>
     private async Task<IActionResult> RequireMemberAsync()
     {
         await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
@@ -41,15 +39,6 @@ public class MemberController : Controller
         return profile ?? new MemberProfileViewModel();
     }
 
-    // pequenos DTOs para binding de AJAX
-    public class BookClassRequestDto { public int classId { get; set; } }
-    public class CancelReservationRequestDto {
-        public int classId { get; set; }
-    }
-
-    // -------------------------
-    // DASHBOARD
-    // -------------------------
     public async Task<IActionResult> Dashboard()
     {
         var idMembro = await GetIdMembro();
@@ -73,9 +62,6 @@ public class MemberController : Controller
         return View(model);
     }
 
-    // -------------------------
-    // PROFILE
-    // -------------------------
     public async Task<IActionResult> Profile()
     {
         var idMembro = await GetIdMembro();
@@ -83,7 +69,6 @@ public class MemberController : Controller
 
         var profile = await GetProfileAsync(idMembro.Value);
 
-        // Obter o plano de treino atual para apresentar no perfil
         var trainingPlan = await _api.GetCurrentTrainingPlanAsync();
         ViewBag.TrainingPlanName = trainingPlan?.Name;
 
@@ -102,11 +87,13 @@ public class MemberController : Controller
         return Json(profile.Name);
     }
 
-    // -------------------------
-    // CLASSES
-    // -------------------------
     public async Task<IActionResult> Classes()
     {
+        var idMembro = await GetIdMembro();
+        if (idMembro == null) return await RequireMemberAsync();
+
+        await GetProfileAsync(idMembro.Value);
+
         var classes = await _api.GetAvailableClassesAsync();
         var reservations = await _api.GetUserReservationsAsync();
 
@@ -118,7 +105,6 @@ public class MemberController : Controller
 
         return View(model);
     }
-
 
     [HttpPost]
     public async Task<IActionResult> BookClass([FromQuery] int id)
@@ -144,20 +130,12 @@ public class MemberController : Controller
         if (!result.Success)
             return BadRequest(new { message = result.ErrorMessage });
 
-        // 🔴 IMPORTANTE: dar tempo à API para persistir a alteração
         await Task.Delay(150);
 
         var reservations = await _api.GetUserReservationsAsync();
         return PartialView("UserReservationsPartial", reservations);
     }
 
-
-
-
-
-    // -------------------------
-    // TRAINING PLAN
-    // -------------------------
     public async Task<IActionResult> TrainingPlan()
     {
         var idMembro = await GetIdMembro();
@@ -172,9 +150,6 @@ public class MemberController : Controller
         return View(plan);
     }
 
-    // -------------------------
-    // PHYSICAL ASSESSMENT
-    // -------------------------
     public async Task<IActionResult> PhysicalAssessment()
     {
         var idMembro = await GetIdMembro();
@@ -208,7 +183,6 @@ public class MemberController : Controller
         if (!DateTime.TryParse(request.DataReserva, null, System.Globalization.DateTimeStyles.RoundtripKind, out var dataReserva))
             return BadRequest(new { message = "DataReserva inválida." });
 
-        // ✅ Verifica se já existe reserva ativa
         var existing = await _api.GetActivePhysicalAssessmentAsync(idMembro.Value);
         if (existing != null)
             return BadRequest(new { message = "O membro já possui uma reserva ativa." });
@@ -216,7 +190,6 @@ public class MemberController : Controller
         Reservation? reservation;
         try
         {
-            // ✅ Cria reserva e retorna o objeto criado
             reservation = await _api.BookPhysicalAssessmentAsync(idMembro.Value, dataReserva);
         }
         catch (Exception ex)
@@ -227,7 +200,6 @@ public class MemberController : Controller
         if (reservation == null)
             return BadRequest(new { message = "Erro ao criar a reserva." });
 
-        // ✅ Retorna o ID válido da reserva imediatamente
         return Ok(new
         {
             IdMembroAvaliacao = reservation.Id,

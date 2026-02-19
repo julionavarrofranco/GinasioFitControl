@@ -101,7 +101,7 @@ public class JwtValidationMiddleware
 
     private async Task ReSignInWithNewJwt(HttpContext context, string newJwt)
     {
-        // Mantém todas as claims originais exceto a antiga JWT
+        // Mantém todas as claims originais exceto a antiga JWT e re-assina o cookie com o novo token.
         var claims = context.User.Claims
             .Where(c => c.Type != "jwt")
             .ToList();
@@ -135,7 +135,7 @@ public class JwtValidationMiddleware
             var path = context.Request.Path.ToString().ToLower();
             if (!path.Contains("/home/index") && !path.Contains("/home"))
             {
-                // Quando o utilizador perde JWT/refresh tokens, volta ao site público (Home/Index).
+                // Quando o membro perde JWT/refresh tokens, volta ao site público (Home/Index).
                 context.Response.Redirect("/Home/Index");
             }
         }

@@ -14,29 +14,15 @@ namespace TTFWebsite.Controllers
             _apiService = apiService;
         }
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(bool forcePublic = false)
         {
-            string memberName = "";
-            if (User.Identity != null && User.Identity.IsAuthenticated)
+            if (!forcePublic && User.Identity?.IsAuthenticated == true)
             {
-                var currentUser = await _apiService.GetCurrentUserAsync();
-                if (currentUser != null)
-                {
-                    memberName = currentUser.Nome;
-                }
-
-                if (string.IsNullOrWhiteSpace(memberName))
-                {
-                    // fallback: usar email do token (claim Name) e mostrar parte antes do '@'
-                    var email = currentUser?.Email ?? User.Identity?.Name ?? "";
-                    memberName = !string.IsNullOrWhiteSpace(email) && email.Contains("@")
-                        ? email.Split('@')[0]
-                        : memberName;
-                }
+                return RedirectToAction("Dashboard", "Member");
             }
 
-            ViewData["MemberName"] = string.IsNullOrWhiteSpace(memberName) ? "Membro" : memberName;
-            // Buscar subscrições/planos ativos da API
+            ViewData["MemberName"] = "Membro";
+
             var activeSubscriptions = await _apiService.GetActiveSubscriptionsAsync();
 
             var model = new HomeViewModel
@@ -50,7 +36,6 @@ namespace TTFWebsite.Controllers
             return View(model);
         }
 
-
         private List<Plan> MapSubscriptionsToPlans(List<SubscriptionDto> subscriptions)
         {
             return subscriptions.Select(s => new Plan
@@ -60,13 +45,9 @@ namespace TTFWebsite.Controllers
                 Price = s.Preco,
                 Description = s.Descricao ?? "",
                 Type = s.Tipo,
-                IsPopular = false // podes aplicar lógica para marcar algum plano como popular
+                IsPopular = false 
             }).ToList();
         }
-
-
-
-
         private List<Gym> GetGyms()
         {
             return new List<Gym>
@@ -96,40 +77,6 @@ namespace TTFWebsite.Controllers
                 new Benefit { Id = 6, Title = "Planos Acessíveis", Description = "A partir de 27€/mês, com acesso total e sem surpresas na mensalidade.", IconClass = "icon-planos-acessiveis" }
             };
         }
-
-        //private List<Plan> GetPlans()
-        //{
-        //    return new List<Plan>
-        //    {
-        //        new Plan
-        //        {
-        //            Id = 1,
-        //            Name = "FitControl Plus",
-        //            Price = 35,
-        //            Description = "Plano completo com tudo incluído",
-        //            Features = new List<string>
-        //            {
-        //                "Débito Direto",
-        //                "Plano geral de treino",
-        //                "Plano Geral De Alimentação"
-        //            }
-        //        },
-        //        new Plan
-        //        {
-        //            Id = 2,
-        //            Name = "FitControl GO",
-        //            Price = 45,
-        //            Description = "Plano flexível sem débito direto",
-        //            Features = new List<string>
-        //            {
-        //                "Sem Débito Direto",
-        //                "Plano geral de treino",
-        //                "Plano Geral De Alimentação"
-        //            },
-        //            IsPopular = true
-        //        }
-        //    };
-        //}
 
         private List<Testimonial> GetTestimonials()
         {
