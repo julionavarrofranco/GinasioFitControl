@@ -1,0 +1,147 @@
+@model TTFWebsite.Models.TrainingPlanViewModel
+@{
+    ViewData["Title"] = "Plano de Treino - ?rea de Membros";
+    ViewData["BodyClass"] = "classes-bg";
+    Layout = "~/Views/Shared/_MemberLayout.cshtml";
+}
+
+<div class="trainingplan-container">
+    <div class="trainingplan-header">
+        <h1>@Model.Name</h1>
+        <p class="plan-meta">
+            Criado por: @Model.CreatedBy, @Model.CreatedDate.ToString("dd/MM/yyyy")
+        </p>
+        @if (!string.IsNullOrWhiteSpace(Model.Observations))
+        {
+            <div class="plan-observacoes">
+                <p>@Model.Observations</p>
+            </div>
+        }
+    </div>
+
+    <div class="trainingplan-content">
+        <h2>Exerc&#237;cios</h2>
+        <div class="exercises-list">
+            @foreach (var ex in Model.Exercises)
+            {
+                <div class="exercise-card">
+                    <div class="exercise-title">
+                        <h3>@ex.Name</h3>
+                        <div class="sets-reps">@ex.Sets x @ex.Reps</div>
+                    </div>
+                    <div class="exercise-body">
+                        <div class="exercise-text">
+                            <p class="exercise-meta">
+                                <span class="exercise-muscle">&#128170; @ex.MuscleGroup</span>
+                                @if (ex.Load.HasValue)
+                                {
+                                    <span class="exercise-load">&#127947; @ex.Load.Value kg</span>
+                                }
+                            </p>
+                            <p class="exercise-desc">&#9998; @ex.Description</p>
+                            @if (!string.IsNullOrWhiteSpace(ex.Notes))
+                            {
+                                <p class="exercise-notes">Notas: @ex.Notes</p>
+                            }
+                        </div>
+                        <img src="@(string.IsNullOrWhiteSpace(ex.PhotoUrl) ? "/img/default-icon.png" : ex.PhotoUrl)"
+                             alt="@ex.Name"
+                             class="exercise-img" />
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<style>
+    .trainingplan-container
+    { 
+        padding: 2rem; 
+        max-width: 900px;
+        margin: 0 auto; 
+    }
+
+    .trainingplan-content h2 
+    { 
+        margin-bottom: 1.25rem;    
+    }
+
+    .exercises-list 
+    {
+        margin-top: 0; 
+    }
+
+    .exercise-card 
+    { 
+        background: var(--bg-card); 
+        border-radius: 10px;
+        padding: 1rem; 
+        margin-bottom: 1rem;
+        border: 1px solid var(--border);  
+    }
+
+    .exercise-title 
+    { 
+        display: flex; 
+        justify-content: space-between; 
+        align-items: center; 
+    }
+
+    .sets-reps 
+    { 
+        font-weight: 600; 
+        color: var(--text-secondary); 
+    }
+
+    .exercise-body 
+    { 
+        position: relative; 
+        min-height: 140px; 
+        padding-right: 140px; 
+    }
+
+    .exercise-text { }
+
+    .exercise-meta 
+    {
+        margin: 0.25rem 0; 
+        display: flex; 
+        flex-wrap: wrap; 
+        gap: 1rem; 
+        font-size: 0.95rem; 
+        color: var(--text-secondary); 
+    }
+
+    .exercise-muscle, .exercise-load 
+    { 
+        display: inline-block; 
+    }
+
+    .exercise-desc 
+    { 
+        margin: 1rem 0 0 0; 
+        font-size: 0.95rem; 
+        color: var(--text-primary); 
+        line-height: 1.5; 
+    }
+
+    .exercise-notes 
+    {
+        margin-top: 0.5rem; 
+        font-style: italic;
+        color: var(--text-secondary); 
+        font-size: 0.9rem; 
+    }
+
+    .exercise-img 
+    { 
+        position: absolute; 
+        right: 0; 
+        bottom: 0; 
+        width: 120px; 
+        height: 120px; 
+        object-fit: fill; 
+        border-radius: 8px; 
+    }
+</style>
