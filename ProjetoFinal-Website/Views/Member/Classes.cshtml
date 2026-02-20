@@ -17,43 +17,40 @@
         <p>Reserva as tuas aulas favoritas</p>
     </div>
 
-    @if (Model.UserReservations.Any())
-    {
-        <div class="section">
-            <h2>As Minhas Reservas</h2>
-            <div class="reservations-grid" id="reservationsGrid">
-                @foreach (var reservation in Model.UserReservations)
-                {
-                    var date = reservation.DataAula.ToString("dd MMM", new System.Globalization.CultureInfo("pt-PT"));
-                    var startTime = reservation.HoraInicio;
-                    var endTime = reservation.HoraFim;
-                    var startAttr = reservation.DataAula.Add(reservation.HoraInicio).ToString("o");
-                    var timeRange = $"{startTime:hh\\:mm} - {endTime:hh\\:mm}";
+    <div class="section" id="myReservationsSection">
+        <h2>As Minhas Reservas</h2>
+        <div class="reservations-grid" id="reservationsGrid">
+            @foreach (var reservation in Model.UserReservations)
+            {
+                var date = reservation.DataAula.ToString("dd MMM", new System.Globalization.CultureInfo("pt-PT"));
+                var startTime = reservation.HoraInicio;
+                var endTime = reservation.HoraFim;
+                var startAttr = reservation.DataAula.Add(reservation.HoraInicio).ToString("o");
+                var timeRange = $"{startTime:hh\\:mm} - {endTime:hh\\:mm}";
 
-                    <div class="class-card reserved"
-                         data-id="@reservation.idAulaMarcada"
-                         data-start="@startAttr">
+                <div class="class-card reserved"
+                     data-id="@reservation.idAulaMarcada"
+                     data-start="@startAttr">
 
-                        <div class="class-body small">
-                            <h3>@reservation.nomeAula</h3>
-                            <div class="class-details">
-                                <div><span class="detail-icon">🕜</span> @($"{date} {timeRange}")</div>
-                                <div><span class="detail-icon">👤</span> @reservation.instrutor</div>
-                                <div><span class="detail-icon">📍</span> Sala @reservation.sala</div>
-                            </div>
-                        </div>
-
-                        <div class="class-footer">
-                            <button class="btn-cancel"
-                                    onclick="openCancelModal(@reservation.idAulaMarcada)">
-                                Cancelar
-                            </button>
+                    <div class="class-body small">
+                        <h3>@reservation.nomeAula</h3>
+                        <div class="class-details">
+                            <div><span class="detail-icon">🕜</span> @($"{date} {timeRange}")</div>
+                            <div><span class="detail-icon">👤</span> @reservation.instrutor</div>
+                            <div><span class="detail-icon">📍</span> Sala @reservation.sala</div>
                         </div>
                     </div>
-                }
-            </div>
+
+                    <div class="class-footer">
+                        <button class="btn-cancel"
+                                onclick="openCancelModal(@reservation.idAulaMarcada)">
+                            Cancelar
+                        </button>
+                    </div>
+                </div>
+            }
         </div>
-    }
+    </div>
 
     <div class="section section-available">
         <h2>Aulas Disponíveis</h2>
@@ -235,21 +232,42 @@
             newGrid.id = 'reservationsGrid';
             newGrid.innerHTML = temp.innerHTML;
         }
-            const oldGrid = document.getElementById('reservationsGrid');
-    let section = null;
+        
+        let section = document.getElementById('myReservationsSection');
+        const oldGrid = document.getElementById('reservationsGrid');
 
-    if(oldGrid){
-        section = oldGrid.closest('.section');
-        oldGrid.replaceWith(newGrid);
-    }
+        // Se a secção não existe, criar ela
+        if(!section){
+            section = document.createElement('div');
+            section.className = 'section';
+            section.id = 'myReservationsSection';
+            const header = document.createElement('h2');
+            header.textContent = 'As Minhas Reservas';
+            section.appendChild(header);
+            
+            // Inserir antes da secção "Aulas Disponíveis"
+            const availableSection = document.querySelector('.section-available');
+            if(availableSection){
+                availableSection.parentNode.insertBefore(section, availableSection);
+            } else {
+                // Se não encontrar, inserir no final do container
+                const container = document.querySelector('.classes-container');
+                if(container) container.appendChild(section);
+            }
+        }
 
-    if(section){
-        const hasCards = newGrid.querySelector('.class-card');
-        section.style.display = hasCards ? '' : 'none';
-    }
-    return newGrid;
+        // Substituir o grid antigo pelo novo
+        if(oldGrid && oldGrid.parentNode === section){
+            oldGrid.replaceWith(newGrid);
+        } else {
+            // Se não há grid antigo ou não está na secção correta, adicionar o novo
+            section.appendChild(newGrid);
+        }
 
-
+        // Mostrar a secção sempre (mesmo que vazia)
+        section.style.display = '';
+        
+        return newGrid;
     }
 
     // Atualiza botões e contador no carousel com base nas reservas atuais (array pode conter ids duplicados)

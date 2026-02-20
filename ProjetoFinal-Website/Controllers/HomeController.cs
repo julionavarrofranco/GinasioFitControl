@@ -21,7 +21,31 @@ namespace TTFWebsite.Controllers
                 return RedirectToAction("Dashboard", "Member");
             }
 
-            ViewData["MemberName"] = "Membro";
+            // Se o utilizador estiver autenticado (mesmo com forcePublic), buscar o nome do membro
+            if (User.Identity?.IsAuthenticated == true)
+            {
+                try
+                {
+                    var currentUser = await _apiService.GetCurrentUserAsync();
+                    if (currentUser?.IdMembro != null)
+                    {
+                        var profile = await _apiService.GetMemberProfileAsync(currentUser.IdMembro.Value);
+                        ViewData["MemberName"] = profile?.Name ?? "Membro";
+                    }
+                    else
+                    {
+                        ViewData["MemberName"] = "Membro";
+                    }
+                }
+                catch
+                {
+                    ViewData["MemberName"] = "Membro";
+                }
+            }
+            else
+            {
+                ViewData["MemberName"] = "Membro";
+            }
 
             var activeSubscriptions = await _apiService.GetActiveSubscriptionsAsync();
 
