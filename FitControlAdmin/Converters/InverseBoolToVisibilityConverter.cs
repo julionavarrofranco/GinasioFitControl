@@ -5,9 +5,7 @@ using System.Windows.Data;
 
 namespace FitControlAdmin.Converters
 {
-    /// <summary>
-    /// Converts true -> Collapsed, false -> Visible (inverse of BoolToVisibility)
-    /// </summary>
+    // true -> Collapsed, false -> Visible (inverso de BoolToVisibility)
     public class InverseBoolToVisibilityConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)

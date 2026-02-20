@@ -188,7 +188,7 @@ namespace FitControlAdmin {
                 return;
             }
             _contentLoaded = true;
-            System.Uri resourceLocater = new System.Uri("/FitControlAdmin;component/changepassworddialog.xaml", System.UriKind.Relative);
+            System.Uri resourceLocater = new System.Uri("/FitControlAdmin;V1.0.0.0;component/changepassworddialog.xaml", System.UriKind.Relative);
             
             #line 1 "..\..\..\ChangePasswordDialog.xaml"
             System.Windows.Application.LoadComponent(this, resourceLocater);

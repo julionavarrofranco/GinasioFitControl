@@ -1,4 +1,5 @@
 using System;
+using System.Configuration;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Net.Http.Headers;
@@ -14,14 +15,13 @@ namespace FitControlAdmin.Services
     public class ApiService
     {
         private readonly HttpClient _httpClient;
-        // Use HTTPS to match the API's launch profile and avoid losing the Authorization header on redirects
-        // Se a API estiver a correr em HTTP, mude para: "http://localhost:5295"
-        private readonly string _baseUrl = "https://localhost:7267";
+        private readonly string _baseUrl;
         private string? _accessToken;
         public string? CurrentAccessToken => _accessToken;
 
         public ApiService()
         {
+            _baseUrl = ConfigurationManager.AppSettings["ApiBaseUrl"] ?? "https://localhost:7267";
             _httpClient = new HttpClient();
             _httpClient.BaseAddress = new Uri(_baseUrl);
             _httpClient.DefaultRequestHeaders.Add("Accept", "application/json");
@@ -42,45 +42,42 @@ namespace FitControlAdmin.Services
             {
                 var response = await _httpClient.PostAsJsonAsync("/api/Auth/login", loginDto);
 
-                // ❗ Se a API devolveu erro, tentar ler a mensagem
+                // Em caso de erro da API, ler mensagem
                 if (!response.IsSuccessStatusCode)
                 {
                     var errorText = await response.Content.ReadAsStringAsync();
-
-                    // Se vier JSON do tipo { error: "mensagem" }
                     try
                     {
                         throw new Exception("Erro no login.");
                     }
                     catch
                     {
-                        // Se não der parse, mostras o texto original
                         throw new Exception(errorText);
                     }
                 }
 
-                // Sucesso → Ler token
+                // Ler token da resposta
                 var tokenResponse = await response.Content.ReadFromJsonAsync<TokenResponse>();
                 if (tokenResponse == null || string.IsNullOrEmpty(tokenResponse.AccessToken))
                     throw new Exception("A resposta do servidor não contém um token válido.");
 
-                // 1. Extrair claim Tipo
+                // Extrair claim Tipo
                 var tipo = JwtHelper.GetClaim(tokenResponse.AccessToken, "Tipo");
 
-                // 2. BLOQUEAR membros
+                // Bloquear membros (apenas funcionários)
                 if (tipo == "Membro")
                 {
                     throw new Exception("Apenas funcionários podem aceder à aplicação de gestão.");
                 }
 
-                // 3. Guardar token
+                // Guardar token
                 SetToken(tokenResponse.AccessToken);
 
                 return tokenResponse;
             }
             catch (Exception ex)
             {
-                // ❗ Agora o LoginWindow consegue mostrar ex.Message
+                // Repassar mensagem para o LoginWindow
                 throw new Exception(ex.Message);
             }
         }
@@ -315,7 +312,7 @@ namespace FitControlAdmin.Services
             }
             catch
             {
-                // Even if logout fails, clear local token
+                // Limpar token local mesmo que o logout falhe
                 _accessToken = null;
                 _httpClient.DefaultRequestHeaders.Authorization = null;
                 return false;
@@ -327,7 +324,7 @@ namespace FitControlAdmin.Services
             try
             {
                 var resetDto = new ResetPasswordDto { Email = email };
-                var response = await _httpClient.PostAsJsonAsync("/api/Auth/reset-password", resetDto);
+                var response = await _httpClient.PostAsJsonAsync("/api/User/reset-password", resetDto);
                 
                 if (response.IsSuccessStatusCode)
                 {
@@ -348,7 +345,7 @@ namespace FitControlAdmin.Services
         {
             try
             {
-                // Use the new /api/User/me endpoint instead of parsing the token
+                // Usar endpoint /api/User/me
                 var response = await _httpClient.GetAsync("/api/User/me");
                 if (response.IsSuccessStatusCode)
                 {
@@ -408,14 +405,14 @@ namespace FitControlAdmin.Services
                 using var doc = JsonDocument.Parse(content);
                 var root = doc.RootElement;
                 
-                // Try "message" first
+                // Tentar propriedade message
                 if (root.TryGetProperty("message", out var messageElement) &&
                     messageElement.ValueKind == JsonValueKind.String)
                 {
                     return messageElement.GetString();
                 }
                 
-                // Try "error" as fallback
+                // Tentar propriedade error
                 if (root.TryGetProperty("error", out var errorElement) &&
                     errorElement.ValueKind == JsonValueKind.String)
                 {
@@ -424,7 +421,7 @@ namespace FitControlAdmin.Services
             }
             catch
             {
-                // If parsing fails, return the raw content (might be plain text error)
+                // Em caso de falha de parse, devolver conteúdo raw
                 if (!string.IsNullOrWhiteSpace(content) && content.Length < 500)
                 {
                     return content;
@@ -566,7 +563,7 @@ namespace FitControlAdmin.Services
                 var errorContent = await response.Content.ReadAsStringAsync();
                 var message = ExtractMessage(errorContent);
                 
-                // If no message extracted, try to get the full error content for debugging
+                // Usar conteúdo completo do erro se não houver mensagem extraída
                 if (string.IsNullOrEmpty(message))
                 {
                     message = errorContent.Length > 500 ? errorContent.Substring(0, 500) + "..." : errorContent;
@@ -584,13 +581,10 @@ namespace FitControlAdmin.Services
         {
             try
             {
-                // Debug: Log the request data
                 System.Diagnostics.Debug.WriteLine($"UpdatePaymentAsync: Updating payment {idPagamento}");
                 System.Diagnostics.Debug.WriteLine($"UpdatePaymentAsync: MetodoPagamento={updateDto.MetodoPagamento}, EstadoPagamento={updateDto.EstadoPagamento}");
 
                 var response = await _httpClient.PatchAsJsonAsync($"/api/Payment/update-payment/{idPagamento}", updateDto);
-
-                // Debug: Log response details
                 System.Diagnostics.Debug.WriteLine($"UpdatePaymentAsync: Response status: {response.StatusCode}");
 
                 if (response.IsSuccessStatusCode)
@@ -842,7 +836,7 @@ namespace FitControlAdmin.Services
 
         #endregion
 
-        #region Physical Evaluation Reservation Methods
+ #region Physical Evaluation Reservation Methods
 
         public async Task<(bool Success, string? ErrorMessage, PhysicalEvaluationReservationResponseDto? Reservation)> CreateReservationAsync(int idMembro, DateTime dataReserva)
         {
@@ -998,6 +992,12 @@ namespace FitControlAdmin.Services
 
         #region Subscription Methods
 
+        private static readonly JsonSerializerOptions SubscriptionJsonOptions = new()
+        {
+            PropertyNameCaseInsensitive = true,
+            Converters = { new JsonStringEnumConverter() }
+        };
+
         public async Task<List<SubscriptionResponseDto>?> GetSubscriptionsByStateAsync(bool ativo, bool ordenarNomeAsc = true)
         {
             try
@@ -1005,7 +1005,7 @@ namespace FitControlAdmin.Services
                 var response = await _httpClient.GetAsync($"/api/Subscription/by-state?ativo={ativo}&ordenarNomeAsc={ordenarNomeAsc}");
                 if (response.IsSuccessStatusCode)
                 {
-                    return await response.Content.ReadFromJsonAsync<List<SubscriptionResponseDto>>();
+                    return await response.Content.ReadFromJsonAsync<List<SubscriptionResponseDto>>(SubscriptionJsonOptions);
                 }
                 return null;
             }
@@ -1039,10 +1039,10 @@ namespace FitControlAdmin.Services
         {
             try
             {
-                var response = await _httpClient.PostAsJsonAsync("/api/Subscription", createDto);
+                var response = await _httpClient.PostAsJsonAsync("/api/Subscription", createDto, SubscriptionJsonOptions);
                 if (response.IsSuccessStatusCode)
                 {
-                    var subscription = await response.Content.ReadFromJsonAsync<SubscriptionResponseDto>();
+                    var subscription = await response.Content.ReadFromJsonAsync<SubscriptionResponseDto>(SubscriptionJsonOptions);
                     return (true, null, subscription);
                 }
 
@@ -1080,9 +1080,7 @@ namespace FitControlAdmin.Services
 
         #region Class Management Methods
 
-        /// <summary>
-        /// Obtém aulas do PT (templates/blueprints para agendar). GET /api/Class/by-pt/{idFuncionario}
-        /// </summary>
+        // Obtém aulas do PT (templates para agendar)
         public async Task<List<AulaResponseDto>?> GetClassesByPtAsync(int idFuncionario)
         {
             try
@@ -1102,10 +1100,7 @@ namespace FitControlAdmin.Services
             }
         }
 
-        /// <summary>
-        /// Obtém aulas por estado (ativo=true ou false). A API expõe apenas GET /api/Class/by-state?ativo= .
-        /// Se a API devolver 500, é provável ser ciclo de serialização (entidade Aula com navegação) — corrigir na API usando DTO.
-        /// </summary>
+        // Obtém aulas por estado (ativo ou inativo)
         public async Task<List<AulaResponseDto>?> GetClassesByStateAsync(bool ativo)
         {
             try
@@ -1132,7 +1127,7 @@ namespace FitControlAdmin.Services
         {
             try
             {
-                // A API só expõe by-state; tentar primeiro aulas ativas (e depois inativas para lista completa)
+                // API expõe by-state; combinar ativas e inativas
                 var activeClasses = await GetClassesByStateAsync(ativo: true);
                 var inactiveClasses = await GetClassesByStateAsync(ativo: false);
                 if (activeClasses != null || inactiveClasses != null)
@@ -1144,7 +1139,7 @@ namespace FitControlAdmin.Services
                     return combined;
                 }
 
-                // Fallback: outros endpoints caso a API ganhe GET all no futuro
+                // Fallback para outros endpoints
                 var endpoints = new[]
                 {
                     "/api/Class",
@@ -1218,14 +1213,12 @@ namespace FitControlAdmin.Services
             }
         }
 
-        /// <summary>
-        /// "Elimina" (desativa) uma aula usando soft-delete
-        /// </summary>
+        // Desativa uma aula (soft-delete)
         public async Task<(bool Success, string? ErrorMessage)> DeleteClassAsync(int idAula)
         {
             try
             {
-                // A API usa soft-delete via change-active-status
+                // API usa change-active-status para soft-delete
                 var response = await _httpClient.PatchAsync($"/api/Class/change-active-status/{idAula}?ativo=false", null);
                 if (response.IsSuccessStatusCode)
                 {
@@ -1242,9 +1235,7 @@ namespace FitControlAdmin.Services
             }
         }
 
-        /// <summary>
-        /// Reativa uma aula desativada
-        /// </summary>
+        // Reativa uma aula desativada
         public async Task<(bool Success, string? ErrorMessage)> ReactivateClassAsync(int idAula)
         {
             try
@@ -1346,9 +1337,7 @@ namespace FitControlAdmin.Services
             }
         }
 
-        /// <summary>
-        /// Cria uma aula agendada individual
-        /// </summary>
+        // Cria uma aula agendada individual
         public async Task<(bool Success, string? ErrorMessage, AulaMarcadaDto? Data)> CreateScheduledClassAsync(ScheduleClassDto dto)
         {
             try
@@ -1370,35 +1359,8 @@ namespace FitControlAdmin.Services
             }
         }
 
-        /// <summary>
-        /// Gera aulas agendadas automaticamente para um PT (próximas 2 semanas)
-        /// </summary>
-        public async Task<(bool Success, string? ErrorMessage, int AulasGeradas)> GenerateScheduledClassesForPTAsync(int idPt)
-        {
-            try
-            {
-                var response = await _httpClient.PostAsync($"/api/ScheduleClass/generate-for-pt/{idPt}", null);
-                if (response.IsSuccessStatusCode)
-                {
-                    var content = await response.Content.ReadAsStringAsync();
-                    // A API retorna { "message": "X aulas geradas com sucesso." }
-                    // Podemos extrair o número se necessário, ou simplesmente retornar sucesso
-                    return (true, "Aulas geradas com sucesso.", 0);
-                }
 
-                var errorContent = await response.Content.ReadAsStringAsync();
-                var message = ExtractMessage(errorContent);
-                return (false, message ?? $"Erro ao gerar aulas ({response.StatusCode}).", 0);
-            }
-            catch (Exception ex)
-            {
-                return (false, ex.Message, 0);
-            }
-        }
-
-        /// <summary>
-        /// Cancela/elimina uma aula agendada
-        /// </summary>
+        // Cancela uma aula agendada
         public async Task<(bool Success, string? ErrorMessage)> CancelScheduledClassAsync(int idAulaMarcada)
         {
             try
@@ -1419,9 +1381,7 @@ namespace FitControlAdmin.Services
             }
         }
 
-        /// <summary>
-        /// Obtém aulas agendadas por PT (próximas 2 semanas)
-        /// </summary>
+        // Obtém aulas agendadas por PT (próximas 2 semanas)
         public async Task<List<AulaMarcadaResponseDto>?> GetScheduledClassesByPTAsync(int idFuncionario)
         {
             try
@@ -1429,11 +1389,11 @@ namespace FitControlAdmin.Services
                 var response = await _httpClient.GetAsync($"/api/MemberClass/by-pt/{idFuncionario}");
                 if (response.IsSuccessStatusCode)
                 {
-                    // A API retorna List<ClassReservationSummaryDto>, vamos converter para AulaMarcadaResponseDto
+                    // Converter resposta da API para AulaMarcadaResponseDto
                     var reservations = await response.Content.ReadFromJsonAsync<List<ClassReservationSummaryDto>>();
                     if (reservations == null) return null;
 
-                    // Converter para o formato esperado
+                    // Converter para formato esperado
                     var result = reservations.Select(r => new AulaMarcadaResponseDto
                     {
                         IdAulaMarcada = r.IdAulaMarcada,
@@ -1457,9 +1417,7 @@ namespace FitControlAdmin.Services
             }
         }
 
-        /// <summary>
-        /// Obtém detalhes completos de uma aula agendada para marcar presenças
-        /// </summary>
+        // Obtém detalhes de uma aula agendada para marcar presenças
         public async Task<ClassAttendanceDto?> GetScheduledClassForAttendanceAsync(int idAulaMarcada)
         {
             try
@@ -1478,9 +1436,7 @@ namespace FitControlAdmin.Services
             }
         }
 
-        /// <summary>
-        /// Marca presenças numa aula agendada (envia lista de IDs dos membros presentes)
-        /// </summary>
+        // Marca presenças numa aula agendada
         public async Task<(bool Success, string? ErrorMessage)> MarkAttendanceAsync(int idAulaMarcada, List<int> idsPresentes)
         {
             try
@@ -1505,9 +1461,7 @@ namespace FitControlAdmin.Services
 
         #region Training Plan Methods
 
-        /// <summary>
-        /// Cria um plano de treino (PT)
-        /// </summary>
+        // Cria um plano de treino
         public async Task<(bool Success, string? ErrorMessage, TrainingPlanSummaryDto? Data)> CreateTrainingPlanAsync(int idFuncionario, TrainingPlanDto dto)
         {
             try
@@ -1515,7 +1469,7 @@ namespace FitControlAdmin.Services
                 var response = await _httpClient.PostAsJsonAsync($"/api/TrainingPlan?idFuncionario={idFuncionario}", dto);
                 if (response.IsSuccessStatusCode)
                 {
-                    // A API retorna PlanoTreino (idPlano, nome, dataCriacao em camelCase)
+                    // API retorna dados do plano em camelCase
                     var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
                     var plano = await response.Content.ReadFromJsonAsync<TrainingPlanDetailDto>(options);
                     if (plano != null)
@@ -1541,9 +1495,7 @@ namespace FitControlAdmin.Services
             }
         }
 
-        /// <summary>
-        /// Atualiza um plano de treino
-        /// </summary>
+        // Atualiza um plano de treino
         public async Task<(bool Success, string? ErrorMessage)> UpdateTrainingPlanAsync(int idPlano, UpdateTrainingPlanDto dto)
         {
             try
@@ -1562,9 +1514,7 @@ namespace FitControlAdmin.Services
             }
         }
 
-        /// <summary>
-        /// Ativa/desativa um plano de treino
-        /// </summary>
+        // Ativa ou desativa um plano de treino
         public async Task<(bool Success, string? ErrorMessage)> ChangeTrainingPlanStateAsync(int idPlano, bool ativo)
         {
             try
@@ -1583,9 +1533,7 @@ namespace FitControlAdmin.Services
             }
         }
 
-        /// <summary>
-        /// Lista planos por estado (ativo=true ou false)
-        /// </summary>
+        // Lista planos por estado (ativo ou inativo)
         public async Task<List<TrainingPlanSummaryDto>?> GetTrainingPlansByStateAsync(bool ativo)
         {
             try
@@ -1605,9 +1553,7 @@ namespace FitControlAdmin.Services
             }
         }
 
-        /// <summary>
-        /// Obtém detalhes de um plano (nome, observações, exercícios) via GET /api/TrainingPlan/{idPlano}.
-        /// </summary>
+        // Obtém detalhes de um plano (nome, observações, exercícios)
         public async Task<TrainingPlanDetailDto?> GetTrainingPlanDetailAsync(int idPlano)
         {
             try
@@ -1628,9 +1574,7 @@ namespace FitControlAdmin.Services
             }
         }
 
-        /// <summary>
-        /// Atribui plano a um membro
-        /// </summary>
+        // Atribui plano a um membro
         public async Task<(bool Success, string? ErrorMessage)> AssignTrainingPlanToMemberAsync(int idMembro, int idPlano)
         {
             try
@@ -1649,9 +1593,7 @@ namespace FitControlAdmin.Services
             }
         }
 
-        /// <summary>
-        /// Remove plano do membro
-        /// </summary>
+        // Remove plano do membro
         public async Task<(bool Success, string? ErrorMessage)> RemoveTrainingPlanFromMemberAsync(int idMembro)
         {
             try
@@ -1670,9 +1612,7 @@ namespace FitControlAdmin.Services
             }
         }
 
-        /// <summary>
-        /// Obtém o plano atual de um membro (com exercícios)
-        /// </summary>
+        // Obtém o plano atual de um membro (com exercícios)
         public async Task<MemberTrainingPlanDto?> GetCurrentMemberPlanAsync(int idMembro)
         {
             try
@@ -1680,7 +1620,7 @@ namespace FitControlAdmin.Services
                 var response = await _httpClient.GetAsync($"/api/TrainingPlan/current/{idMembro}");
                 if (response.IsSuccessStatusCode)
                 {
-                    // A API retorna PlanoTreino; pode ter estrutura diferente de MemberTrainingPlanDto
+                    // API pode retornar estrutura diferente de MemberTrainingPlanDto
                     var dto = await response.Content.ReadFromJsonAsync<MemberTrainingPlanDto>();
                     if (dto != null) return dto;
                     var detail = await response.Content.ReadFromJsonAsync<TrainingPlanDetailDto>();
@@ -1705,9 +1645,7 @@ namespace FitControlAdmin.Services
             }
         }
 
-        /// <summary>
-        /// Histórico de planos do membro
-        /// </summary>
+        // Histórico de planos do membro
         public async Task<List<TrainingPlanSummaryDto>?> GetMemberPlanHistoryAsync(int idMembro)
         {
             try
@@ -1732,9 +1670,7 @@ namespace FitControlAdmin.Services
 
         #region Exercise Plan Methods
 
-        /// <summary>
-        /// Adiciona exercício ao plano
-        /// </summary>
+        // Adiciona exercício ao plano
         public async Task<(bool Success, string? ErrorMessage)> AddExerciseToPlanAsync(int idPlano, ExercisePlanDto dto)
         {
             try
@@ -1753,9 +1689,7 @@ namespace FitControlAdmin.Services
             }
         }
 
-        /// <summary>
-        /// Atualiza exercício no plano
-        /// </summary>
+        // Atualiza exercício no plano
         public async Task<(bool Success, string? ErrorMessage)> UpdateExerciseInPlanAsync(int idPlano, int idExercicio, UpdateExercisePlanDto dto)
         {
             try
@@ -1774,9 +1708,7 @@ namespace FitControlAdmin.Services
             }
         }
 
-        /// <summary>
-        /// Remove exercício do plano
-        /// </summary>
+        // Remove exercício do plano
         public async Task<(bool Success, string? ErrorMessage)> RemoveExerciseFromPlanAsync(int idPlano, int idExercicio)
         {
             try

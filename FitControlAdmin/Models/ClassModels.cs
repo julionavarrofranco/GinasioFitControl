@@ -2,9 +2,6 @@ using System.Text.Json.Serialization;
 
 namespace FitControlAdmin.Models
 {
-    /// <summary>
-    /// Ordem deve coincidir com a API (Segunda=0, ..., Domingo=6) para deserialização correta.
-    /// </summary>
     public enum DiaSemana
     {
         Segunda, Terca, Quarta, Quinta, Sexta, Sabado, Domingo
@@ -113,7 +110,7 @@ namespace FitControlAdmin.Models
     public class ScheduleClassDto
     {
         public int IdAula { get; set; }
-        public int Sala { get; set; } // 1-5 (sala de aula)
+        public int Sala { get; set; }
         public DateTime DataAula { get; set; }
     }
 
@@ -131,7 +128,7 @@ namespace FitControlAdmin.Models
         public string? NomeInstrutor { get; set; }
         public DateTime? DataDesativacao { get; set; }
         
-        // Para UI
+        // Propriedades calculadas para a interface
         public string HorarioFormatado => $"{HoraInicio:hh\\:mm} - {HoraFim:hh\\:mm}";
         public string CapacidadeFormatada => $"{TotalReservas}/{Capacidade}";
         public bool EstaLotada => TotalReservas >= Capacidade;

@@ -1,0 +1,204 @@
+using FitControlAdmin;
+using FitControlAdmin.Services;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Media.Imaging;
+
+namespace FitControlAdmin.Views
+{
+    public partial class LoginWindow : Window
+    {
+        private readonly ApiService _apiService;
+        private bool _isPasswordVisible = false;
+
+        public LoginWindow()
+        {
+            InitializeComponent();
+            _apiService = new ApiService();
+            
+            // Sincronizar campos de palavra-passe
+            PasswordBox.PasswordChanged += (s, e) =>
+            {
+                if (!_isPasswordVisible)
+                {
+                    PasswordTextBox.Text = PasswordBox.Password;
+                }
+            };
+            
+            PasswordTextBox.TextChanged += (s, e) =>
+            {
+                if (_isPasswordVisible)
+                {
+                    PasswordBox.Password = PasswordTextBox.Text;
+                }
+            };
+        }
+
+        private async void LoginButton_Click(object sender, RoutedEventArgs e)
+        {
+            var email = EmailTextBox.Text.Trim();
+            var password = _isPasswordVisible ? PasswordTextBox.Text : PasswordBox.Password;
+
+            if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
+            {
+                ShowError("Por favor, preencha email e palavra-passe.");
+                return;
+            }
+
+            LoginButton.IsEnabled = false;
+            ErrorMessage.Visibility = Visibility.Collapsed;
+
+            try
+            {
+                var tokenResponse = await _apiService.LoginAsync(email, password);
+
+                if (tokenResponse != null && !string.IsNullOrEmpty(tokenResponse.AccessToken))
+                {
+                    if (tokenResponse.NeedsPasswordChange)
+                    {
+                        var changePasswordDialog = new ChangePasswordDialog(_apiService, password);
+                        if (changePasswordDialog.ShowDialog() == true && !string.IsNullOrEmpty(changePasswordDialog.NewPasswordAfterChange))
+                        {
+                            var newPassword = changePasswordDialog.NewPasswordAfterChange;
+                            var reLogin = await _apiService.LoginAsync(email, newPassword);
+                            if (reLogin != null && !string.IsNullOrEmpty(reLogin.AccessToken))
+                            {
+                                var win = new MainWindow(_apiService);
+                                win.Show();
+                                this.Close();
+                            }
+                            else
+                                ShowError("Palavra-passe alterada. Por favor, faça login novamente com a nova palavra-passe.");
+                        }
+                        else
+                            ShowError("É obrigatório alterar a palavra-passe no primeiro login para continuar.");
+                        return;
+                    }
+                    var mainWindow = new MainWindow(_apiService);
+                    mainWindow.Show();
+                    this.Close();
+                }
+                else
+                {
+                    ShowError("Email ou palavra-passe incorretos.");
+                }
+            }
+            catch (Exception)
+            {
+                ShowError("Credenciais inválidas.");
+            }
+            finally
+            {
+                LoginButton.IsEnabled = true;
+            }
+        }
+
+        private void TogglePasswordButton_Click(object sender, RoutedEventArgs e)
+        {
+            _isPasswordVisible = !_isPasswordVisible;
+
+            if (_isPasswordVisible)
+            {
+                PasswordTextBox.Text = PasswordBox.Password;
+                PasswordBox.Visibility = Visibility.Collapsed;
+                PasswordTextBox.Visibility = Visibility.Visible;
+                TogglePasswordIcon.Source = new BitmapImage(
+                    new Uri("pack://application:,,,/Images/eye-closed.png"));
+                Dispatcher.BeginInvoke(new Action(() => PasswordTextBox.Focus()), System.Windows.Threading.DispatcherPriority.Loaded);
+            }
+            else
+            {
+                var text = PasswordTextBox.Text ?? string.Empty;
+                PasswordBox.Password = text;
+                PasswordTextBox.Visibility = Visibility.Collapsed;
+                PasswordBox.Visibility = Visibility.Visible;
+                TogglePasswordIcon.Source = new BitmapImage(
+                    new Uri("pack://application:,,,/Images/eye-open.png"));
+                Dispatcher.BeginInvoke(new Action(() => PasswordBox.Focus()), System.Windows.Threading.DispatcherPriority.Loaded);
+            }
+        }
+
+        private void ForgotPasswordButton_Click(object sender, RoutedEventArgs e)
+        {
+            ForgotPasswordOverlay.Visibility = Visibility.Visible;
+            ForgotPasswordEmailTextBox.Text = EmailTextBox.Text.Trim();
+            ForgotPasswordMessage.Visibility = Visibility.Collapsed;
+            ForgotPasswordError.Visibility = Visibility.Collapsed;
+        }
+
+        private void CancelForgotPasswordButton_Click(object sender, RoutedEventArgs e)
+        {
+            CloseForgotPasswordOverlay();
+        }
+
+        private void ForgotPasswordOkButton_Click(object sender, RoutedEventArgs e)
+        {
+            CloseForgotPasswordOverlay();
+        }
+
+        private void CloseForgotPasswordOverlay()
+        {
+            ForgotPasswordOverlay.Visibility = Visibility.Collapsed;
+            ForgotPasswordEmailTextBox.Text = string.Empty;
+            ForgotPasswordMessage.Visibility = Visibility.Collapsed;
+            ForgotPasswordError.Visibility = Visibility.Collapsed;
+            CancelForgotPasswordButton.Visibility = Visibility.Visible;
+            SendResetEmailButton.Visibility = Visibility.Visible;
+            ForgotPasswordOkButton.Visibility = Visibility.Collapsed;
+        }
+
+        private async void SendResetEmailButton_Click(object sender, RoutedEventArgs e)
+        {
+            var email = ForgotPasswordEmailTextBox.Text.Trim();
+
+            if (string.IsNullOrEmpty(email))
+            {
+                ForgotPasswordError.Text = "Por favor, insira um email.";
+                ForgotPasswordError.Visibility = Visibility.Visible;
+                ForgotPasswordMessage.Visibility = Visibility.Collapsed;
+                return;
+            }
+
+            SendResetEmailButton.IsEnabled = false;
+            ForgotPasswordError.Visibility = Visibility.Collapsed;
+            ForgotPasswordMessage.Visibility = Visibility.Collapsed;
+
+            try
+            {
+                var (success, errorMessage) = await _apiService.ResetPasswordAsync(email);
+
+                if (success)
+                {
+                    ForgotPasswordMessage.Text = "Email enviado com sucesso! Verifique a sua caixa de entrada (e a pasta de spam). A palavra-passe temporária pode demorar até 1 minuto a ser enviada.";
+                    ForgotPasswordMessage.Visibility = Visibility.Visible;
+                    ForgotPasswordError.Visibility = Visibility.Collapsed;
+                    CancelForgotPasswordButton.Visibility = Visibility.Collapsed;
+                    SendResetEmailButton.Visibility = Visibility.Collapsed;
+                    ForgotPasswordOkButton.Visibility = Visibility.Visible;
+                }
+                else
+                {
+                    ForgotPasswordError.Text = errorMessage ?? "Erro ao enviar email.";
+                    ForgotPasswordError.Visibility = Visibility.Visible;
+                    ForgotPasswordMessage.Visibility = Visibility.Collapsed;
+                }
+            }
+            catch (Exception ex)
+            {
+                ForgotPasswordError.Text = ex.Message;
+                ForgotPasswordError.Visibility = Visibility.Visible;
+                ForgotPasswordMessage.Visibility = Visibility.Collapsed;
+            }
+            finally
+            {
+                SendResetEmailButton.IsEnabled = true;
+            }
+        }
+
+        private void ShowError(string message)
+        {
+            ErrorMessage.Text = message;
+            ErrorMessage.Visibility = Visibility.Visible;
+        }
+    }
+}

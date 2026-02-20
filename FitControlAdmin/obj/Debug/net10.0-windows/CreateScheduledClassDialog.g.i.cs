@@ -77,7 +77,7 @@ namespace FitControlAdmin {
                 return;
             }
             _contentLoaded = true;
-            System.Uri resourceLocater = new System.Uri("/FitControlAdmin;component/createscheduledclassdialog.xaml", System.UriKind.Relative);
+            System.Uri resourceLocater = new System.Uri("/FitControlAdmin;V1.0.0.0;component/createscheduledclassdialog.xaml", System.UriKind.Relative);
             
             #line 1 "..\..\..\CreateScheduledClassDialog.xaml"
             System.Windows.Application.LoadComponent(this, resourceLocater);

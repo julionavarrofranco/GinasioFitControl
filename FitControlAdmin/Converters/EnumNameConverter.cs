@@ -13,10 +13,10 @@ namespace FitControlAdmin.Converters
             
             var enumName = value.ToString() ?? string.Empty;
             
-            // Casos especiais
+            // Casos especiais de exibição
             if (enumName == "MBWay") return "MBWay";
             if (enumName == "Bracos") return "Braços";
-            // Função (evitar "P T" e mostrar "Receção")
+            // Função: exibir Receção e PT sem espaço
             if (enumName == "Rececao") return "Receção";
             if (enumName == "PT") return "PT";
             if (enumName == "Admin") return "Admin";
@@ -30,7 +30,7 @@ namespace FitControlAdmin.Converters
             if (enumName == "Sabado") return "Sábado";
             if (enumName == "Domingo") return "Domingo";
             
-            // Adiciona espaço antes de letras maiúsculas (exceto a primeira)
+            // Adicionar espaço antes de maiúsculas
             return Regex.Replace(enumName, "(?<!^)([A-Z])", " $1");
         }
 

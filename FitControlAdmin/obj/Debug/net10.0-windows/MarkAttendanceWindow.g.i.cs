@@ -133,7 +133,7 @@ namespace FitControlAdmin {
                 return;
             }
             _contentLoaded = true;
-            System.Uri resourceLocater = new System.Uri("/FitControlAdmin;component/markattendancewindow.xaml", System.UriKind.Relative);
+            System.Uri resourceLocater = new System.Uri("/FitControlAdmin;V1.0.0.0;component/markattendancewindow.xaml", System.UriKind.Relative);
             
             #line 1 "..\..\..\MarkAttendanceWindow.xaml"
             System.Windows.Application.LoadComponent(this, resourceLocater);

@@ -1269,46 +1269,14 @@
                            FontSize="14"/>
             </StackPanel>
 
-            <!-- Subscription Management Panel -->
+            <!-- Subscription Management Panel (Receção: só consulta) -->
             <StackPanel x:Name="SubscriptionManagementPanel" Margin="20,90,20,20" VerticalAlignment="Top" Visibility="Collapsed">
-                <!-- Header with Add Button -->
-                <Grid Margin="0,0,0,20">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-
-                    <TextBlock Text="Gestão de Subscrições"
-                               Grid.Column="0"
-                               FontSize="24"
-                               FontWeight="Bold"
-                               Foreground="#e6e6e8"
-                               VerticalAlignment="Center"/>
-
-                    <!-- Add Subscription Button -->
-                    <Button x:Name="CreateSubscriptionButton"
-                            Grid.Column="1"
-                            Content="+ Adicionar Subscrição"
-                            Click="CreateSubscriptionButton_Click"
-                            Padding="20,10"
-                            Background="#27AE60"
-                            Foreground="White"
-                            BorderThickness="0"
-                            Cursor="Hand"
-                            FontSize="14"
-                            FontWeight="SemiBold">
-                        <Button.Style>
-                            <Style TargetType="Button">
-                                <Setter Property="Background" Value="#27AE60"/>
-                                <Style.Triggers>
-                                    <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter Property="Background" Value="#229954"/>
-                                    </Trigger>
-                                </Style.Triggers>
-                            </Style>
-                        </Button.Style>
-                    </Button>
-                </Grid>
+                <TextBlock Text="Gestão de Subscrições"
+                           Margin="0,0,0,20"
+                           FontSize="24"
+                           FontWeight="Bold"
+                           Foreground="#e6e6e8"
+                           VerticalAlignment="Center"/>
 
                 <!-- Refresh Button -->
                 <Button x:Name="RefreshSubscriptionsButton"
@@ -1351,33 +1319,6 @@
                                 <DataGridTextColumn Header="Tipo" Binding="{Binding Tipo, Converter={StaticResource EnumNameConverter}}" Width="120"/>
                                 <DataGridTextColumn Header="Preço" Binding="{Binding Preco, StringFormat={}{0:F2}€}" Width="100"/>
                                 <DataGridCheckBoxColumn Header="Ativo" Binding="{Binding Ativo}" Width="60"/>
-                                <DataGridTemplateColumn Header="Ações" Width="100">
-                                    <DataGridTemplateColumn.CellTemplate>
-                                        <DataTemplate>
-                                            <Button Content="Editar"
-                                                    Click="EditSubscriptionButton_Click"
-                                                    Tag="{Binding IdSubscricao}"
-                                                    Padding="8,4"
-                                                    Margin="2"
-                                                    Background="#02acc3"
-                                                    Foreground="White"
-                                                    BorderThickness="0"
-                                                    Cursor="Hand"
-                                                    FontSize="12">
-                                                <Button.Style>
-                                                    <Style TargetType="Button">
-                                                        <Setter Property="Background" Value="#02acc3"/>
-                                                        <Style.Triggers>
-                                                            <Trigger Property="IsMouseOver" Value="True">
-                                                                <Setter Property="Background" Value="#0299b0"/>
-                                                            </Trigger>
-                                                        </Style.Triggers>
-                                                    </Style>
-                                                </Button.Style>
-                                            </Button>
-                                        </DataTemplate>
-                                    </DataGridTemplateColumn.CellTemplate>
-                                </DataGridTemplateColumn>
                             </DataGrid.Columns>
                         </DataGrid>
                     </ScrollViewer>

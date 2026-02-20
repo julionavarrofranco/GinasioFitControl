@@ -10,10 +10,7 @@ namespace FitControlAdmin.Models
         public Funcao Funcao { get; set; }
     }
 
-    /// <summary>
-    /// Modelo para exibir funcionários na grid (inclui Ativo via User).
-    /// DataRegisto: a API não expõe data de registo para funcionários; usar "—" quando não disponível.
-    /// </summary>
+    // Modelo para exibir funcionários na grid (inclui Ativo); DataRegisto usa "—" se indisponível
     public class EmployeeDisplayDto
     {
         public int IdUser { get; set; }
@@ -25,7 +22,7 @@ namespace FitControlAdmin.Models
         public bool Ativo { get; set; }
         public DateTime? DataRegisto { get; set; }
 
-        /// <summary>Para binding na grid; exibe "—" quando DataRegisto não existe.</summary>
+        // Para binding na grid; exibe "—" quando DataRegisto não existe
         public string DataRegistoDisplay => DataRegisto.HasValue ? DataRegisto.Value.ToString("dd/MM/yyyy") : "—";
     }
 }

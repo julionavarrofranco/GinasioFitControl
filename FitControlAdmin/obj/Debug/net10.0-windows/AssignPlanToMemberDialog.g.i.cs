@@ -60,7 +60,7 @@ namespace FitControlAdmin {
                 return;
             }
             _contentLoaded = true;
-            System.Uri resourceLocater = new System.Uri("/FitControlAdmin;component/assignplantomemberdialog.xaml", System.UriKind.Relative);
+            System.Uri resourceLocater = new System.Uri("/FitControlAdmin;V1.0.0.0;component/assignplantomemberdialog.xaml", System.UriKind.Relative);
             
             #line 1 "..\..\..\AssignPlanToMemberDialog.xaml"
             System.Windows.Application.LoadComponent(this, resourceLocater);

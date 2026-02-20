@@ -1,6 +1,7 @@
 using FitControlAdmin.Helper;
 using FitControlAdmin.Models;
 using FitControlAdmin.Services;
+using FitControlAdmin.Views;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -23,7 +24,7 @@ namespace FitControlAdmin
         private string? _userFuncao;
         private int? _userId;
 
-        // Data storage for filtering
+        // Armazenamento para filtros
         private List<PhysicalEvaluationHistoryDto>? _allHistory;
         private List<AulaResponseDto>? _allClasses;
 
@@ -41,10 +42,17 @@ namespace FitControlAdmin
             SetupSidebarHandlers();
 
             var isPt = string.Equals(_userFuncao, "PT", StringComparison.OrdinalIgnoreCase);
+            var isRececao = string.Equals(_userFuncao, "Rececao", StringComparison.OrdinalIgnoreCase);
             if (isPt)
             {
                 ShowClassManagement();
                 HighlightActiveButton(BtnAulas);
+            }
+            else if (isRececao)
+            {
+                ShowUserManagement();
+                UserManagementTitle.Text = "Gestão de Membros";
+                HighlightActiveButton(BtnMembros);
             }
             else
             {
@@ -323,9 +331,7 @@ namespace FitControlAdmin
             LoadPhysicalEvaluations();
         }
 
-        /// <summary>
-        /// True quando o utilizador é PT - esconde Editar/Eliminar, mostra apenas Agendar (templates).
-        /// </summary>
+        // True quando o utilizador é PT (mostra apenas Agendar)
         public bool IsPtClassView { get; set; }
 
         private void ShowClassManagement()
@@ -381,7 +387,7 @@ namespace FitControlAdmin
         {
             try
             {
-                // Show loading state
+                // Estado de carregamento
                 AccountTypeText.Text = "A carregar...";
                 AccountNameText.Text = "A carregar...";
                 AccountContactText.Text = "A carregar...";
@@ -469,7 +475,7 @@ namespace FitControlAdmin
             StatusText.Text = "A carregar utilizadores...";
             try
             {
-                // Load users and subscriptions in parallel
+                // Carregar utilizadores e subscrições em paralelo
                 var usersTask = _apiService.GetUsersAsync();
                 var subscriptionsTask = _apiService.GetSubscriptionsByStateAsync(true);
 
@@ -533,10 +539,10 @@ namespace FitControlAdmin
             {
                 try
                 {
-                    // Get MemberDto from DataContext
+                    // Obter MemberDto do DataContext
                     MemberDto? member = null;
 
-                    // Try to get from DataGridRow
+                    // Tentar obter da linha do DataGrid
                     var parent = button.Parent;
                     while (parent != null && !(parent is System.Windows.Controls.DataGridRow))
                     {
@@ -563,7 +569,7 @@ namespace FitControlAdmin
                         return;
                     }
 
-                    // Convert MemberDto to UserDto
+                    // Converter MemberDto para UserDto
                     var user = new UserDto
                     {
                         IdUser = member.IdUser,
@@ -573,13 +579,13 @@ namespace FitControlAdmin
                         Tipo = "Membro",
                         Ativo = member.Ativo,
                         DataNascimento = member.DataNascimento,
-                        IdSubscricao = null // Will be loaded from subscription name if needed
+                        IdSubscricao = null // Será carregado a partir do nome da subscrição se necessário
                     };
 
                     // Try to get subscription ID from subscription name
                     if (!string.IsNullOrEmpty(member.Subscricao))
                     {
-                        // Load subscriptions if not already loaded
+                        // Carregar subscrições se ainda não carregadas
                         if (_subscriptionsForMembers == null)
                         {
                             _subscriptionsForMembers = await _apiService.GetSubscriptionsByStateAsync(true);
@@ -616,10 +622,10 @@ namespace FitControlAdmin
             {
                 try
                 {
-                    // Get MemberDto from DataContext
+                    // Obter MemberDto do DataContext
                     MemberDto? member = null;
 
-                    // Try to get from DataGridRow
+                    // Tentar obter da linha do DataGrid
                     var parent = button.Parent;
                     while (parent != null && !(parent is System.Windows.Controls.DataGridRow))
                     {
@@ -704,14 +710,13 @@ namespace FitControlAdmin
                 using var doc = JsonDocument.Parse(bytes);
                 var root = doc.RootElement;
 
-                // Try different possible field names for user ID
+                // Tentar diferentes nomes de campo para o ID do utilizador
                 System.Diagnostics.Debug.WriteLine("Checking for user ID fields...");
                 if (root.TryGetProperty("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier", out var nameIdentifierProp))
                 {
                     System.Diagnostics.Debug.WriteLine($"Found nameidentifier: {nameIdentifierProp}, ValueKind: {nameIdentifierProp.ValueKind}");
 
-                    // Try to parse as string first, then convert to int
-                    var stringValue = nameIdentifierProp.ToString().Trim('"'); // Remove quotes if present
+                    var stringValue = nameIdentifierProp.ToString().Trim('"');
                     System.Diagnostics.Debug.WriteLine($"Raw value: '{nameIdentifierProp}', String value: '{stringValue}'");
 
                     if (int.TryParse(stringValue, out var nameIdentifierId))
@@ -750,7 +755,7 @@ namespace FitControlAdmin
                     _userId = UserId;
                 }
 
-                // Debug: Print all properties in the JWT
+                // Imprimir propriedades do JWT
                 System.Diagnostics.Debug.WriteLine("JWT Properties:");
                 foreach (var property in root.EnumerateObject())
                 {
@@ -767,13 +772,13 @@ namespace FitControlAdmin
                     _userFuncao = funcaoProp.GetString();
                 }
 
-                // Debug: Log extracted values
+                // Registar valores extraídos
                 System.Diagnostics.Debug.WriteLine($"ExtractUserInfoFromToken: _userId={_userId}, _userTipo={_userTipo}, _userFuncao={_userFuncao}");
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"ExtractUserInfoFromToken error: {ex.Message}");
-                // Se falhar o parse, mantemos os valores nulos
+                // Em caso de falha no parse, manter valores nulos
             }
         }
 
@@ -812,7 +817,7 @@ namespace FitControlAdmin
             {
                 if (string.Equals(_userFuncao, "Rececao", StringComparison.OrdinalIgnoreCase))
                 {
-                    // Receção: apenas Membros, Subscrições, Pagamentos, Configurações e Logout
+                    // Receção: Membros, Subscrições, Pagamentos, Configurações e Logout
                     BtnDashboard.Visibility = Visibility.Collapsed;
                     BtnFuncionarios.Visibility = Visibility.Collapsed;
                     BtnExercicios.Visibility = Visibility.Collapsed;
@@ -826,7 +831,7 @@ namespace FitControlAdmin
                 }
                 else if (string.Equals(_userFuncao, "PT", StringComparison.OrdinalIgnoreCase))
                 {
-                    // PT: retirar Dashboard, Membros e Exercícios; mostrar Config (dados como Admin)
+                    // PT: sem Dashboard, Membros e Exercícios; mostrar Config
                     BtnDashboard.Visibility = Visibility.Collapsed;
                     BtnMembros.Visibility = Visibility.Collapsed;
                     BtnExercicios.Visibility = Visibility.Collapsed;
@@ -846,7 +851,7 @@ namespace FitControlAdmin
 
         private async Task LogoutAndReturnToLogin()
         {
-            // Show confirmation dialog
+            // Mostrar diálogo de confirmação
             var confirmDialog = new ConfirmDialog(
                 "Tem certeza que deseja fazer logout?",
                 "Confirmar Logout");
@@ -855,22 +860,22 @@ namespace FitControlAdmin
             
             if (confirmDialog.ShowDialog() != true || !confirmDialog.Result)
             {
-                return; // User cancelled
+                return; // Utilizador cancelou
             }
 
             try
             {
-                // Call logout API
+                // Chamar API de logout
                 await _apiService.LogoutAsync();
 
-                // Close MainWindow and open LoginWindow
+                // Fechar MainWindow e abrir LoginWindow
                 var loginWindow = new LoginWindow();
                 loginWindow.Show();
                 this.Close();
             }
             catch (Exception ex)
             {
-                // Even if logout fails, still return to login
+                // Mesmo que o logout falhe, voltar ao login
                 MessageBox.Show($"Erro ao fazer logout: {ex.Message}", 
                     "Aviso", MessageBoxButton.OK, MessageBoxImage.Warning);
                 
@@ -896,7 +901,7 @@ namespace FitControlAdmin
             ExerciseStatusText.Text = "A carregar exercícios...";
             try
             {
-                // Carregar todos os exercícios (ativos e inativos)
+                // Carregar exercícios ativos e inativos
                 var activeExercises = await _apiService.GetExercisesByStateAsync(true);
                 var inactiveExercises = await _apiService.GetExercisesByStateAsync(false);
                 
@@ -905,7 +910,7 @@ namespace FitControlAdmin
                 if (inactiveExercises != null) _allExercises.AddRange(inactiveExercises);
 
                 // Popular ComboBox de grupos musculares
-                if (ExerciseGrupoMuscularFilterComboBox.Items.Count == 1) // Só tem "Todos"
+                if (ExerciseGrupoMuscularFilterComboBox.Items.Count == 1)
                 {
                     foreach (GrupoMuscular grupo in Enum.GetValues(typeof(GrupoMuscular)))
                     {
@@ -915,7 +920,7 @@ namespace FitControlAdmin
                     }
                 }
 
-                // Aplicar filtros após carregar
+                // Aplicar filtros
                 ApplyExerciseFilters();
             }
             catch (Exception ex)
@@ -942,7 +947,7 @@ namespace FitControlAdmin
 
             var filtered = _allExercises.AsEnumerable();
 
-            // Filtro por nome (LIKE)
+            // Filtro por nome
             var nomeFilter = ExerciseNameFilterTextBox?.Text?.Trim() ?? string.Empty;
             if (!string.IsNullOrWhiteSpace(nomeFilter))
             {
@@ -950,7 +955,7 @@ namespace FitControlAdmin
                     ex.Nome.ToLower().Contains(nomeFilter.ToLower()));
             }
 
-            // Filtro por estado
+            // Filtro por estado ativo/inativo
             var estadoSelected = (ExerciseEstadoFilterComboBox?.SelectedItem as ComboBoxItem)?.Content?.ToString();
             if (estadoSelected == "Ativo")
             {
@@ -960,7 +965,7 @@ namespace FitControlAdmin
             {
                 filtered = filtered.Where(ex => !ex.Ativo);
             }
-            // "Todos" não filtra
+            // Opção Todos não filtra
 
             // Filtro por grupo muscular
             var grupoSelectedItem = ExerciseGrupoMuscularFilterComboBox?.SelectedItem as ComboBoxItem;
@@ -969,7 +974,7 @@ namespace FitControlAdmin
                 filtered = filtered.Where(ex => ex.GrupoMuscular == grupo);
             }
 
-            // Ordenação
+            // Aplicar ordenação
             var sortBy = (ExerciseSortByComboBox?.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? "Nome";
             var sortDirection = (ExerciseSortDirectionComboBox?.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? "Ascendente";
             var ascending = sortDirection == "Ascendente";
@@ -990,7 +995,7 @@ namespace FitControlAdmin
 
             var result = filtered.ToList();
             
-            // Atualizar ItemsSource explicitamente
+            // Atualizar ItemsSource
             ExercisesItemsControl.ItemsSource = null;
             ExercisesItemsControl.ItemsSource = result;
             
@@ -1013,7 +1018,7 @@ namespace FitControlAdmin
             {
                 try
                 {
-                    // Buscar o exercício completo da lista
+                    // Obter exercício completo da lista
                     var exercise = _allExercises?.FirstOrDefault(ex => ex.IdExercicio == exerciseId);
                     if (exercise == null)
                     {
@@ -1053,7 +1058,7 @@ namespace FitControlAdmin
                         var (success, errorMessage) = await _apiService.ChangeExerciseStatusAsync(exerciseId, false);
                         if (success)
                         {
-                            // Recarregar a lista completa da API
+                            // Recarregar lista da API
                             await LoadExercisesAsync();
                             
                             MessageBox.Show("Exercício eliminado com sucesso!",
@@ -1079,7 +1084,7 @@ namespace FitControlAdmin
         #region Employee Management
 
         private List<EmployeeDisplayDto>? _allEmployees = null;
-        /// <summary>Cache do estado Ativo por IdUser (a API não expõe GET User/{id}, por isso usamos o que guardámos ao editar).</summary>
+        // Cache do estado Ativo por IdUser (usado ao editar)
         private readonly Dictionary<int, bool> _employeeAtivoCache = new Dictionary<int, bool>();
 
         private static string EmployeeAtivoCacheFilePath()
@@ -1127,23 +1132,23 @@ namespace FitControlAdmin
         private List<MemberDto>? _allMembers = null;
         private List<SubscriptionResponseDto>? _allSubscriptions = null;
         private List<SubscriptionResponseDto>? _subscriptionsForMembers = null;
-        /// <summary>Lista completa de pagamentos para exibição (usada pelo filtro de pesquisa).</summary>
+        // Lista de pagamentos para exibição e filtro
         private List<PaymentDisplayModel>? _allPaymentDisplay = null;
 
         private async Task LoadPayments()
         {
             System.Diagnostics.Debug.WriteLine("LoadPayments: Starting to load payments");
 
-            // Atualizar na thread da UI
+            // Atualizar na UI
             Dispatcher.Invoke(() =>
             {
                 PaymentStatusText.Text = "A carregar pagamentos...";
-                PaymentsDataGrid.ItemsSource = null; // Limpar primeiro
+                PaymentsDataGrid.ItemsSource = null;
             });
 
             try
             {
-                // Carregar pagamentos, membros e subscrições em paralelo
+                // Carregar pagamentos, membros e subscrições
                 var paymentsTask = _apiService.GetPaymentsByActiveStateAsync(true);
                 var inactivePaymentsTask = _apiService.GetPaymentsByActiveStateAsync(false);
                 var membersTask = _apiService.GetAllMembersAsync();
@@ -1158,19 +1163,19 @@ namespace FitControlAdmin
                 var activeSubscriptions = await subscriptionsTask;
                 var inactiveSubscriptions = await inactiveSubscriptionsTask;
 
-                // Debug: Verificar se os dados foram carregados
+                // Verificar se os dados foram carregados
                 System.Diagnostics.Debug.WriteLine($"Active Payments: {activePayments?.Count ?? 0}");
                 System.Diagnostics.Debug.WriteLine($"Inactive Payments: {inactivePayments?.Count ?? 0}");
                 System.Diagnostics.Debug.WriteLine($"Members: {members?.Count ?? 0}");
                 System.Diagnostics.Debug.WriteLine($"Active Subscriptions: {activeSubscriptions?.Count ?? 0}");
                 System.Diagnostics.Debug.WriteLine($"Inactive Subscriptions: {inactiveSubscriptions?.Count ?? 0}");
 
-                // Combinar todos os pagamentos
+                // Combinar pagamentos
                 var allPayments = new List<PaymentResponseDto>();
                 if (activePayments != null) allPayments.AddRange(activePayments);
                 if (inactivePayments != null) allPayments.AddRange(inactivePayments);
 
-                // Combinar todas as subscrições
+                // Combinar subscrições
                 var allSubscriptions = new List<SubscriptionResponseDto>();
                 if (activeSubscriptions != null) allSubscriptions.AddRange(activeSubscriptions);
                 if (inactiveSubscriptions != null) allSubscriptions.AddRange(inactiveSubscriptions);
@@ -1181,7 +1186,7 @@ namespace FitControlAdmin
                     System.Diagnostics.Debug.WriteLine($"LoadPayments: Payment {payment.IdPagamento} - Subscricao: '{payment.Subscricao}'");
                 }
 
-                // Criar lista de display com todos os dados dos pagamentos
+                // Criar lista de display com dados dos pagamentos
                 var displayList = allPayments.Select(payment =>
                 {
                     var member = members?.FirstOrDefault(m => m.IdMembro == payment.IdMembro);
@@ -1209,7 +1214,7 @@ namespace FitControlAdmin
 
                 System.Diagnostics.Debug.WriteLine($"LoadPayments: Created {displayList.Count} display items");
 
-                // Atualizar na thread da UI
+                // Atualizar na UI
                 Dispatcher.Invoke(() =>
                 {
                     try
@@ -1232,7 +1237,7 @@ namespace FitControlAdmin
             }
             catch (Exception ex)
             {
-                // Atualizar na thread da UI
+                // Atualizar na UI
                 Dispatcher.Invoke(() =>
                 {
                     _allPaymentDisplay = null;
@@ -1247,7 +1252,7 @@ namespace FitControlAdmin
 
         private static string FormatEnumName(string enumName)
         {
-            // Casos especiais
+            // Formatar nome do enum (casos especiais)
             if (enumName == "MBWay") return "MBWay";
             if (enumName == "Cartao") return "Cartão";
             if (enumName == "Bracos") return "Braços";
@@ -1255,7 +1260,7 @@ namespace FitControlAdmin
             if (enumName == "Trimestral") return "trimestral";
             if (enumName == "Anual") return "anual";
 
-            // Adiciona espaço antes de letras maiúsculas (exceto a primeira)
+            // Adicionar espaço antes de maiúsculas
             return System.Text.RegularExpressions.Regex.Replace(enumName, "(?<!^)([A-Z])", " $1");
         }
 
@@ -1270,10 +1275,10 @@ namespace FitControlAdmin
             {
                 try
                 {
-                    // Debug: Log the payment ID being edited
+                    // Identificar pagamento a editar
                     System.Diagnostics.Debug.WriteLine($"EditPaymentButton_Click: Editing payment {idPagamento}");
 
-                    // Get payment details from display model
+                    // Obter detalhes do pagamento do modelo de display
                     PaymentDisplayModel? displayPayment = null;
                     if (PaymentsDataGrid.SelectedItem is PaymentDisplayModel selectedPayment)
                     {
@@ -1281,7 +1286,7 @@ namespace FitControlAdmin
                     }
                     else
                     {
-                        // Try to find in ItemsSource
+                        // Procurar em ItemsSource
                         if (PaymentsDataGrid.ItemsSource is System.Collections.IEnumerable items)
                         {
                             foreach (PaymentDisplayModel item in items)
@@ -1301,7 +1306,7 @@ namespace FitControlAdmin
                         return;
                     }
 
-                    // Get the payment details from API
+                    // Obter detalhes do pagamento da API
                     var allPayments = await _apiService.GetPaymentsByActiveStateAsync(true);
                     var inactivePayments = await _apiService.GetPaymentsByActiveStateAsync(false);
                     var allPaymentsList = new List<PaymentResponseDto>();
@@ -1316,10 +1321,10 @@ namespace FitControlAdmin
                         return;
                     }
 
-                    // Debug: Log payment details before editing
+                    // Obter detalhes antes de editar
                     System.Diagnostics.Debug.WriteLine($"EditPaymentButton_Click: Payment before edit - Id: {payment.IdPagamento}, Subscricao: {payment.Subscricao}");
 
-                    // Get member details
+                    // Obter detalhes do membro
                     var members = await _apiService.GetAllMembersAsync();
                     var member = members?.FirstOrDefault(m => m.IdMembro == payment.IdMembro);
 
@@ -1329,7 +1334,7 @@ namespace FitControlAdmin
                         return;
                     }
 
-                    // Open CreatePaymentWindow in edit mode
+                    // Abrir CreatePaymentWindow em modo edição
                     var createPaymentWindow = new CreatePaymentWindow(_apiService, payment.IdMembro, payment, member);
                     createPaymentWindow.Owner = this;
                     var result = createPaymentWindow.ShowDialog();
@@ -1362,7 +1367,7 @@ namespace FitControlAdmin
                 {
                     try
                     {
-                        // Atualizar pagamento para Pago
+                        // Marcar pagamento como pago
                         var updateDto = new UpdatePaymentDto
                         {
                             EstadoPagamento = EstadoPagamento.Pago
@@ -1444,7 +1449,7 @@ namespace FitControlAdmin
                 var completedReservations = await completedReservationsTask;
                 var history = await historyTask;
 
-                // Preencher tabela de reservas ativas
+                // Preencher reservas ativas
                 if (activeReservations != null)
                 {
                     ReservationsDataGrid.ItemsSource = activeReservations;
@@ -1454,7 +1459,7 @@ namespace FitControlAdmin
                     ReservationsDataGrid.ItemsSource = new List<MemberEvaluationReservationSummaryDto>();
                 }
 
-                // Preencher tabela "Reservas completas": unir reservas do endpoint "completed" (canceladas, faltas, etc.) com as do histórico (feitas com sucesso)
+                // Preencher reservas completas (canceladas, faltas e histórico)
                 var reservasCompletas = new List<MemberEvaluationReservationSummaryDto>();
                 if (completedReservations != null)
                     reservasCompletas.AddRange(completedReservations);
@@ -1467,12 +1472,19 @@ namespace FitControlAdmin
                         {
                             reservasCompletas.Add(new MemberEvaluationReservationSummaryDto
                             {
+                                IdMembroAvaliacao = h.IdAvaliacao,
                                 IdMembro = h.IdMembro,
                                 NomeMembro = h.NomeMembro,
+                                TelemovelMembro = h.TelemovelMembro,
                                 DataReserva = h.DataAvaliacao,
                                 EstadoString = "Presente",
                                 NomeFuncionario = h.NomeFuncionario,
-                                IdAvaliacaoFisica = h.IdAvaliacao
+                                IdAvaliacaoFisica = h.IdAvaliacao,
+                                TemAvaliacaoFisica = true,
+                                Peso = h.Peso,
+                                Altura = h.Altura,
+                                Imc = h.Imc,
+                                DataAvaliacao = h.DataAvaliacao
                             });
                         }
                     }
@@ -1486,7 +1498,7 @@ namespace FitControlAdmin
                 reservasCompletas = reservasCompletas.OrderByDescending(r => r.DataReserva).ToList();
                 CompletedEvaluationsDataGrid.ItemsSource = reservasCompletas;
 
-                // Preencher tabela de histórico (apenas avaliações realizadas com sucesso)
+                // Preencher histórico (avaliações realizadas)
                 if (history != null)
                 {
                     _allHistory = history.ToList();
@@ -1612,7 +1624,7 @@ namespace FitControlAdmin
             {
                 try
                 {
-                    // Buscar a avaliação do histórico
+                    // Obter avaliação do histórico
                     var history = await _apiService.GetAllEvaluationsAsync();
                     var evaluation = history?.FirstOrDefault(h => h.IdAvaliacao == idAvaliacao);
 
@@ -1622,7 +1634,7 @@ namespace FitControlAdmin
                         return;
                     }
 
-                    // Mostrar detalhes
+                    // Mostrar detalhes da avaliação
                     var details = $"Membro: {evaluation.NomeMembro}\n" +
                                   $"PT: {evaluation.NomeFuncionario}\n" +
                                   $"Data: {evaluation.DataAvaliacao:dd/MM/yyyy HH:mm}\n\n" +
@@ -1648,14 +1660,14 @@ namespace FitControlAdmin
             {
                 try
                 {
-                    // Apenas PT pode criar avaliações físicas (API: OnlyPT)
+                    // Apenas PT pode criar avaliações físicas
                     if (!string.Equals(_userFuncao, "PT", StringComparison.OrdinalIgnoreCase))
                     {
                         MessageBox.Show("Apenas o PT pode fazer avaliações físicas.", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
                         return;
                     }
 
-                    // Buscar a reserva completa
+                    // Obter reserva completa
                     var completedReservations = await _apiService.GetCompletedReservationsAsync();
                     var reservation = completedReservations?.FirstOrDefault(r => r.IdMembroAvaliacao == idMembroAvaliacao);
 
@@ -1734,10 +1746,16 @@ namespace FitControlAdmin
                 var inactiveSubscriptions = await inactiveSubscriptionsTask;
 
                 var allSubscriptions = new List<SubscriptionResponseDto>();
-                if (activeSubscriptions != null) allSubscriptions.AddRange(activeSubscriptions);
-                if (inactiveSubscriptions != null) allSubscriptions.AddRange(inactiveSubscriptions);
+                if (activeSubscriptions != null)
+                {
+                    foreach (var s in activeSubscriptions) { s.Ativo = true; allSubscriptions.Add(s); }
+                }
+                if (inactiveSubscriptions != null)
+                {
+                    foreach (var s in inactiveSubscriptions) { s.Ativo = false; allSubscriptions.Add(s); }
+                }
 
-                // Ordenar por nome e depois por tipo
+                // Ordenar por nome e tipo
                 allSubscriptions = allSubscriptions
                     .OrderBy(s => s.Nome)
                     .ThenBy(s => s.Tipo)
@@ -1761,8 +1779,7 @@ namespace FitControlAdmin
 
         private async void CreateSubscriptionButton_Click(object sender, RoutedEventArgs e)
         {
-            // Para criar uma nova subscrição, passamos null como subscription
-            // O EditSubscriptionWindow deve detectar isso e mostrar em modo criação
+            // Passar null para criar nova subscrição (EditSubscriptionWindow detecta e abre em modo criação)
             var createWindow = new EditSubscriptionWindow(_apiService, null);
             createWindow.Owner = this;
             if (createWindow.ShowDialog() == true)
@@ -1771,7 +1788,7 @@ namespace FitControlAdmin
             }
         }
 
-        // Search handlers
+        // Handlers de pesquisa
         private void UserSearchTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
             ApplyUserSearchFilter();
@@ -1835,14 +1852,14 @@ namespace FitControlAdmin
             }
         }
 
-        // Search filter methods
+        // Métodos de filtro de pesquisa
         private void ApplyUserSearchFilter()
         {
             if (_allMembers == null) return;
 
             var searchText = UserSearchTextBox.Text?.Trim().ToLower() ?? string.Empty;
 
-            // Treat placeholder text as empty search
+            // Tratar texto placeholder como pesquisa vazia
             if (string.IsNullOrWhiteSpace(searchText) || searchText == "pesquisar por nome...")
             {
                 MembersDataGrid.ItemsSource = _allMembers;
@@ -1868,7 +1885,7 @@ namespace FitControlAdmin
 
             var searchText = EmployeeSearchTextBox.Text?.Trim().ToLower() ?? string.Empty;
 
-            // Treat placeholder text as empty search
+            // Tratar texto placeholder como pesquisa vazia
             if (string.IsNullOrWhiteSpace(searchText) || searchText == "pesquisar por nome...")
             {
                 EmployeesDataGrid.ItemsSource = _allEmployees;
@@ -1921,7 +1938,7 @@ namespace FitControlAdmin
             {
                 try
                 {
-                    // Find the subscription in the current data
+                    // Procurar subscrição nos dados atuais
                     var subscription = SubscriptionsDataGrid.ItemsSource
                         .Cast<SubscriptionResponseDto>()
                         .FirstOrDefault(s => s.IdSubscricao == idSubscricao);
@@ -1986,7 +2003,7 @@ namespace FitControlAdmin
 
                 if (IsPtClassView)
                 {
-                    // PT: carregar apenas as suas aulas (templates) e as suas aulas agendadas
+                    // PT: carregar aulas e aulas agendadas do PT
                     var currentUser = await _apiService.GetCurrentUserAsync();
                     var idFuncionario = currentUser?.IdFuncionario ?? 0;
                     if (idFuncionario <= 0)
@@ -1999,7 +2016,7 @@ namespace FitControlAdmin
                     }
                     classes = await _apiService.GetClassesByPtAsync(idFuncionario);
                     var ptScheduled = await _apiService.GetScheduledClassesByPTAsync(idFuncionario);
-                    // Converter AulaMarcadaResponseDto para ClassReservationSummaryDto
+                    // Converter para ClassReservationSummaryDto
                     reservations = ptScheduled?.Select(s => new ClassReservationSummaryDto
                     {
                         IdAulaMarcada = s.IdAulaMarcada,
@@ -2014,7 +2031,7 @@ namespace FitControlAdmin
                 }
                 else
                 {
-                    // Admin: carregar todas as aulas ativas e reservas
+                    // Admin: carregar todas as aulas e reservas
                     var classesTask = _apiService.GetClassesByStateAsync(ativo: true);
                     var reservationsTask = _apiService.GetClassReservationsAsync();
                     await Task.WhenAll(classesTask, reservationsTask);
@@ -2036,7 +2053,7 @@ namespace FitControlAdmin
                     ClassesDataGrid.ItemsSource = _allClasses;
                 }
 
-                // Preencher tabela de reservas/aulas agendadas (futuras e em curso)
+                // Preencher reservas e aulas agendadas
                 var today = DateTime.Today;
                 var upcomingReservations = reservations?
                     .Where(r => r.DataAula.Date >= today)
@@ -2094,7 +2111,7 @@ namespace FitControlAdmin
             {
                 try
                 {
-                    // Buscar a aula completa da lista
+                    // Obter aula completa da lista
                     var allClasses = ClassesDataGrid.ItemsSource as IEnumerable<AulaResponseDto>;
                     var aula = allClasses?.FirstOrDefault(c => c.IdAula == idAula);
 
@@ -2124,7 +2141,7 @@ namespace FitControlAdmin
             {
                 try
                 {
-                    // Obter detalhes da aula
+                    // Obter detalhes da aula para o diálogo
                     var allClasses = await _apiService.GetAllClassesAsync();
                     var selectedClass = allClasses?.FirstOrDefault(c => c.IdAula == idAula);
                     
@@ -2134,16 +2151,16 @@ namespace FitControlAdmin
                         return;
                     }
 
-                    // Criar lista com apenas esta aula para o diálogo
+                    // Criar lista com esta aula para o diálogo
                     var classList = new List<AulaResponseDto> { selectedClass };
                     
-                    // Abrir diálogo de criar aula agendada
+                    // Abrir diálogo de aula agendada
                     var dialog = new CreateScheduledClassDialog(classList);
                     dialog.Owner = this;
                     
                     if (dialog.ShowDialog() == true)
                     {
-                        // Usar DateTimeKind.Unspecified para evitar conversão de timezone no JSON
+                        // Usar DateTimeKind.Unspecified para evitar conversão de fuso no JSON
                         var dataSelecionada = dialog.SelectedDate;
                         var scheduleDto = new ScheduleClassDto
                         {
@@ -2152,7 +2169,7 @@ namespace FitControlAdmin
                             DataAula = new DateTime(dataSelecionada.Year, dataSelecionada.Month, dataSelecionada.Day, 0, 0, 0, DateTimeKind.Unspecified)
                         };
 
-                        // Validar: o dia da data deve corresponder ao dia da semana da aula
+                        // Validar dia da semana da data com o da aula
                         var diaDaData = DiaSemanaHelper.FromDayOfWeek(scheduleDto.DataAula.DayOfWeek);
                         if (diaDaData != selectedClass.DiaSemana)
                         {
@@ -2163,7 +2180,7 @@ namespace FitControlAdmin
                             return;
                         }
 
-                        // Validar: mínimo 1 dia de antecedência
+                        // Validar antecedência mínima de 1 dia
                         if (scheduleDto.DataAula.Date <= DateTime.Today)
                         {
                             MessageBox.Show("A aula deve ser agendada com pelo menos 1 dia de antecedência.", "Aviso", 
@@ -2171,7 +2188,7 @@ namespace FitControlAdmin
                             return;
                         }
 
-                        // Validar: máximo 2 semanas
+                        // Validar máximo 2 semanas à frente
                         if (scheduleDto.DataAula.Date > DateTime.Today.AddDays(14))
                         {
                             MessageBox.Show("Só é possível agendar aulas até 2 semanas à frente.", "Aviso", 
@@ -2190,7 +2207,7 @@ namespace FitControlAdmin
                         }
                         else
                         {
-                            // Se foi erro 500/Internal, verificar se a aula foi criada (workaround para API que cria mas falha na resposta)
+                            // Workaround: em erro 500 verificar se a aula foi criada
                             var idFuncionario = selectedClass.IdFuncionario ?? 0;
                             var isServerError = errorMessage != null && (errorMessage.Contains("Internal", StringComparison.OrdinalIgnoreCase) || errorMessage.Contains("500"));
                             if (isServerError && idFuncionario > 0)
@@ -2207,7 +2224,7 @@ namespace FitControlAdmin
                                 }
                             }
 
-                            // Se "já existe aula" - pode ter sido criada na tentativa anterior
+                            // Aula pode ter sido criada numa tentativa anterior
                             if (errorMessage != null && (errorMessage.Contains("já existe", StringComparison.OrdinalIgnoreCase) || errorMessage.Contains("existe aula")))
                             {
                                 MessageBox.Show($"{errorMessage}\n\nA aula pode ter sido criada numa tentativa anterior. Verifique a lista de aulas agendadas.", "Aviso", 
@@ -2327,7 +2344,7 @@ namespace FitControlAdmin
             }
         }
 
-        // Search handlers
+        // Handlers de pesquisa
         private void ClassSearchTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
             ApplyClassSearchFilter();
@@ -2349,7 +2366,7 @@ namespace FitControlAdmin
             }
         }
 
-        // History search handlers
+        // Handlers de pesquisa do histórico
         private void HistorySearchTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
             ApplyHistorySearchFilter();
@@ -2378,7 +2395,7 @@ namespace FitControlAdmin
 
             var searchText = ClassSearchTextBox.Text?.Trim().ToLower() ?? string.Empty;
 
-            // Treat placeholder text as empty search
+            // Tratar texto placeholder como pesquisa vazia
             if (string.IsNullOrWhiteSpace(searchText) || searchText == "pesquisar por nome...")
             {
                 ClassesDataGrid.ItemsSource = _allClasses;
@@ -2402,7 +2419,7 @@ namespace FitControlAdmin
 
             var searchText = HistorySearchTextBox.Text?.Trim().ToLower() ?? string.Empty;
 
-            // Treat placeholder text as empty search
+            // Tratar texto placeholder como pesquisa vazia
             if (string.IsNullOrWhiteSpace(searchText) || searchText == "pesquisar por nome do membro...")
             {
                 MembersHistoryDataGrid.ItemsSource = _allHistory;

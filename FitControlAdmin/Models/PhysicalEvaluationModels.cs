@@ -20,8 +20,6 @@ namespace FitControlAdmin.Models
         public decimal? MassaGorda { get; set; }
         public string? Observacoes { get; set; }
         public DateTime? DataAvaliacao { get; set; }
-
-        // Opcional: ID do funcionário que realizou a avaliação
         public int? IdFuncionario { get; set; }
         public string? NomeFuncionario { get; set; }
         

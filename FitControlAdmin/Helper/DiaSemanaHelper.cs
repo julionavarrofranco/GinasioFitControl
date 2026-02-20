@@ -1,9 +1,6 @@
 namespace FitControlAdmin.Helper
 {
-    /// <summary>
-    /// Converte DayOfWeek (C#: Sunday=0, Monday=1, ...) para DiaSemana (Segunda=0, ..., Domingo=6).
-    /// O cast direto (DiaSemana)DayOfWeek falha porque os enums têm ordens diferentes.
-    /// </summary>
+    // Converte DayOfWeek para DiaSemana (ordem dos enums é diferente)
     public static class DiaSemanaHelper
     {
         public static Models.DiaSemana FromDayOfWeek(DayOfWeek dayOfWeek)

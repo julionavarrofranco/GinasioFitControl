@@ -12,7 +12,7 @@ namespace FitControlAdmin.Models
         public int? IdSubscricao { get; set; }
         public DateTime? DataNascimento { get; set; }
 
-        // Propriedades para incluir informações do funcionário
+        // Informações do funcionário quando aplicável
         public int? IdFuncionario { get; set; }
         public string? NomeFuncionario { get; set; }
         public string? EmailFuncionario { get; set; }
@@ -52,9 +52,9 @@ namespace FitControlAdmin.Models
         public string Telemovel { get; set; } = default!;
         public DateTime DataNascimento { get; set; }
         public DateTime DataRegisto { get; set; }
-        public string Subscricao { get; set; } = default!;    // Nome da subscri��o
-        public string PlanoTreino { get; set; } = default!;   // Nome do plano
-        public string DataDesativacao { get; set; } = "Ativo"; // "Ativo" ou data
+        public string Subscricao { get; set; } = default!;
+        public string PlanoTreino { get; set; } = default!;
+        public string DataDesativacao { get; set; } = "Ativo";
         public bool Ativo { get; set; }
     }
 

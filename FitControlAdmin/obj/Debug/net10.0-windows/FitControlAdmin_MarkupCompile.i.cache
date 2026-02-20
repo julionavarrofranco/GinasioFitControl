@@ -10,11 +10,11 @@ none
 false
 TRACE;DEBUG;NET;NET10_0;NETCOREAPP;WINDOWS;WINDOWS7_0;NET5_0_OR_GREATER;NET6_0_OR_GREATER;NET7_0_OR_GREATER;NET8_0_OR_GREATER;NET9_0_OR_GREATER;NET10_0_OR_GREATER;NETCOREAPP3_0_OR_GREATER;NETCOREAPP3_1_OR_GREATER;WINDOWS7_0_OR_GREATER
 C:\Users\tiago\OneDrive\Área de Trabalho\PF\nova versao\FitControlAdmin\App.xaml
-21-1546752942
+17-1895820163
 
-49-1120196213
+44-1318663988
 213132136026
-AddExerciseToPlanDialog.xaml;AssignPlanToMemberDialog.xaml;ChangePasswordDialog.xaml;ConfirmDialog.xaml;CreateEditClassWindow.xaml;CreateEditExerciseWindow.xaml;CreateEditTrainingPlanWindow.xaml;CreateEditUserWindow.xaml;CreateFuncionarioWindow.xaml;CreatePaymentWindow.xaml;CreatePhysicalEvaluationWindow.xaml;CreateScheduledClassDialog.xaml;EditMemberPaymentsWindow.xaml;EditPaymentWindow.xaml;EditSubscriptionWindow.xaml;LoginWindow.xaml;MainWindow.xaml;MarkAttendanceWindow.xaml;MemberEvaluationHistoryWindow.xaml;ScheduledClassesWindow.xaml;ViewTrainingPlanWindow.xaml;
+MainWindow.xaml;Views\AddExerciseToPlanDialog.xaml;Views\AssignPlanToMemberDialog.xaml;Views\ChangePasswordDialog.xaml;Views\ConfirmDialog.xaml;Views\CreateEditClassWindow.xaml;Views\CreateEditExerciseWindow.xaml;Views\CreateEditTrainingPlanWindow.xaml;Views\CreateEditUserWindow.xaml;Views\CreateFuncionarioWindow.xaml;Views\CreatePaymentWindow.xaml;Views\CreatePhysicalEvaluationWindow.xaml;Views\CreateScheduledClassDialog.xaml;Views\EditSubscriptionWindow.xaml;Views\LoginWindow.xaml;Views\MarkAttendanceWindow.xaml;Views\ViewTrainingPlanWindow.xaml;
 
-False
+True
 

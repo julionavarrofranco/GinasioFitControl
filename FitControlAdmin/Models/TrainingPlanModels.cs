@@ -1,17 +1,13 @@
 namespace FitControlAdmin.Models
 {
-    /// <summary>
-    /// DTO para criar plano de treino
-    /// </summary>
+    // DTO para criar plano de treino
     public class TrainingPlanDto
     {
         public string Nome { get; set; } = null!;
         public string? Observacoes { get; set; }
     }
 
-    /// <summary>
-    /// Resposta resumida de plano (lista por estado)
-    /// </summary>
+    // Resposta resumida de plano (lista por estado)
     public class TrainingPlanSummaryDto
     {
         public int IdPlano { get; set; }
@@ -20,18 +16,14 @@ namespace FitControlAdmin.Models
         public bool Ativo { get; set; }
     }
 
-    /// <summary>
-    /// DTO para atualizar plano de treino
-    /// </summary>
+    // DTO para atualizar plano de treino
     public class UpdateTrainingPlanDto
     {
         public string? Nome { get; set; }
         public string? Observacoes { get; set; }
     }
 
-    /// <summary>
-    /// Detalhes completos do plano (com exercícios) - para visualização/edição
-    /// </summary>
+    // Detalhes completos do plano (com exercícios) para visualização e edição
     public class TrainingPlanDetailDto
     {
         public int IdPlano { get; set; }
@@ -44,9 +36,7 @@ namespace FitControlAdmin.Models
         public List<TrainingPlanExerciseDto> Exercicios { get; set; } = new();
     }
 
-    /// <summary>
-    /// Exercício dentro de um plano (para exibição)
-    /// </summary>
+    // Exercício dentro de um plano (exibição)
     public class TrainingPlanExerciseDto
     {
         public int IdExercicio { get; set; }
@@ -60,9 +50,7 @@ namespace FitControlAdmin.Models
         public int Ordem { get; set; }
     }
 
-    /// <summary>
-    /// DTO para adicionar exercício ao plano
-    /// </summary>
+    // DTO para adicionar exercício ao plano
     public class ExercisePlanDto
     {
         public int IdExercicio { get; set; }
@@ -72,9 +60,7 @@ namespace FitControlAdmin.Models
         public int? Ordem { get; set; }
     }
 
-    /// <summary>
-    /// DTO para atualizar exercício no plano
-    /// </summary>
+    // DTO para atualizar exercício no plano
     public class UpdateExercisePlanDto
     {
         public int? Series { get; set; }
@@ -83,9 +69,7 @@ namespace FitControlAdmin.Models
         public int? Ordem { get; set; }
     }
 
-    /// <summary>
-    /// Plano de treino do membro (resposta de current/history)
-    /// </summary>
+    // Plano de treino do membro (resposta current/history)
     public class MemberTrainingPlanDto
     {
         public string NomePlano { get; set; } = null!;

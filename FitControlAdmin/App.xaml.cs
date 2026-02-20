@@ -1,10 +1,9 @@
-﻿using System.Windows;
+using System.Windows;
+using FitControlAdmin.Views;
 
 namespace FitControlAdmin;
 
-/// <summary>
-/// Interaction logic for App.xaml
-/// </summary>
+// Entrada da aplicação; abre a janela de login
 public partial class App : Application
 {
     protected override void OnStartup(StartupEventArgs e)

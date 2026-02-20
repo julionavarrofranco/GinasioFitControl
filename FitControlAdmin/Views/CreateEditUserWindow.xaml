@@ -1,0 +1,271 @@
+<Window x:Class="FitControlAdmin.Views.CreateEditUserWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Criar/Editar Utilizador" Height="650" Width="500"
+        WindowStartupLocation="CenterScreen"
+        ResizeMode="NoResize"
+        Background="#313443">
+    <Grid Margin="25">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock x:Name="TitleText" Grid.Row="0" 
+                   Text="Criar Utilizador" 
+                   FontSize="22" FontWeight="Bold" 
+                   Foreground="#e6e6e8"
+                   Margin="0,0,0,25"/>
+
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <StackPanel>
+                <TextBlock Text="Email:" 
+                           Foreground="#95a5a6" 
+                           Margin="0,0,0,8"
+                           FontSize="14"/>
+                <TextBox x:Name="EmailTextBox" 
+                         Margin="0,0,0,20" 
+                         Padding="12,10"
+                         Background="#272936"
+                         Foreground="#e6e6e8"
+                         BorderBrush="#34495E"
+                         BorderThickness="1"
+                         FontSize="14">
+                    <TextBox.Style>
+                        <Style TargetType="TextBox">
+                            <Style.Triggers>
+                                <Trigger Property="IsFocused" Value="True">
+                                    <Setter Property="BorderBrush" Value="#02acc3"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBox.Style>
+                </TextBox>
+
+                <TextBlock Text="Tipo:" 
+                           Foreground="#95a5a6" 
+                           Margin="0,0,0,8"
+                           FontSize="14"/>
+                <ComboBox x:Name="TipoComboBox" 
+                          Margin="0,0,0,20" 
+                          Padding="12,10"
+                          Background="#272936"
+                          Foreground="Black"
+                          BorderBrush="#34495E"
+                          BorderThickness="1"
+                          FontSize="14"
+                          ItemContainerStyle="{StaticResource DefaultComboBoxItemStyle}">
+                    
+                    <ComboBoxItem Content="Membro" IsSelected="True"/>
+                    <ComboBoxItem Content="Funcionario"/>
+                </ComboBox>
+
+                <TextBlock Text="Nome:" 
+                           Foreground="#95a5a6" 
+                           Margin="0,0,0,8"
+                           FontSize="14"/>
+                <TextBox x:Name="NomeTextBox" 
+                         Margin="0,0,0,20" 
+                         Padding="12,10"
+                         Background="#272936"
+                         Foreground="#e6e6e8"
+                         BorderBrush="#34495E"
+                         BorderThickness="1"
+                         FontSize="14">
+                    <TextBox.Style>
+                        <Style TargetType="TextBox">
+                            <Style.Triggers>
+                                <Trigger Property="IsFocused" Value="True">
+                                    <Setter Property="BorderBrush" Value="#02acc3"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBox.Style>
+                </TextBox>
+
+                <TextBlock Text="Telemóvel:" 
+                           Foreground="#95a5a6" 
+                           Margin="0,0,0,8"
+                           FontSize="14"/>
+                <Grid Margin="0,0,0,20">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="120"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <ComboBox x:Name="TelemovelCountryCodeComboBox"
+                              Grid.Column="0"
+                              Margin="0,0,8,0"
+                              Padding="8,10"
+                              Background="#272936"
+                              Foreground="Black"
+                              BorderBrush="#34495E"
+                              BorderThickness="1"
+                              FontSize="14"
+                              ItemContainerStyle="{StaticResource DefaultComboBoxItemStyle}">
+                        
+                        <ComboBoxItem Content="(PT) +351" Tag="+351"/>
+                        <ComboBoxItem Content="(ES) +34" Tag="+34"/>
+                        <ComboBoxItem Content="(UK) +44" Tag="+44"/>
+                    </ComboBox>
+                    <TextBox x:Name="TelemovelTextBox" 
+                             Grid.Column="1"
+                             Padding="12,10"
+                             Background="#272936"
+                             Foreground="#e6e6e8"
+                             BorderBrush="#34495E"
+                             BorderThickness="1"
+                             FontSize="14">
+                        <TextBox.Style>
+                            <Style TargetType="TextBox">
+                                <Style.Triggers>
+                                    <Trigger Property="IsFocused" Value="True">
+                                        <Setter Property="BorderBrush" Value="#02acc3"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBox.Style>
+                    </TextBox>
+                </Grid>
+
+                <StackPanel x:Name="MembroPanel" Margin="0,0,0,20">
+                    <TextBlock Text="Data de Nascimento:" 
+                               Foreground="#95a5a6" 
+                               Margin="0,0,0,8"
+                               FontSize="14"/>
+                    <DatePicker x:Name="DataNascimentoDatePicker" 
+                                Margin="0,0,0,20"
+                                Background="#272936"
+                                Foreground="#e6e6e8"
+                                BorderBrush="#34495E"
+                                BorderThickness="1"
+                                Padding="10,8"
+                                FontSize="14"
+                                SelectedDateFormat="Short"
+                                FirstDayOfWeek="Monday">
+                        <DatePicker.Resources>
+                            <Style TargetType="DatePickerTextBox">
+                                <Setter Property="Foreground" Value="#e6e6e8"/>
+                                <Setter Property="Background" Value="#272936"/>
+                            </Style>
+                        </DatePicker.Resources>
+                    </DatePicker>
+
+                    <TextBlock Text="Subscrição:" 
+                               Foreground="#95a5a6" 
+                               Margin="0,0,0,8"
+                               FontSize="14"/>
+                    <ComboBox x:Name="SubscricaoComboBox" 
+                              Margin="0,0,0,20"
+                              Padding="12,10"
+                              Background="#272936"
+                              Foreground="Black"
+                              BorderBrush="#34495E"
+                              BorderThickness="1"
+                              FontSize="14"
+                              ItemContainerStyle="{StaticResource DefaultComboBoxItemStyle}">
+                        
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Nome}"/>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+
+                    </ComboBox>
+
+                    <TextBlock Text="Método de Pagamento:" 
+                               Foreground="#95a5a6" 
+                               Margin="0,0,0,8"
+                               FontSize="14"/>
+                    <ComboBox x:Name="MetodoPagamentoComboBox" 
+                              Margin="0,0,0,20"
+                              Padding="12,10"
+                              Background="#272936"
+                              Foreground="Black"
+                              BorderBrush="#34495E"
+                              BorderThickness="1"
+                              FontSize="14"
+                              ItemContainerStyle="{StaticResource DefaultComboBoxItemStyle}">
+                        
+                    </ComboBox>
+                </StackPanel>
+
+                <StackPanel x:Name="FuncionarioPanel" Visibility="Collapsed" Margin="0,0,0,20">
+                    <TextBlock Text="Função:" 
+                               Foreground="#95a5a6" 
+                               Margin="0,0,0,8"
+                               FontSize="14"/>
+                    <ComboBox x:Name="FuncaoComboBox" 
+                              Padding="12,10"
+                              Background="#272936"
+                              Foreground="Black"
+                              BorderBrush="#34495E"
+                              BorderThickness="1"
+                              FontSize="14"
+                              ItemContainerStyle="{StaticResource DefaultComboBoxItemStyle}">
+
+                        <ComboBoxItem Content="Admin" Tag="Admin"/>
+                        <ComboBoxItem Content="Receção" Tag="Rececao"/>
+                        <ComboBoxItem Content="PT" Tag="PT"/>
+                    </ComboBox>
+                </StackPanel>
+
+                <CheckBox x:Name="AtivoCheckBox" 
+                          Content="Ativo" 
+                          IsChecked="True" 
+                          Margin="0,10,0,0"
+                          Foreground="#e6e6e8"
+                          FontSize="14"/>
+            </StackPanel>
+        </ScrollViewer>
+
+        <StackPanel Grid.Row="2" 
+                    Orientation="Horizontal" 
+                    HorizontalAlignment="Right" 
+                    Margin="0,25,0,0">
+            <Button x:Name="SaveButton" 
+                    Content="Confirmar" 
+                    Click="SaveButton_Click" 
+                    Padding="20,10" 
+                    Margin="0,0,10,0" 
+                    Width="120"
+                    Background="#27AE60"
+                    Foreground="White"
+                    BorderThickness="0"
+                    Cursor="Hand"
+                    FontSize="14"
+                    FontWeight="SemiBold">
+                <Button.Style>
+                    <Style TargetType="Button">
+                        <Setter Property="Background" Value="#27AE60"/>
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#229954"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+            </Button>
+            <Button Content="Cancelar" 
+                    Click="CancelButton_Click" 
+                    Padding="20,10" 
+                    Width="120"
+                    Background="#34495E"
+                    Foreground="White"
+                    BorderThickness="0"
+                    Cursor="Hand"
+                    FontSize="14">
+                <Button.Style>
+                    <Style TargetType="Button">
+                        <Setter Property="Background" Value="#34495E"/>
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#2c3e50"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+            </Button>
+        </StackPanel>
+    </Grid>
+</Window>
