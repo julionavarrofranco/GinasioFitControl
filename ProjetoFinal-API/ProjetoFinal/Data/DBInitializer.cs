@@ -362,6 +362,7 @@ public static class DbInitializer
         }
         await context.SaveChangesAsync();
 
+
         // avaliações físicas
         if (!await context.AvaliacoesFisicas.AnyAsync())
         {
