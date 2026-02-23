@@ -1,0 +1,19 @@
+﻿// Ficheiro do Backend (API): Services/Interfaces/IPaymentService.cs
+
+using ProjetoFinal.Models;
+using ProjetoFinal.Models.DTOs;
+
+namespace ProjetoFinal.Services.Interfaces
+{
+    public interface IPaymentService
+    {
+        Task<Pagamento> CreatePaymentAsync(PaymentDto request);
+        Task<string> UpdatePaymentAsync(int idPagamento, UpdatePaymentDto request);
+        Task ChangePaymentActiveStateAsync(int idPagamento, bool ativo);
+        Task<List<Pagamento>> GetAllPaymentsAsync();
+        Task<List<Pagamento>> GetPaymentsByActiveStateAsync(bool ativo);
+        Task<List<Pagamento>> GetPaymentsByDateAsync(DateTime inicio, DateTime fim);
+        Task<List<Pagamento>> GetPaymentsByPaymentStateAsync(EstadoPagamento estado);
+        Task<decimal> GetMonthlyRevenueAsync(int ano, int mes);
+    }
+}
