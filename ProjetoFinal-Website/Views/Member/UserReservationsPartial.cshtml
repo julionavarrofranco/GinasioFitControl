@@ -1,0 +1,36 @@
+@model IEnumerable<TTFWebsite.Models.DTOs.ClassReservationDto>
+
+<div class="reservations-grid" id="reservationsGrid">
+    @foreach (var reservation in Model)
+    {
+        var date = reservation.DataAula.ToString("dd MMM", new System.Globalization.CultureInfo("pt-PT"));
+        var startTime = reservation.HoraInicio;
+        var endTime = reservation.HoraFim;
+        var startDateTime = reservation.DataAula.Add(reservation.HoraInicio);
+        var startAttr = startDateTime.ToString("o");
+        var timeRange = $"{startTime:hh\\:mm} - {endTime:hh\\:mm}";
+
+        <div class="class-card reserved"
+             data-member-id="@reservation.idMembro"
+             data-id="@reservation.idAulaMarcada"
+             data-start="@startAttr">
+
+            <div class="class-body small">
+                <h3>@reservation.nomeAula</h3>
+                <div class="class-details">
+                    <div>🕜 @($"{date} - {timeRange}")</div>
+                    <div>👤 @reservation.instrutor</div>
+                    <div>📍 Sala @reservation.sala</div>
+                </div>
+            </div>
+
+
+            <div class="class-footer">
+                <button class="btn-cancel"
+                        onclick="openCancelModal(@reservation.idAulaMarcada)">
+                    Cancelar
+                </button>
+            </div>
+        </div>
+    }
+</div>

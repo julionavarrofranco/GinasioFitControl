@@ -1,0 +1,741 @@
+@model TTFWebsite.ViewModels.PhysicalAssessmentViewModel
+@{
+    ViewData["Title"] = "Avaliação Física - Área de Membros";
+    ViewData["BodyClass"] = "assessment-bg";
+    Layout = "~/Views/Shared/_MemberLayout.cshtml";
+
+    var latestAssessment = Model.LatestAssessment;
+    var nextReservation = Model.NextReservation;
+
+    bool hasValidReservation = nextReservation != null && nextReservation.CreatedAt != DateTime.MinValue && !nextReservation.IsCancelled;
+}
+
+<div class="assessment-container">
+    <div id="global-booking-messages">
+        <div id="booking-success-message" class="booking-message success"></div>
+        <div id="booking-error-message" class="booking-message error"></div>
+    </div>
+
+    <div class="assessment-header">
+        <h1>Avaliação Física</h1>
+        <p>Consulta abaixo a tua avaliação mais recente</p>
+        <div class="header-cta">
+            @if (hasValidReservation)
+            {
+                <button class="btn-agendar-avaliacao prominent-cta disabled" disabled>
+                    Agendar Nova Avaliação
+                </button>
+            }
+            else
+            {
+                <button class="btn-agendar-avaliacao prominent-cta" onclick="openAssessmentModal()">
+                    Agendar Nova Avaliação
+                </button>
+            }
+        </div>
+    </div>
+
+    @if (hasValidReservation)
+    {
+        <div class="assessment-notice-card" data-reservation-id="@nextReservation.Id">
+            <div class="container">
+                <div class="notice-content">
+                    <div class="notice-icon">🩺</div>
+                    <div>
+                        <div class="notice-title">Tens uma avaliação marcada</div>
+                        <div class="notice-sub">@nextReservation.CreatedAt.ToString("dddd, dd MMMM yyyy 'às' HH:mm")</div>
+                    </div>
+                    <div class="notice-actions">
+                        <button class="btn-cancel" onclick="cancelAssessment(@nextReservation.Id)">Cancelar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <div class="recent-assessment-block">
+        <h2>Mais Recente</h2>
+        @if (latestAssessment != null && latestAssessment.AssessmentDate != DateTime.MinValue)
+        {
+            <div class="assessment-card">
+                <div class="assessment-card-header">
+                    <div>
+                        <h2>@latestAssessment.AssessmentDate.ToString("dd MMMM yyyy")</h2>
+                        <p class="trainer-name">Personal Trainer: @latestAssessment.TrainerName</p>
+                    </div>
+                </div>
+
+                <div class="assessment-metrics-grid">
+                    <div class="metric-card">
+                        <div class="metric-icon">⚖️</div>
+                        <div class="metric-content">
+                            <div class="metric-label">Peso</div>
+                            <div class="metric-value">@latestAssessment.Weight kg</div>
+                        </div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="metric-icon">📏</div>
+                        <div class="metric-content">
+                            <div class="metric-label">Altura</div>
+                            <div class="metric-value">@latestAssessment.Height m</div>
+                        </div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="metric-icon">📊</div>
+                        <div class="metric-content">
+                            <div class="metric-label">IMC</div>
+                            <div class="metric-value">@latestAssessment.BMI</div>
+                        </div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="metric-icon">💪</div>
+                        <div class="metric-content">
+                            <div class="metric-label">Massa Muscular</div>
+                            <div class="metric-value">@latestAssessment.MuscleMass kg</div>
+                        </div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="metric-icon">💧</div>
+                        <div class="metric-content">
+                            <div class="metric-label">Gordura Corporal</div>
+                            <div class="metric-value">@latestAssessment.BodyFat%</div>
+                        </div>
+                    </div>
+                </div>
+
+                @if (!string.IsNullOrEmpty(latestAssessment.Notes))
+                {
+                    <div class="assessment-notes"><h3>Observações</h3><p>@latestAssessment.Notes</p></div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="empty-state"><p>Não tens avaliações físicas registadas.</p></div>
+        }
+    </div>
+
+    <div class="assessment-reservations-block">
+        <div id="booking-modal" class="booking-modal" inert>
+            <div class="booking-dialog" role="dialog" aria-modal="true" aria-labelledby="bookingTitle">
+                <button class="close-btn" aria-label="Fechar" onclick="closeAssessmentModal()">×</button>
+                <h3 id="bookingTitle">Escolher Data para Avaliação Física</h3>
+                <p class="muted">Escolhe uma data e hora conveniente. Receberás confirmação por email.</p>
+                <input type="datetime-local" id="assessmentDateInput" class="input-datetime" aria-label="Data e hora para avaliação" step="1800"><br>
+                <div id="date-help" style="margin-bottom: 20px">Marcação com 7 dias de antecedência</div>
+                <div class="dialog-actions">
+                    <button class="btn btn-primary" onclick="bookAssessment(document.getElementById('assessmentDateInput').value)">
+                        Agendar
+                    </button>
+                    <button class="btn btn-secondary" onclick="closeAssessmentModal()">Cancelar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const modal = document.getElementById('booking-modal');
+    const btnAgendar = document.querySelector('.btn-agendar-avaliacao');
+    const dateInput = document.getElementById('assessmentDateInput');
+    const successEl = document.getElementById('booking-success-message');
+    const errorEl = document.getElementById('booking-error-message');
+
+    if (!btnAgendar) {
+        console.warn('Botão de agendamento não encontrado na página.');
+    }
+
+    // Garante que a posição e visibilidade das mensagens se mantenham constantes
+    function clearMessageElements() {
+        [successEl, errorEl].forEach(el => {
+            if (!el) return;
+            el.classList.remove('show');
+            el.style.display = 'none';
+            el.innerText = '';
+        });
+    }
+
+    function showBookingMessage(msg, type) {
+        if (!successEl || !errorEl) return;
+
+        const el = type === 'success' ? successEl : errorEl;
+        const otherEl = type === 'success' ? errorEl : successEl;
+
+        // Esconder a outra mensagem imediatamente
+        otherEl.classList.remove('show');
+        otherEl.style.display = 'none';
+        otherEl.innerText = '';
+
+        // Mostrar a mensagem atual de forma previsível
+        el.innerText = msg;
+        el.style.display = 'block';
+        // Forçar reflow para garantir animação consistente
+        void el.offsetWidth;
+        el.classList.add('show');
+
+        // Esconder após 3s e limpar texto
+        setTimeout(() => {
+            el.classList.remove('show');
+            // garantir que depois da transição a display fique oculta
+            setTimeout(() => {
+                el.style.display = 'none';
+                el.innerText = '';
+            }, 300);
+        }, 3000);
+    }
+
+    function showBookingSuccess(msg) { showBookingMessage(msg, 'success'); }
+    function showBookingError(msg) { showBookingMessage(msg, 'error'); }
+
+    function openAssessmentModal() {
+        if (dateInput) dateInput.value = '';
+        clearMessageElements();
+
+        modal.classList.add('open');
+        modal.removeAttribute('inert');
+        modal.setAttribute('aria-hidden', 'false');
+        const focusable = modal.querySelector('button, input, [tabindex]:not([tabindex="-1"])');
+        if (focusable) focusable.focus();
+    }
+
+    function closeAssessmentModal() {
+        modal.classList.remove('open');
+        modal.setAttribute('inert', '');
+        modal.setAttribute('aria-hidden', 'true');
+        if (dateInput) dateInput.value = '';
+        clearMessageElements();
+    }
+
+    function updateBookingButton() {
+        const hasReservation = document.querySelector('.assessment-notice-card') !== null;
+        if (hasReservation && btnAgendar) {
+            btnAgendar.classList.add('disabled');
+            btnAgendar.disabled = true;
+        } else if (btnAgendar) {
+            btnAgendar.classList.remove('disabled');
+            btnAgendar.disabled = false;
+        }
+    }
+
+    async function bookAssessment(dataReserva) {
+        if (!dataReserva) {
+            showBookingError("Escolhe uma data válida.");
+            return;
+        }
+
+        const selectedDate = new Date(dataReserva);
+        const isoDate = selectedDate.toISOString();
+
+        const minDate = new Date();
+        minDate.setDate(minDate.getDate() + 7);
+        if (selectedDate < minDate) {
+            showBookingError("A avaliação deve ser agendada com pelo menos 7 dias de antecedência.");
+            return;
+        }
+
+        try {
+            const res = await fetch('/Member/BookPhysicalAssessment', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ DataReserva: isoDate }),
+                credentials: 'include'
+            });
+
+            let data;
+            try { data = await res.json(); } catch { data = {}; }
+
+            if (!res.ok) {
+                const msg = data?.message || "Erro ao agendar.";
+                showBookingError(msg);
+                return;
+            }
+
+            const idRaw = data?.IdMembroAvaliacao ?? data?.idMembroAvaliacao ?? data?.id ?? 0;
+            const reservationId = Number(idRaw || 0);
+
+            if (!reservationId || reservationId === 0) {
+                showBookingError("Erro ao agendar: ID da reserva inválido.");
+                return;
+            }
+
+            // Cria cartão da reserva
+            const container = document.createElement('div');
+            container.className = 'assessment-notice-card';
+            container.setAttribute('data-reservation-id', reservationId);
+            container.innerHTML = `
+                <div class="container">
+                    <div class="notice-content">
+                        <div class="notice-icon">🩺</div>
+                        <div>
+                            <div class="notice-title">Tens uma avaliação marcada</div>
+                            <div class="notice-sub">${selectedDate.toLocaleDateString('pt-PT', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' })} às ${selectedDate.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' })}</div>
+                        </div>
+                        <div class="notice-actions">
+                            <button class="btn-cancel" data-reservation-id="${reservationId}">Cancelar</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            container.querySelector('.btn-cancel').addEventListener('click', function () {
+                cancelAssessment(this.dataset.reservationId);
+            });
+
+            const recentBlock = document.querySelector('.recent-assessment-block');
+            recentBlock.parentNode.insertBefore(container, recentBlock);
+
+            if (dateInput) dateInput.value = '';
+
+            updateBookingButton();
+            closeAssessmentModal();
+            showBookingSuccess("Avaliação agendada com sucesso!");
+
+        } catch (err) {
+            showBookingError(err?.message || "Erro inesperado ao agendar.");
+        }
+    }
+
+    async function cancelAssessment(reservationId) {
+        const id = Number(reservationId);
+
+        try {
+            const res = await fetch(`/Member/CancelPhysicalAssessment?reservationId=${id}`, {
+                method: 'POST',
+                credentials: 'include'
+            });
+            const data = await res.json();
+
+            if (!res.ok || !data.success) throw new Error(data?.message || 'Erro ao cancelar a avaliação.');
+
+            const card = document.querySelector(`.assessment-notice-card[data-reservation-id='${id}']`);
+            if (card) card.remove();
+
+            // Garantir que o botão volte ao estado correto
+            updateBookingButton();
+           
+            clearMessageElements();
+            if (dateInput) dateInput.value = '';
+
+            showBookingSuccess("Avaliação cancelada com sucesso.");
+        } catch (err) {
+            showBookingError(err?.message || 'Erro ao cancelar a avaliação.');
+        }
+    }
+
+    if (btnAgendar) {
+        btnAgendar.onclick = () => {
+            if (!btnAgendar.disabled) openAssessmentModal();
+        };
+    }
+
+    clearMessageElements();
+    updateBookingButton();
+</script>
+
+
+<style>
+    #global-booking-messages {
+        position: fixed;
+        top: 22%;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+        pointer-events: none;
+    }
+
+    #global-booking-messages .booking-message {
+        pointer-events: auto;
+        opacity: 0;
+        transform: translateY(-10px);
+        transition: opacity 0.3s ease, transform 0.3s ease;
+        display: block;
+    }
+
+    #global-booking-messages .booking-message.show {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    .assessment-container {
+        position: relative;
+        z-index: 2;
+        padding: 2rem;
+        max-width: 1200px;
+        margin: 0 auto;
+        font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+
+    .assessment-header {
+        margin-bottom: 2rem;
+    }
+
+    .assessment-header h1 {
+        font-size: 2.5rem;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+    }
+
+    .assessment-header p {
+        color: var(--text-secondary);
+        font-size: 1.1rem;
+    }
+
+    .assessments-list {
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+    }
+
+    .assessment-card {
+        background: var(--bg-card);
+        border-radius: 12px;
+        padding: 2rem;
+        border: 1px solid var(--border);
+        transition: transform .15s ease, box-shadow .15s ease;
+    }
+
+    .assessment-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+    }
+
+    .assessment-card-header {
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .assessment-card-header h2 {
+        font-size: 1.5rem;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+    }
+
+    .trainer-name {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+    }
+
+    .assessment-metrics-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        margin-bottom: 1.25rem;
+    }
+
+    .metric-card {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 0.6rem 0.8rem;
+        background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.01));
+        border-radius: 10px;
+        border: 1px solid rgba(0,0,0,0.04);
+    }
+
+    .metric-icon {
+        font-size: 1.8rem;
+        width: 44px;
+        height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(0,0,0,0.03);
+        border-radius: 8px;
+    }
+
+    .metric-content {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+    }
+
+    .metric-label {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        margin-bottom: 0;
+    }
+
+    .metric-value {
+        font-size: 1.05rem;
+        font-weight: 700;
+        color: var(--accent);
+        margin-left: 1rem;
+    }
+
+    .assessment-notes {
+        padding-top: 1.5rem;
+        border-top: 1px solid var(--border);
+    }
+
+    .assessment-notes h3 {
+        font-size: 1.1rem;
+        color: var(--text-primary);
+        margin-bottom: 0.75rem;
+    }
+
+    .assessment-notes p {
+        color: var(--text-secondary);
+        line-height: 1.6;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        background: var(--bg-card);
+        border-radius: 12px;
+        border: 1px solid var(--border);
+    }
+
+    .empty-state p {
+        color: var(--text-secondary);
+        font-size: 1.1rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .empty-subtitle {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        opacity: 0.8;
+    }
+
+    .recent-assessment-block {
+        margin-bottom: 2.5rem;
+    }
+
+    .recent-assessment-block h2 {
+        margin-bottom: 1.25rem;
+    }
+
+    .assessment-reservations-block {
+        margin-bottom: 2.5rem;
+    }
+
+    .metric-list {
+        list-style: none;
+        padding: 0;
+        margin: 0 0 1.2rem 0;
+    }
+
+    .metric-list li {
+        padding: 0.4rem 0;
+        font-size: 1.05rem;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .metric-list li:last-child {
+        border-bottom: none;
+    }
+
+    .btn-agendar-avaliacao {
+        background: var(--accent);
+        color: #fff;
+        border: 0;
+        border-radius: 8px;
+        padding: 0.7rem 1.7rem;
+        cursor: pointer;
+        font-size: 1.1rem;
+        margin-bottom: 1rem;
+        margin-top: .5rem;
+    }
+
+    .header-cta {
+        margin-top: 0.8rem;
+    }
+
+    .prominent-cta {
+        background: linear-gradient(90deg, var(--accent), #00bcd4);
+        box-shadow: 0 8px 30px rgba(2,172,195,0.18);
+        padding: 0.85rem 1.9rem;
+        font-size: 1.15rem;
+        border-radius: 12px;
+        transform: translateY(-4px);
+    }
+
+    .metric-card + .metric-card {
+        margin-top: 0.5rem;
+    }
+
+    .metric-card {
+        border-left: 4px solid transparent;
+    }
+
+    .metric-card[data-important="true"] {
+        border-left-color: var(--accent);
+    }
+
+    .assessment-notice-card {
+        background: linear-gradient(180deg, rgba(2,172,195,0.08), rgba(2,172,195,0.04));
+        border: 1px solid rgba(2,172,195,0.12);
+        color: var(--text-primary);
+        border-radius: 10px;
+        padding: 1rem 1.25rem;
+        margin-bottom: 1.25rem;
+    }
+
+    .assessment-notice-card .notice-content {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .assessment-notice-card .notice-icon {
+        font-size: 1.8rem;
+    }
+
+    .assessment-notice-card .notice-title {
+        font-weight: 700;
+        color: var(--text-primary);
+    }
+
+    .assessment-notice-card .notice-sub {
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+    }
+
+    .assessment-notice-card .notice-actions {
+        margin-left: auto;
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .booking-modal {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.45);
+        align-items: center;
+        justify-content: center;
+        z-index: 1200;
+    }
+
+    .booking-modal.open {
+        display: flex;
+        animation: fadeIn .12s ease both;
+    }
+
+    .booking-dialog {
+        background: var(--bg-card);
+        color: var(--text-primary);
+        border-radius: 12px;
+        padding: 1.5rem;
+        min-width: 320px;
+        max-width: 420px;
+        box-shadow: 0 10px 40px rgba(2,6,23,0.15);
+        position: relative;
+    }
+
+    .booking-dialog h3 {
+        margin: 0 0 0.25rem 0;
+    }
+
+    .booking-dialog .muted {
+        margin: 0 0 1rem 0;
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+    }
+
+    .input-datetime {
+        width: 100%;
+        padding: 0.6rem 0.75rem;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        margin-bottom: 1rem;
+    }
+
+    .booking-message {
+        padding: 0.6rem 0.8rem;
+        border-radius: 8px;
+        margin-bottom: 0.8rem;
+        display: none;
+    }
+
+    .booking-message.success {
+        background: rgba(40,167,69,0.7);
+        border: 1px solid rgba(40,167,69,0.9);
+        color: #fff;
+    }
+
+    .booking-message.error {
+        background: rgba(220,53,69,0.7);
+        border: 1px solid rgba(220,53,69,0.9);
+        color: #fff;
+    }
+
+    .btn-agendar-avaliacao.disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    .dialog-actions {
+        display: flex;
+        gap: 0.5rem;
+        justify-content: flex-end;
+    }
+
+    .btn {
+        padding: 0.55rem 0.9rem;
+        border-radius: 8px;
+        border: 1px solid transparent;
+        cursor: pointer;
+        font-weight: 600;
+    }
+
+    .btn-primary {
+        background: var(--accent);
+        color: #fff;
+    }
+
+    .btn-secondary {
+        background: transparent;
+        color: var(--text-primary);
+        border-color: var(--border);
+    }
+
+    .close-btn {
+        position: absolute;
+        right: 8px;
+        top: 8px;
+        background: transparent;
+        border: 0;
+        font-size: 1.25rem;
+        cursor: pointer;
+        color: var(--text-secondary);
+    }
+
+    @@keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(6px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .booking-modal[aria-hidden="true"] {
+        display: none;
+    }
+
+    @@media (max-width: 600px) {
+        .assessment-header h1 {
+            font-size: 1.8rem;
+        }
+
+        .metric-value {
+            font-size: 1.05rem;
+        }
+    }
+</style>

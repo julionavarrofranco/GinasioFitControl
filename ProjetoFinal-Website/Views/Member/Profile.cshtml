@@ -1,0 +1,85 @@
+@model TTFWebsite.Models.MemberProfileViewModel
+@{
+    ViewData["Title"] = "Perfil - Área de Membros";
+    ViewData["BodyClass"] = "profile-bg";
+    Layout = "~/Views/Shared/_MemberLayout.cshtml";
+}
+
+<div class="profile-container">
+    <div class="profile-top">
+        @{
+            var friendlyName = !string.IsNullOrWhiteSpace(Model.Name) && Model.Name.Contains("@") ? Model.Name.Split('@')[0] : Model.Name;
+            var avatarLetter = !string.IsNullOrWhiteSpace(friendlyName) ? friendlyName.Split(' ')[0].Substring(0,1).ToUpper() : "?";
+        }
+        <div class="avatar">@avatarLetter</div>
+        <div>
+            <h1>O Teu Perfil FitControl</h1>
+            <p>Informações da tua conta</p>
+        </div>
+        <div class="profile-actions">
+            <a href="@Url.Action("ChangePassword", "Account")" class="btn-edit">Mudar Palavra-passe</a>
+        </div>
+    </div>
+
+    <div class="profile-content">
+        <div class="profile-card">
+            <h2>Informações Pessoais</h2>
+            <div class="profile-details">
+                <div class="detail-row">
+                    <span class="detail-label">Nome Completo</span>
+                    <span class="detail-value">@(
+                        !string.IsNullOrWhiteSpace(Model.Name) && Model.Name.Contains("@") ? Model.Name.Split('@')[0] : Model.Name
+                    )</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Email</span>
+                    <span class="detail-value">@Model.Email</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Telefone</span>
+                    <span class="detail-value">@Model.Phone</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Data de Nascimento</span>
+                    <span class="detail-value">@Model.BirthDate.ToString("dd/MM/yyyy")</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="profile-card">
+            <h2>Informações de Membro</h2>
+            <div class="profile-details">
+                <div class="detail-row">
+                    <span class="detail-label">Nº Membro</span>
+                    <span class="detail-value membership-number">
+                        @(Model.IdMembro > 0 ? Model.IdMembro.ToString() : "—")
+                    </span>
+                </div>
+
+                <div class="detail-row">
+                    <span class="detail-label">Plano</span>
+                    <span class="detail-value">@Model.Plan</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Plano de treino</span>
+                    <span class="detail-value">
+                        @(ViewBag.TrainingPlanName != null && !string.IsNullOrWhiteSpace((string)ViewBag.TrainingPlanName)
+                            ? (string)ViewBag.TrainingPlanName
+                            : "Sem plano de treino")
+                    </span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Membro Desde:</span>
+                    <span class="detail-value">@Model.MembershipStartDate.ToString("dd/MM/yyyy")</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.profile-header { display:none; }
+</style>
+
+
+

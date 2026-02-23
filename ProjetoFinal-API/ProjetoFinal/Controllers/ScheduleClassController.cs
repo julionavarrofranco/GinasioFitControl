@@ -1,0 +1,84 @@
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using ProjetoFinal.Models.DTOs;
+using ProjetoFinal.Services.Interfaces;
+
+namespace ProjetoFinal.Controllers
+{
+    [Route("api/[controller]")]
+    [ApiController]
+    public class ScheduleClassController : ControllerBase
+    {
+        private readonly IScheduleClassService _scheduleClassService;
+
+        public ScheduleClassController(IScheduleClassService scheduleClassService)
+        {
+            _scheduleClassService = scheduleClassService;
+        }
+
+        [Authorize(Policy = "OnlyPT")]
+        [HttpPost("create")]
+
+        public async Task<IActionResult> CreateScheduledClass([FromBody] ScheduleClassDto request)
+        {
+            try
+            {
+                if (request == null)
+                    return BadRequest(new { message = "Dados da aula marcada inválidos." });
+
+                var aulaMarcada = await _scheduleClassService.CreateAsync(request);
+                var response = new CreateScheduleClassResponseDto
+                {
+                    Id = aulaMarcada.Id,
+                    IdAula = aulaMarcada.IdAula,
+                    DataAula = aulaMarcada.DataAula
+                };
+                return Ok(response);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch
+            {
+                return StatusCode(500, new { message = "Erro interno do servidor." });
+            }
+        }
+
+        [Authorize(Policy = "OnlyPT")]
+        [HttpPatch("cancel/{idAulaMarcada}")]
+
+        public async Task<IActionResult> CancelScheduledClass(int idAulaMarcada)
+        {
+            try
+            {
+                var result = await _scheduleClassService.CancelByPtAsync(idAulaMarcada);
+                return Ok(new { message = result });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch
+            {
+                return StatusCode(500, new { message = "Erro interno do servidor." });
+            }
+        }
+
+        [Authorize(Policy = "CanViewClasses")]
+        [HttpGet("available")]
+
+        public async Task<IActionResult> ListAvailable()
+        {
+            try
+            {
+                var aulas = await _scheduleClassService.ListAvailableAsync();
+                return Ok(aulas);
+            }
+            catch
+            {
+                return StatusCode(500, new { message = "Erro interno do servidor." });
+            }
+        }
+    }
+}
